@@ -12,11 +12,11 @@ type FooterProps = {
 
 export function Footer({ groups }: FooterProps) {
   function renderLink(link: NavItem) {
-    const isExternal = /^https?:\/\//.test(link.href);
+    const isExternal = /^(https?:\/\/|mailto:)/.test(link.href);
 
     if (isExternal) {
       return (
-        <a href={link.href} rel="noreferrer" target="_blank">
+        <a href={link.href} rel={link.href.startsWith("http") ? "noreferrer" : undefined} target={link.href.startsWith("http") ? "_blank" : undefined}>
           {link.label}
         </a>
       );
@@ -31,11 +31,11 @@ export function Footer({ groups }: FooterProps) {
         <div className="site-footer__brand">
           <div className="site-footer__brand-head">
             <span className="brand-lockup__mark brand-lockup__mark--image brand-lockup__mark--footer">
-              <img alt="SNAILSLAYER logo" src="/snailslayer-logo.jpeg" />
+              <img alt="SNAILSLAYER logo" decoding="async" loading="lazy" src="/snailslayer-logo.jpeg" />
             </span>
             <strong>SNAILSLAYER</strong>
           </div>
-          <p>MapleStory content focused on bossing, progression, and live community-driven coverage.</p>
+          <p>Live MapleStory. Sharp guides. Real progression.</p>
         </div>
 
         {groups.map((group) => (
@@ -51,7 +51,7 @@ export function Footer({ groups }: FooterProps) {
       </div>
       <div className="container site-footer__bottom">
         <span>
-          Contact email: <a href={`mailto:${businessEmail}`}>{businessEmail}</a>
+          Contact: <a href={`mailto:${businessEmail}`}>{businessEmail}</a>
         </span>
         <span>© 2026 SNAILSLAYER</span>
       </div>

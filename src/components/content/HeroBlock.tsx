@@ -1,14 +1,12 @@
 import { Badge } from "../ui/Badge";
-import { Button } from "../ui/Button";
 
 type HeroBlockProps = {
   eyebrow: string;
   title: string;
   description: string;
-  primaryCta: { label: string; href: string };
-  secondaryCta: { label: string; href: string };
-  supportLink: { label: string; href: string };
+  urgencyText?: string;
   statusLabel: string;
+  statusTone?: "live" | "offline";
   featuredTitle: string;
   featuredDescription: string;
 };
@@ -17,20 +15,21 @@ export function HeroBlock({
   eyebrow,
   title,
   description,
-  primaryCta,
-  secondaryCta,
-  supportLink,
+  urgencyText,
   statusLabel,
+  statusTone = "live",
   featuredTitle,
   featuredDescription
 }: HeroBlockProps) {
+  const statusCopy = statusTone === "live" ? "Live now on Twitch" : "Live, clips, and alerts";
+
   return (
-    <section className="hero">
+    <section className="hero" data-reveal>
       <div className="container hero__grid">
         <div className="hero__copy">
           <div className="hero__brand">
             <span className="hero__brand-logo">
-              <img alt="SNAILSLAYER logo" src="/snailslayer-logo.jpeg" />
+              <img alt="SNAILSLAYER logo" decoding="async" fetchPriority="high" height="72" src="/snailslayer-logo.jpeg" width="72" />
             </span>
             <div className="hero__brand-copy">
               <strong>SNAILSLAYER</strong>
@@ -38,43 +37,35 @@ export function HeroBlock({
             </div>
           </div>
           <span className="hero__eyebrow">{eyebrow}</span>
+          <div className="hero__status-row">
+            <Badge label={statusLabel} tone={statusTone} />
+            <span>{statusCopy}</span>
+          </div>
           <h1>{title}</h1>
           <p>{description}</p>
-          <div className="hero__actions">
-            <Button href={primaryCta.href}>{primaryCta.label}</Button>
-            <Button href={secondaryCta.href} variant="secondary">{secondaryCta.label}</Button>
-          </div>
-          <Button href={supportLink.href} variant="link">{supportLink.label}</Button>
+          {urgencyText ? <strong className="hero__hook">{urgencyText}</strong> : null}
         </div>
 
         <div className="hero__feature card">
           <div className="hero__feature-visual">
-            <div className="hero__moon hero__moon--one" />
-            <div className="hero__moon hero__moon--two" />
-            <div className="hero__sparkles" />
+            <div className="hero__feature-ring" aria-hidden="true" />
+            <div className="hero__feature-shine" aria-hidden="true" />
             <div className="hero__avatar-shell">
               <div className="hero__avatar-glow" aria-hidden="true" />
               <img
                 alt="Creator avatar"
                 className="hero__avatar"
+                decoding="async"
+                fetchPriority="high"
+                height="740"
                 loading="eager"
-                src="/avatar.jpg"
+                src="/hero-photo.jpg"
+                width="740"
               />
             </div>
           </div>
-          <Badge label={statusLabel} tone="live" />
           <h2>{featuredTitle}</h2>
           <p>{featuredDescription}</p>
-          <div className="hero__feature-metrics">
-            <div>
-              <span>Focus</span>
-              <strong>Bossing + progression</strong>
-            </div>
-            <div>
-              <span>Format</span>
-              <strong>Video + live</strong>
-            </div>
-          </div>
         </div>
       </div>
     </section>

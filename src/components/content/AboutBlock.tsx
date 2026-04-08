@@ -9,7 +9,7 @@ type AboutBlockProps = {
 
 export function AboutBlock({ title, description, points, cta }: AboutBlockProps) {
   return (
-    <section className="section about-block">
+    <section className="section about-block" data-reveal>
       <div className="container about-block__grid">
         <div className="card about-block__intro">
           <span className="section-header__eyebrow">About</span>

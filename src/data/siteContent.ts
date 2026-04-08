@@ -8,28 +8,13 @@ export type VideoItem = {
   title: string;
   description: string;
   category: string;
+  tags?: string[];
   duration: string;
   published: string;
   href: string;
   thumbnail?: string;
   viewCount?: string;
   featured?: boolean;
-};
-
-export type HighlightItem = {
-  id: string;
-  title: string;
-  duration: string;
-  label: string;
-  href: string;
-  featured?: boolean;
-};
-
-export type CategoryItem = {
-  title: string;
-  description: string;
-  href: string;
-  accent: "blue" | "cyan" | "violet";
 };
 
 export type SocialItem = {
@@ -53,10 +38,15 @@ export type StreamDetails = {
 
 export const navigationItems: NavItem[] = [
   { label: "Home", href: "/" },
+  { label: "Classes", href: "/classes" },
+  { label: "News", href: "/news" },
   { label: "Videos", href: "/videos" },
   { label: "Live", href: "/live" },
+  { label: "Community", href: "/community" }
+];
+
+export const secondaryNavigationItems: NavItem[] = [
   { label: "About", href: "/about" },
-  { label: "Community", href: "/community" },
   { label: "Contact", href: "/contact" }
 ];
 
@@ -64,23 +54,6 @@ export const headerActions = {
   primary: { label: "Watch Live", href: "https://www.twitch.tv/snailslayermain" },
   secondary: { label: "Join Discord", href: "/community" }
 };
-
-export const heroContent = {
-  eyebrow: "SNAILSLAYER • MapleStory • Live Streams",
-  title: "Clean guides. Stronger runs. Better decisions.",
-  description:
-    "MapleStory bossing, progression, and live content for players who want real progress.",
-  statusLabel: "Live Now",
-  featuredTitle: "Progression, bossing, and live sessions with a premium MapleStory feel",
-  featuredDescription:
-    "Fresh uploads, clean clears, community updates, and live runs that stay focused on what actually matters."
-};
-
-export const creatorPoints = [
-  "Built around useful clears",
-  "Progression-first content",
-  "Live community-driven sessions"
-];
 
 export const fallbackVideos: VideoItem[] = [
   {
@@ -122,31 +95,45 @@ export const fallbackVideos: VideoItem[] = [
   }
 ];
 
-export const contentCategories: CategoryItem[] = [
-  { title: "Bossing Guides", description: "Mechanics, prep, and execution explained cleanly.", href: "/videos", accent: "blue" },
-  { title: "Progression Content", description: "Real account growth, upgrades, and route planning.", href: "/videos", accent: "violet" },
-  { title: "Class Insights", description: "Build choices and practical notes that matter in runs.", href: "/about", accent: "cyan" },
-  { title: "Highlights", description: "Fast clips from clears, close calls, and stream moments.", href: "/community", accent: "blue" }
-];
-
-export const highlightClips: HighlightItem[] = [
-  { id: "clip-1", title: "The run almost fell apart and still converted", duration: "00:42", label: "Top Moment", href: "/community", featured: true },
-  { id: "clip-2", title: "Patch notes reaction in one clean minute", duration: "00:58", label: "Clip", href: "/community" },
-  { id: "clip-3", title: "The damage spike that changed the whole run", duration: "00:34", label: "Recent Highlight", href: "/community" },
-  { id: "clip-4", title: "Viewers called it before the clear happened", duration: "00:51", label: "Stream Moment", href: "/community" }
-];
-
 export const socialLinks: SocialItem[] = [
-  { platform: "Discord", title: "Stay close to the community", description: "Get stream alerts, patch talk, and MapleStory discussion.", href: "/community", ctaLabel: "Join Discord", badge: "Best Place to Start" },
-  { platform: "Telegram", title: "Get quick updates on Telegram", description: "Channel drops, alerts, and fast updates in one place.", href: "https://t.me/snailslayermain", ctaLabel: "Open Telegram", badge: "Fast Updates" },
-  { platform: "YouTube", title: "Watch full MapleStory videos", description: "Guides, bossing breakdowns, and progression uploads.", href: "https://www.youtube.com/@snailslayermain", ctaLabel: "Open YouTube", badge: "New Uploads" },
-  { platform: "Twitch", title: "Catch the stream live", description: "Boss attempts, progression sessions, and viewer questions.", href: "https://www.twitch.tv/snailslayermain", ctaLabel: "Watch Twitch", badge: "Live Focus" }
+  {
+    platform: "Discord",
+    title: "Get inside before the next run",
+    description: "Live alerts, fast help, patch talk, and the real SNAILSLAYER community loop.",
+    href: "/community",
+    ctaLabel: "Join Discord First",
+    badge: "Best Place to Start"
+  },
+  {
+    platform: "Telegram",
+    title: "Fast drops",
+    description: "Quick updates, alerts, and patch notes.",
+    href: "https://t.me/snailslayermain",
+    ctaLabel: "Join Telegram",
+    badge: "Fast Alerts"
+  },
+  {
+    platform: "YouTube",
+    title: "Watch the full breakdown",
+    description: "Guides, boss runs, and progression uploads.",
+    href: "https://www.youtube.com/@snailslayermain",
+    ctaLabel: "See New Videos",
+    badge: "Latest Videos"
+  },
+  {
+    platform: "Twitch",
+    title: "Catch the run live",
+    description: "Boss attempts, live calls, and real-time questions.",
+    href: "https://www.twitch.tv/snailslayermain",
+    ctaLabel: "Watch Live",
+    badge: "Live Now"
+  }
 ];
 
 export const footerGroups = [
   { title: "Explore", links: navigationItems },
   {
-    title: "Platforms",
+    title: "Community",
     links: [
       { label: "Discord", href: "/community" },
       { label: "Telegram", href: "https://t.me/snailslayermain" },
@@ -155,38 +142,37 @@ export const footerGroups = [
     ]
   },
   {
-    title: "Business",
+    title: "Contact",
     links: [
       { label: "Contact", href: "/contact" },
-      { label: "Partnerships", href: "/contact" },
-      { label: "Collaborations", href: "/contact" }
+      { label: "Email", href: "mailto:Snailslayermain@gmail.com" }
     ]
   }
 ];
 
 export const streamDetails: StreamDetails = {
   status: "offline",
-  title: "Nightly progression and bossing sessions",
-  description: "Live runs, account decisions, clean breakdowns, and viewer questions in real time.",
-  nextStream: "Follow on Twitch for the next live session",
+  title: "Next stream starts here",
+  description: "Bossing, progression, and live MapleStory calls.",
+  nextStream: "Follow for the next run",
   viewerCount: undefined,
-  primaryCta: { label: "Watch on Twitch", href: "https://www.twitch.tv/snailslayermain" },
-  secondaryCta: { label: "Get Stream Alerts", href: "/community" }
+  primaryCta: { label: "Watch Live", href: "https://www.twitch.tv/snailslayermain" },
+  secondaryCta: { label: "Get Alerts", href: "/community" }
 };
 
 export const aboutPoints = [
-  "Bossing runs with real progression.",
-  "Guides that stay clear and useful.",
-  "Live sessions with the community."
+  "Deep detail. No filler.",
+  "Reliable info. Real opinion.",
+  "Need help? Reach out."
 ];
 
 export const communityBenefits = [
-  "Get stream alerts first",
-  "Talk MapleStory with the community",
-  "See updates, clips, and drops",
-  "Stay close to every upload"
+  "Get the live alert before everyone else",
+  "Ask for help and get real answers",
+  "Catch clips, drops, and patch updates fast",
+  "Stay close to every upload and stream move"
 ];
 
-export const contactTopics = ["Sponsorship", "Brand Partnership", "Collaboration", "Media Request"];
+export const contactTopics = ["Collab", "Sponsorship", "Partnership", "General"];
 
 export const businessEmail = "Snailslayermain@gmail.com";

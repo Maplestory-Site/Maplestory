@@ -9,7 +9,7 @@ type CtaBannerProps = {
 
 export function CtaBanner({ title, description, primaryCta, secondaryCta }: CtaBannerProps) {
   return (
-    <section className="cta-banner">
+    <section className="cta-banner" data-reveal>
       <div className="container cta-banner__inner">
         <div>
           <span className="section-header__eyebrow">Next move</span>

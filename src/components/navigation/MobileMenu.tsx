@@ -5,13 +5,22 @@ import { Button } from "../ui/Button";
 type MobileMenuProps = {
   open: boolean;
   navItems: NavItem[];
+  utilityItems?: NavItem[];
   socialLinks: SocialItem[];
   primaryCta: { label: string; href: string };
   secondaryCta: { label: string; href: string };
   onClose: () => void;
 };
 
-export function MobileMenu({ open, navItems, socialLinks, primaryCta, secondaryCta, onClose }: MobileMenuProps) {
+export function MobileMenu({
+  open,
+  navItems,
+  utilityItems = [],
+  socialLinks,
+  primaryCta,
+  secondaryCta,
+  onClose
+}: MobileMenuProps) {
   function renderSocialLink(platform: SocialItem) {
     const isExternal = /^https?:\/\//.test(platform.href);
 
@@ -61,8 +70,18 @@ export function MobileMenu({ open, navItems, socialLinks, primaryCta, secondaryC
           ))}
         </nav>
 
+        {utilityItems.length ? (
+          <div className="mobile-menu__utility">
+            {utilityItems.map((item) => (
+              <NavLink className="mobile-menu__utility-link" key={item.href} onClick={onClose} to={item.href}>
+                {item.label}
+              </NavLink>
+            ))}
+          </div>
+        ) : null}
+
         <div className="mobile-menu__socials">
-          <span>Platforms</span>
+          <span>Watch</span>
           {socialLinks.map((item) => renderSocialLink(item))}
         </div>
       </div>

@@ -1,5 +1,11 @@
-import type { CategoryItem } from "../../data/siteContent";
 import { Button } from "../ui/Button";
+
+type CategoryItem = {
+  title: string;
+  description: string;
+  href: string;
+  accent: string;
+};
 
 type CategoryCardProps = {
   item: CategoryItem;
