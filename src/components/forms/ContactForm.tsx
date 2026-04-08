@@ -15,8 +15,8 @@ export function ContactForm({ topics }: ContactFormProps) {
 
   return (
     <div className="card contact-card">
-      <h3>Contact email</h3>
-      <p>Use the form below or send an email to get in touch.</p>
+      <h3>Get in touch</h3>
+      <p>Send a message or email me directly.</p>
       <form className="contact-form" onSubmit={handleSubmit}>
         <label>
           <span>Name</span>
@@ -24,7 +24,7 @@ export function ContactForm({ topics }: ContactFormProps) {
         </label>
         <label>
           <span>Email</span>
-          <input name="email" placeholder="you@company.com" required type="email" />
+          <input name="email" placeholder="you@email.com" required type="email" />
         </label>
         <label>
           <span>Company</span>
@@ -34,7 +34,7 @@ export function ContactForm({ topics }: ContactFormProps) {
           <span>Inquiry type</span>
           <select defaultValue="">
             <option disabled value="">
-              Select inquiry type
+              Choose one
             </option>
             {topics.map((topic) => (
               <option key={topic} value={topic}>
@@ -45,10 +45,10 @@ export function ContactForm({ topics }: ContactFormProps) {
         </label>
         <label className="contact-form__message">
           <span>Message</span>
-          <textarea placeholder="Tell me a little about the opportunity" required rows={6} />
+          <textarea placeholder="Tell me what you need" required rows={6} />
         </label>
-        <Button type="submit">Send Inquiry</Button>
-        {submitted ? <p className="contact-form__success">Your message has been sent. I'll get back to you when I can.</p> : null}
+        <Button type="submit">Send Message</Button>
+        {submitted ? <p className="contact-form__success">Message sent. I&apos;ll get back to you soon.</p> : null}
       </form>
     </div>
   );

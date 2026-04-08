@@ -1,5 +1,6 @@
 import type { VideoItem } from "../../data/siteContent";
-import { Badge } from "../ui/Badge";
+import { inferContentTags } from "../../lib/contentDiscovery";
+import { ShareActions } from "./ShareActions";
 import { Button } from "../ui/Button";
 
 type VideoCardProps = {
@@ -7,25 +8,41 @@ type VideoCardProps = {
 };
 
 export function VideoCard({ item }: VideoCardProps) {
+  const tags = inferContentTags(item).slice(0, 2);
+
   return (
     <article className={`card video-card ${item.featured ? "video-card--featured" : ""}`}>
-      <div
-        className="video-card__thumb"
-        aria-hidden="true"
-        style={item.thumbnail ? { backgroundImage: `linear-gradient(180deg, rgba(33, 42, 58, 0.08), rgba(33, 42, 58, 0.26)), url("${item.thumbnail}")` } : undefined}
-      >
-        <span>{item.category}</span>
+      <div className="video-card__thumb" aria-hidden="true">
+        {item.thumbnail ? <img alt="" className="video-card__thumb-image" decoding="async" loading="lazy" src={item.thumbnail} /> : null}
+        <div className="video-card__thumb-top">
+          <span className="video-card__thumb-tag">{item.category}</span>
+          {item.featured ? <span className="video-card__thumb-featured">Featured</span> : null}
+        </div>
+        <span className="video-card__thumb-duration">{item.duration}</span>
+        <span className="video-card__thumb-play">Play</span>
       </div>
       <div className="video-card__body">
-        <Badge label={item.category} tone="info" />
+        <div className="video-card__eyebrow">
+          <span>{item.category}</span>
+          <span>{item.published}</span>
+        </div>
         <h3>{item.title}</h3>
         <p>{item.description}</p>
+        {tags.length ? (
+          <div className="content-tag-row" aria-label="Video tags">
+            {tags.map((tag) => (
+              <span className="content-tag-row__tag" key={`${item.id}-${tag}`}>
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
         <div className="video-card__meta">
-          <span>{item.duration}</span>
-          <span>{item.published}</span>
           {item.viewCount ? <span>{item.viewCount} views</span> : null}
+          <span>Quick watch</span>
         </div>
-        <Button href={item.href} variant="ghost">Watch on YouTube</Button>
+        <ShareActions href={item.href} title={item.title} />
+        <Button href={item.href} variant="ghost">Watch Video</Button>
       </div>
     </article>
   );
