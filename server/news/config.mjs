@@ -13,8 +13,15 @@ export const CACHE_TTL_MINUTES = 180;
 export const MAX_ITEMS = 48;
 export const FETCH_TIMEOUT_MS = 12000;
 
-export const CACHE_FILE = path.resolve(PROJECT_ROOT, "cache", "news-feed.json");
 export const BUNDLED_FEED_FILE = path.resolve(PROJECT_ROOT, "src", "data", "newsFeed.json");
+const runtimeCacheRoot =
+  process.env.NEWS_CACHE_DIR ||
+  process.env.TMPDIR ||
+  process.env.TEMP ||
+  process.env.TMP ||
+  path.resolve(PROJECT_ROOT, "cache");
+
+export const CACHE_FILE = path.resolve(runtimeCacheRoot, "news-feed.json");
 
 export const OFFICIAL_SOURCE = {
   sourceName: "Official MapleStory / Nexon",

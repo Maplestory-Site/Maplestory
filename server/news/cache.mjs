@@ -1,4 +1,5 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
+import path from "node:path";
 import { BUNDLED_FEED_FILE, CACHE_FILE, EMPTY_FEED } from "./config.mjs";
 
 async function readJson(file) {
@@ -8,11 +9,6 @@ async function readJson(file) {
   } catch {
     return null;
   }
-}
-
-async function writeJson(file, payload) {
-  await mkdir(new URL(".", `file://${file}`).pathname, { recursive: true }).catch(() => {});
-  await writeFile(file, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
 }
 
 export async function readBundledFeed() {
@@ -25,7 +21,7 @@ export async function readCacheFeed() {
 
 export async function writeCacheFeed(payload) {
   try {
-    await mkdir(CACHE_FILE.replace(/\\[^\\]+$/, ""), { recursive: true });
+    await mkdir(path.dirname(CACHE_FILE), { recursive: true });
     await writeFile(CACHE_FILE, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
     return true;
   } catch (error) {
@@ -36,7 +32,7 @@ export async function writeCacheFeed(payload) {
 
 export async function writeBundledFeed(payload) {
   try {
-    await mkdir(BUNDLED_FEED_FILE.replace(/\\[^\\]+$/, ""), { recursive: true });
+    await mkdir(path.dirname(BUNDLED_FEED_FILE), { recursive: true });
     await writeFile(BUNDLED_FEED_FILE, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
     return true;
   } catch (error) {
