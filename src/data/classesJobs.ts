@@ -792,6 +792,22 @@ export const classJobs: ClassJob[] = [
     tags: ["Anima", "Support", "Party"]
   }),
   makeClass({
+    name: "Ren",
+    category: "Anima",
+    shortDescription: "Fox-spirit warrior with fast routes and sharp pressure.",
+    overview: "Ren blends quick movement, modern burst windows, and clean combo routing into a very active style.",
+    playstyle: "Combo",
+    strengths: ["Fast movement", "Sharp burst", "Modern feel"],
+    weaknesses: ["Needs comfort", "Combo timing", "Lower forgiveness"],
+    difficulty: "Moderate",
+    beginnerFriendly: false,
+    bossingRating: 4,
+    farmingRating: 4,
+    mobilityRating: 5,
+    survivabilityRating: 3,
+    tags: ["Anima", "Warrior", "Combo"]
+  }),
+  makeClass({
     name: "Hayato",
     category: "Sengoku",
     shortDescription: "Katana warrior with fluid combos and speed.",
@@ -822,6 +838,38 @@ export const classJobs: ClassJob[] = [
     mobilityRating: 3,
     survivabilityRating: 3,
     tags: ["Sengoku", "Mage", "Support"]
+  }),
+  makeClass({
+    name: "Mo Xuan",
+    category: "Other / Special",
+    shortDescription: "Martial artist with flowing strikes and stance control.",
+    overview: "Mo Xuan rewards smooth pressure, disciplined movement, and a polished close-range combat rhythm.",
+    playstyle: "Combo",
+    strengths: ["Fluid combat", "Good mobility", "Strong sustained pressure"],
+    weaknesses: ["Melee risk", "Needs practice", "Lower range safety"],
+    difficulty: "Advanced",
+    beginnerFriendly: false,
+    bossingRating: 4,
+    farmingRating: 4,
+    mobilityRating: 4,
+    survivabilityRating: 3,
+    tags: ["Special", "Warrior", "Combo"]
+  }),
+  makeClass({
+    name: "Sia Astelle",
+    category: "Other / Special",
+    shortDescription: "Astral caster with stylish space magic and utility.",
+    overview: "Sia Astelle mixes map control, spell layering, and a distinctive support-leaning mage identity.",
+    playstyle: "Utility",
+    strengths: ["Unique toolkit", "Strong utility", "Range control"],
+    weaknesses: ["Setup moments", "Learning curve", "Average burst"],
+    difficulty: "Advanced",
+    beginnerFriendly: false,
+    bossingRating: 4,
+    farmingRating: 4,
+    mobilityRating: 3,
+    survivabilityRating: 3,
+    tags: ["Special", "Mage", "Utility"]
   }),
   makeClass({
     name: "Zero",

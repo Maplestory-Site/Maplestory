@@ -1,7 +1,5 @@
-import { useMemo } from "react";
 import { usePageMeta } from "../app/usePageMeta";
 import { CtaBanner } from "../components/content/CtaBanner";
-import { NextStreamCountdown } from "../components/content/NextStreamCountdown";
 import { StreamStatusCard } from "../components/content/StreamStatusCard";
 import { SectionHeader } from "../components/ui/SectionHeader";
 import { streamDetails } from "../data/siteContent";
@@ -11,16 +9,6 @@ import { twitchChannelUrl, twitchGameName, twitchLiveStatus, twitchStreamTitle, 
 export function LivePage() {
   usePageMeta("Live", "Watch live MapleStory bossing, progression sessions, and real-time community discussion.");
   const latestReplay = youtubeVideos[0];
-  const nextStreamDate = useMemo(() => {
-    const target = new Date();
-    target.setHours(20, 0, 0, 0);
-
-    if (target.getTime() <= Date.now()) {
-      target.setDate(target.getDate() + 1);
-    }
-
-    return target;
-  }, []);
 
   const liveCardDetails = {
     ...streamDetails,
@@ -46,11 +34,6 @@ export function LivePage() {
             <SectionHeader
               description="Boss clears, progression calls, and live chat."
               title="What happens live"
-            />
-            <NextStreamCountdown
-              description="Catch the next run the second it starts."
-              targetDate={nextStreamDate}
-              title="Next stream countdown"
             />
             <div className="bullet-stack bullet-stack--column">
               <span>Real progression. Real choices.</span>

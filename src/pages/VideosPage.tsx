@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { usePageMeta } from "../app/usePageMeta";
-import { ClipEditorStudio } from "../components/content/ClipEditorStudio";
 import { ContentFilterBar } from "../components/content/ContentFilterBar";
 import { CtaBanner } from "../components/content/CtaBanner";
 import { RecommendationPanel } from "../components/content/RecommendationPanel";
@@ -45,32 +44,6 @@ export function VideosPage() {
   }, [currentPage, filteredVideos]);
 
   const recommendationSections = useMemo(() => buildRecommendationSections(youtubeVideos, mockWatchHistory), []);
-  const clipEditorMoments = useMemo(
-    () => [
-      {
-        id: "moment-1",
-        label: "Boss phase spike",
-        note: "Big damage window and clean finish.",
-        start: 38,
-        end: 61
-      },
-      {
-        id: "moment-2",
-        label: "Route decision",
-        note: "The account call that changed the run.",
-        start: 74,
-        end: 96
-      },
-      {
-        id: "moment-3",
-        label: "Funny recovery",
-        note: "Close mistake turned into a clean save.",
-        start: 118,
-        end: 142
-      }
-    ],
-    []
-  );
 
   function updateSearch(nextPage: number, nextFilter: ContentFilterKey) {
     setSearchParams(
@@ -135,17 +108,6 @@ export function VideosPage() {
               </button>
             </div>
           ) : null}
-        </div>
-      </section>
-
-      <section className="section section--tight" data-reveal>
-        <div className="container">
-          <ClipEditorStudio
-            durationSeconds={180}
-            moments={clipEditorMoments}
-            sourceTitle={youtubeVideos[0]?.title || "Latest MapleStory upload"}
-            thumbnail={youtubeVideos[0]?.thumbnail}
-          />
         </div>
       </section>
 

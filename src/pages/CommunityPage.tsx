@@ -4,10 +4,9 @@ import { CtaBanner } from "../components/content/CtaBanner";
 import { LeaderboardPanel } from "../components/content/LeaderboardPanel";
 import { SocialLinkCard } from "../components/content/SocialLinkCard";
 import { TelegramPreviewCard } from "../components/content/TelegramPreviewCard";
-import { UploadPipelineCard } from "../components/content/UploadPipelineCard";
 import { SectionHeader } from "../components/ui/SectionHeader";
 import { communityBenefits, socialLinks } from "../data/siteContent";
-import { syncedContentFeed, supportedUploadTypes, telegramPreviewPosts, uploadPipelineSteps } from "../data/contentAutomation";
+import { syncedContentFeed, telegramPreviewPosts } from "../data/contentAutomation";
 import { leaderboards } from "../data/leaderboards";
 
 export function CommunityPage() {
@@ -45,7 +44,6 @@ export function CommunityPage() {
             {primarySocialCards.map((item) => (
               <SocialLinkCard item={item} key={item.platform} />
             ))}
-            <UploadPipelineCard steps={uploadPipelineSteps} supportedTypes={supportedUploadTypes} />
           </div>
         </div>
       </section>

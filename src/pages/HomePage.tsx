@@ -79,7 +79,7 @@ export function HomePage() {
         featuredTitle="Everything worth watching starts here."
         statusLabel={isLive ? "LIVE NOW" : "OFFLINE NOW"}
         statusTone={isLive ? "live" : "offline"}
-        title="Clean clears. Real progression."
+        title="Clean clears. Sharp calls."
         urgencyText={isLive ? "Live now. Get in before the run ends." : "Next push starts soon. Get the ping first."}
       />
 

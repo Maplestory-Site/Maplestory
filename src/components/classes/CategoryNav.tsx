@@ -16,8 +16,8 @@ export function CategoryNav({ categories, selected, onSelect }: CategoryNavProps
           className={`classes-category-nav__button${selected === category.label ? " is-active" : ""}`}
           onClick={() => onSelect(category.label)}
         >
-          <span>{category.label}</span>
-          <strong>{category.count}</strong>
+          <span className="classes-category-nav__label">{category.label}</span>
+          <strong className="classes-category-nav__count">{category.count}</strong>
         </button>
       ))}
     </section>
