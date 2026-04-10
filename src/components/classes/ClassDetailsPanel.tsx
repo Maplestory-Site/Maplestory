@@ -34,7 +34,7 @@ export function ClassDetailsPanel({ item, onClose }: ClassDetailsPanelProps) {
       <aside className="class-details__panel">
         <div className="class-details__top">
           <div>
-            <span className="class-details__eyebrow">{item.category}</span>
+            <span className="class-details__eyebrow">{item.previewVideoFaction ?? item.category}</span>
             <h2>{item.name}</h2>
             <p>{item.overview}</p>
           </div>
@@ -43,60 +43,90 @@ export function ClassDetailsPanel({ item, onClose }: ClassDetailsPanelProps) {
           </button>
         </div>
 
-        <div className="class-details__stats">
-          <div className="class-details__badge">
-            <span>Playstyle</span>
-            <strong>{item.playstyle}</strong>
+        <div className="class-details__layout">
+          <div className="class-details__visual">
+            {item.detailPreviewVideo ? (
+              <video
+                className="class-details__preview-video"
+                src={item.detailPreviewVideo}
+                muted
+                loop
+                autoPlay
+                playsInline
+                preload="metadata"
+              />
+            ) : item.previewVideo ? (
+              <video
+                className="class-details__preview-video"
+                src={item.previewVideo}
+                muted
+                loop
+                autoPlay
+                playsInline
+                preload="metadata"
+              />
+            ) : (
+              <div className="class-details__visual-fallback">{item.name.slice(0, 2).toUpperCase()}</div>
+            )}
           </div>
-          <div className="class-details__badge">
-            <span>Difficulty</span>
-            <strong>{item.difficulty}</strong>
-          </div>
-          <div className="class-details__badge">
-            <span>Entry</span>
-            <strong>{item.beginnerFriendly ? "Friendly" : "Advanced"}</strong>
-          </div>
-        </div>
 
-        <div className="class-details__split">
-          <div className="class-details__card">
-            <h3>Strengths</h3>
-            <ul>
-              {item.strengths.map((entry) => (
-                <li key={entry}>{entry}</li>
-              ))}
-            </ul>
-          </div>
-          <div className="class-details__card">
-            <h3>Weaknesses</h3>
-            <ul>
-              {item.weaknesses.map((entry) => (
-                <li key={entry}>{entry}</li>
-              ))}
-            </ul>
-          </div>
-        </div>
+          <div className="class-details__body">
+            <div className="class-details__stats">
+              <div className="class-details__badge">
+                <span>Playstyle</span>
+                <strong>{item.playstyle}</strong>
+              </div>
+              <div className="class-details__badge">
+                <span>Difficulty</span>
+                <strong>{item.difficulty}</strong>
+              </div>
+              <div className="class-details__badge">
+                <span>Entry</span>
+                <strong>{item.beginnerFriendly ? "Friendly" : "Advanced"}</strong>
+              </div>
+            </div>
 
-        <div className="class-details__ratings">
-          <RatingDisplay label="Bossing" value={item.bossingRating} />
-          <RatingDisplay label="Farming" value={item.farmingRating} />
-          <RatingDisplay label="Mobility" value={item.mobilityRating} />
-          <RatingDisplay label="Survivability" value={item.survivabilityRating} />
-        </div>
+            <div className="class-details__split">
+              <div className="class-details__card">
+                <h3>Strengths</h3>
+                <ul>
+                  {item.strengths.map((entry) => (
+                    <li key={entry}>{entry}</li>
+                  ))}
+                </ul>
+              </div>
+              <div className="class-details__card">
+                <h3>Weaknesses</h3>
+                <ul>
+                  {item.weaknesses.map((entry) => (
+                    <li key={entry}>{entry}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
 
-        <div className="class-details__footer">
-          <div className="class-details__tags">
-            {item.tags.map((tag) => (
-              <span key={tag}>{tag}</span>
-            ))}
-          </div>
-          <div className="class-details__actions">
-            <Button href="/videos" variant="primary">
-              Related Videos
-            </Button>
-            <Button href="/community" variant="secondary">
-              Ask the Community
-            </Button>
+            <div className="class-details__ratings">
+              <RatingDisplay label="Bossing" value={item.bossingRating} />
+              <RatingDisplay label="Farming" value={item.farmingRating} />
+              <RatingDisplay label="Mobility" value={item.mobilityRating} />
+              <RatingDisplay label="Survivability" value={item.survivabilityRating} />
+            </div>
+
+            <div className="class-details__footer">
+              <div className="class-details__tags">
+                {item.tags.map((tag) => (
+                  <span key={tag}>{tag}</span>
+                ))}
+              </div>
+              <div className="class-details__actions">
+                <Button href="/videos" variant="primary">
+                  Related Videos
+                </Button>
+                <Button href="/community" variant="secondary">
+                  Ask the Community
+                </Button>
+              </div>
+            </div>
           </div>
         </div>
       </aside>

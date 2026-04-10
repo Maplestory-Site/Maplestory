@@ -39,6 +39,7 @@ export type ClassJob = {
   image?: string;
   previewVideo?: string;
   previewVideoFaction?: string;
+  detailPreviewVideo?: string;
 };
 
 type ClassSeed = Omit<ClassJob, "id">;

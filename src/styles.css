@@ -8242,7 +8242,7 @@ main,
   position: absolute;
   top: 50%;
   right: 1.5rem;
-  width: min(42rem, calc(100vw - 2rem));
+  width: min(82rem, calc(100vw - 3rem));
   max-height: calc(100vh - 3rem);
   padding: 1.5rem;
   overflow: auto;
@@ -8253,6 +8253,58 @@ main,
 
 .class-details__top {
   grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.class-details__layout {
+  display: grid;
+  grid-template-columns: minmax(470px, 1.25fr) minmax(0, 1fr);
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.class-details__visual {
+  position: relative;
+  min-height: 30rem;
+  max-height: 30rem;
+  border-radius: 1.6rem;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(108, 199, 193, 0.18), transparent 18%),
+    radial-gradient(circle at 86% 14%, rgba(210, 205, 192, 0.14), transparent 12%),
+    linear-gradient(180deg, rgba(30, 36, 39, 0.98) 0%, rgba(21, 17, 19, 0.98) 100%);
+  border: 1px solid rgba(163, 214, 206, 0.08);
+}
+
+.class-details__preview-video,
+.class-details__visual-fallback {
+  width: 100%;
+  height: 100%;
+}
+
+.class-details__preview-video {
+  display: block;
+  object-fit: cover;
+  object-position: center top;
+  transform: scale(1.28) translateY(-8%);
+  transform-origin: center top;
+}
+
+.class-details__visual-fallback {
+  display: grid;
+  place-items: center;
+  color: #f3f6fa;
+  font-size: 4rem;
+  font-weight: 800;
+  letter-spacing: -0.05em;
+  background:
+    radial-gradient(circle at 50% 48%, rgba(108, 199, 193, 0.18), transparent 18%),
+    radial-gradient(circle at 86% 14%, rgba(210, 205, 192, 0.14), transparent 12%),
+    linear-gradient(180deg, rgba(30, 36, 39, 0.98) 0%, rgba(21, 17, 19, 0.98) 100%);
+}
+
+.class-details__body {
+  display: grid;
+  gap: 1rem;
 }
 
 .class-details__close {
@@ -8370,6 +8422,7 @@ main,
   .classes-filter-bar,
   .classes-cta,
   .class-details__top,
+  .class-details__layout,
   .class-details__split,
   .class-details__ratings,
   .class-details__footer {
@@ -8401,6 +8454,16 @@ main,
     width: auto;
     max-height: calc(100vh - 2rem);
     transform: none;
+  }
+
+  .class-details__visual {
+    min-height: 18rem;
+    max-height: 18rem;
+  }
+
+  .class-details__preview-video {
+    transform: scale(1.12) translateY(-4%);
+    transform-origin: center top;
   }
 }
 

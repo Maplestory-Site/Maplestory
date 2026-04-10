@@ -39525,10 +39525,10 @@
     "copyrightLabel": "Source: MapleStory Monster Table / curated preview",
     "sourceStatus": "ok",
     "syncState": "synced",
-    "updatedAt": "2026-04-10T14:42:08.577Z",
-    "fetchedAt": "2026-04-10T14:42:08.579Z",
+    "updatedAt": "2026-04-10T14:32:05.030Z",
+    "fetchedAt": "2026-04-10T14:32:05.031Z",
     "itemCount": 1214,
-    "freshItemCount": 1210,
+    "freshItemCount": 0,
     "canAutoSync": true,
     "cacheTtlMinutes": 360,
     "error": ""
