@@ -18,6 +18,11 @@ export function PageHero({ title, subtitle, total }: PageHeroProps) {
         </div>
       </div>
       <div className="classes-hero__visual" aria-hidden="true">
+        <img
+          className="classes-hero__visual-image"
+          src="/classes-hero-art.avif"
+          alt=""
+        />
         <div className="classes-hero__orb" />
         <div className="classes-hero__visual-card">
           <span>Browse by faction</span>

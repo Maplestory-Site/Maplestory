@@ -63,11 +63,26 @@ export function MobileMenu({
         </div>
 
         <nav aria-label="Mobile" className="mobile-menu__nav">
-          {navItems.map((item) => (
-            <NavLink className="mobile-menu__link" key={item.href} onClick={onClose} to={item.href}>
-              {item.label}
-            </NavLink>
-          ))}
+          {navItems.map((item) =>
+            item.children?.length ? (
+              <div className="mobile-menu__group" key={item.label}>
+                <NavLink className="mobile-menu__link" onClick={onClose} to={item.href}>
+                  {item.label}
+                </NavLink>
+                <div className="mobile-menu__sublinks">
+                  {item.children.map((child) => (
+                    <NavLink className="mobile-menu__sublink" key={child.href} onClick={onClose} to={child.href}>
+                      {child.label}
+                    </NavLink>
+                  ))}
+                </div>
+              </div>
+            ) : (
+              <NavLink className="mobile-menu__link" key={item.href} onClick={onClose} to={item.href}>
+                {item.label}
+              </NavLink>
+            )
+          )}
         </nav>
 
         {utilityItems.length ? (

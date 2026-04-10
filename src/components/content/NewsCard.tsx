@@ -29,17 +29,10 @@ export function NewsCard({ item, featured = false }: NewsCardProps) {
       <div className="news-card__body">
         <div className="news-card__meta">
           <span>{published}</span>
-          <span>Source: {item.sourceName}</span>
+          <span>{item.category.replace("-", " ")}</span>
         </div>
         <h3>{item.title}</h3>
         <p>{item.summary}</p>
-        <div className="news-card__credit">
-          <strong>Source:</strong> {item.sourceName}
-          <a href={item.sourceUrl} rel="noreferrer" target="_blank">
-            Open source
-          </a>
-          <span>{item.copyrightLabel}</span>
-        </div>
         <div className="news-card__actions">
           <Button href={item.sourceUrl} variant={featured ? "primary" : "ghost"}>
             Read Original

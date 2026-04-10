@@ -23,7 +23,6 @@ export function NewsPage() {
           />
 
           <div className="news-meta-strip card">
-            <span>Source: Official MapleStory / Nexon</span>
             <span>Last synced {formatNewsMetaDate(meta.lastUpdated)}</span>
             <span>
               {meta.sourceStatus === "fresh"

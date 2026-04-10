@@ -1,0 +1,710 @@
+{
+  "items": [
+    {
+      "id": "brown-kitty",
+      "name": "Brown Kitty",
+      "category": "Classic Companions",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/6/66/MS_Brown_Kitty.png",
+      "summary": "Brown Kitty is a classic companions pet from the MapleStory pet collection.",
+      "tags": [
+        "Classic Companions",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "brown-puppy",
+      "name": "Brown Puppy",
+      "category": "Classic Companions",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/b/b1/MS_Brown_Puppy.png",
+      "summary": "Brown Puppy is a classic companions pet from the MapleStory pet collection.",
+      "tags": [
+        "Classic Companions",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "black-kitty",
+      "name": "Black Kitty",
+      "category": "Classic Companions",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/9/90/MS_Black_Kitty.png",
+      "summary": "Black Kitty is a classic companions pet from the MapleStory pet collection.",
+      "tags": [
+        "Classic Companions",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "mini-kargo",
+      "name": "Mini Kargo",
+      "category": "Robo / Mechanical",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/8/8a/MS_Mini_Kargo.png",
+      "summary": "Mini Kargo is a robo / mechanical pet from the MapleStory pet collection.",
+      "tags": [
+        "Robo / Mechanical",
+        "Mechanical"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "rudolph",
+      "name": "Rudolph",
+      "category": "Holiday / Event",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/5/53/MS_Rudolph.png",
+      "summary": "Rudolph is a holiday / event pet from the MapleStory pet collection.",
+      "tags": [
+        "Holiday / Event",
+        "Event"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "dasher",
+      "name": "Dasher",
+      "category": "Holiday / Event",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/0/0d/MS_Dasher.png",
+      "summary": "Dasher is a holiday / event pet from the MapleStory pet collection.",
+      "tags": [
+        "Holiday / Event",
+        "Event"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "husky",
+      "name": "Husky",
+      "category": "Classic Companions",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/a/a4/MS_Husky.png",
+      "summary": "Husky is a classic companions pet from the MapleStory pet collection.",
+      "tags": [
+        "Classic Companions",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "black-pig",
+      "name": "Black Pig",
+      "category": "Classic Companions",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/0/09/MS_Black_Pig.png",
+      "summary": "Black Pig is a classic companions pet from the MapleStory pet collection.",
+      "tags": [
+        "Classic Companions",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "white-bunny",
+      "name": "White Bunny",
+      "category": "Classic Companions",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/7/77/MS_White_Bunny.png",
+      "summary": "White Bunny is a classic companions pet from the MapleStory pet collection.",
+      "tags": [
+        "Classic Companions",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "pink-bunny",
+      "name": "Pink Bunny",
+      "category": "Classic Companions",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/a/ab/MS_Pink_Bunny.png",
+      "summary": "Pink Bunny is a classic companions pet from the MapleStory pet collection.",
+      "tags": [
+        "Classic Companions",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "panda",
+      "name": "Panda",
+      "category": "Classic Companions",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/f/f6/MS_Panda.png",
+      "summary": "Panda is a classic companions pet from the MapleStory pet collection.",
+      "tags": [
+        "Classic Companions",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "dino-boy",
+      "name": "Dino Boy",
+      "category": "Special / Fantasy",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/4/4b/MS_Dino_Boy.png",
+      "summary": "Dino Boy is a special / fantasy pet from the MapleStory pet collection.",
+      "tags": [
+        "Special / Fantasy"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "dino-girl",
+      "name": "Dino Girl",
+      "category": "Special / Fantasy",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/f/f5/MS_Dino_Girl.png",
+      "summary": "Dino Girl is a special / fantasy pet from the MapleStory pet collection.",
+      "tags": [
+        "Special / Fantasy"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "white-tiger",
+      "name": "White Tiger",
+      "category": "Classic Companions",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/8/84/MS_White_Tiger.png",
+      "summary": "White Tiger is a classic companions pet from the MapleStory pet collection.",
+      "tags": [
+        "Classic Companions",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "monkey",
+      "name": "Monkey",
+      "category": "Classic Companions",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/4/4d/MS_Monkey.png",
+      "summary": "Monkey is a classic companions pet from the MapleStory pet collection.",
+      "tags": [
+        "Classic Companions",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "turkey",
+      "name": "Turkey",
+      "category": "Holiday / Event",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/d/df/MS_Turkey.png",
+      "summary": "Turkey is a holiday / event pet from the MapleStory pet collection.",
+      "tags": [
+        "Holiday / Event",
+        "Event"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "penguin",
+      "name": "Penguin",
+      "category": "Special / Fantasy",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/4/4f/MS_Penguin.png",
+      "summary": "Penguin is a special / fantasy pet from the MapleStory pet collection.",
+      "tags": [
+        "Special / Fantasy"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "robot",
+      "name": "Robot",
+      "category": "Robo / Mechanical",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/5/56/MS_Robot.png",
+      "summary": "Robot is a robo / mechanical pet from the MapleStory pet collection.",
+      "tags": [
+        "Robo / Mechanical",
+        "Mechanical"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "mini-yeti",
+      "name": "Mini Yeti",
+      "category": "Special / Fantasy",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/0/03/MS_Mini_Yeti.png",
+      "summary": "Mini Yeti is a special / fantasy pet from the MapleStory pet collection.",
+      "tags": [
+        "Special / Fantasy"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "jr-balrog",
+      "name": "Jr. Balrog",
+      "category": "Special / Fantasy",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/5/56/MS_Jr._Balrog.png",
+      "summary": "Jr. Balrog is a special / fantasy pet from the MapleStory pet collection.",
+      "tags": [
+        "Special / Fantasy"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "golden-pig",
+      "name": "Golden Pig",
+      "category": "Classic Companions",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/7/74/MS_Golden_Pig.png",
+      "summary": "Golden Pig is a classic companions pet from the MapleStory pet collection.",
+      "tags": [
+        "Classic Companions",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "elephant",
+      "name": "Elephant",
+      "category": "Classic Companions",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/a/a7/MS_Elephant.png",
+      "summary": "Elephant is a classic companions pet from the MapleStory pet collection.",
+      "tags": [
+        "Classic Companions",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "cloud-leopard",
+      "name": "Cloud Leopard",
+      "category": "Classic Companions",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/3/32/MS_Cloud_Leopard.png",
+      "summary": "Cloud Leopard is a classic companions pet from the MapleStory pet collection.",
+      "tags": [
+        "Classic Companions",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "sun-wu-kong",
+      "name": "Sun Wu Kong",
+      "category": "Classic Companions",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/2/2f/MS_Sun_Wu_Kong.png",
+      "summary": "Sun Wu Kong is a classic companions pet from the MapleStory pet collection.",
+      "tags": [
+        "Classic Companions"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "dragon-egg",
+      "name": "Dragon Egg",
+      "category": "Dragon Line",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/4/4e/MS_Dragon_Egg.png",
+      "summary": "Dragon Egg is a dragon line pet from the MapleStory pet collection.",
+      "tags": [
+        "Dragon Line",
+        "Dragon"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "baby-dragon",
+      "name": "Baby Dragon",
+      "category": "Dragon Line",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/2/2a/MS_Baby_Dragon.png",
+      "summary": "Baby Dragon is a dragon line pet from the MapleStory pet collection.",
+      "tags": [
+        "Dragon Line",
+        "Dragon"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "black-dragon",
+      "name": "Black Dragon",
+      "category": "Dragon Line",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/8/84/MS_Black_Dragon.png",
+      "summary": "Black Dragon is a dragon line pet from the MapleStory pet collection.",
+      "tags": [
+        "Dragon Line",
+        "Dragon"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "red-dragon",
+      "name": "Red Dragon",
+      "category": "Dragon Line",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/f/ff/MS_Red_Dragon.png",
+      "summary": "Red Dragon is a dragon line pet from the MapleStory pet collection.",
+      "tags": [
+        "Dragon Line",
+        "Dragon"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "green-dragon",
+      "name": "Green Dragon",
+      "category": "Dragon Line",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/e/ec/MS_Green_Dragon.png",
+      "summary": "Green Dragon is a dragon line pet from the MapleStory pet collection.",
+      "tags": [
+        "Dragon Line",
+        "Dragon"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "blue-dragon",
+      "name": "Blue Dragon",
+      "category": "Dragon Line",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/f/fb/MS_Blue_Dragon.png",
+      "summary": "Blue Dragon is a dragon line pet from the MapleStory pet collection.",
+      "tags": [
+        "Dragon Line",
+        "Dragon"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "farm-pig",
+      "name": "Farm Pig",
+      "category": "Special / Fantasy",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/c/c3/MS_Farm_Pig.png",
+      "summary": "Farm Pig is a special / fantasy pet from the MapleStory pet collection.",
+      "tags": [
+        "Special / Fantasy",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "black-bunny",
+      "name": "Black Bunny",
+      "category": "Special / Fantasy",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/1/1f/MS_Black_Bunny.png",
+      "summary": "Black Bunny is a special / fantasy pet from the MapleStory pet collection.",
+      "tags": [
+        "Special / Fantasy",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "blue-husky",
+      "name": "Blue Husky",
+      "category": "Special / Fantasy",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/7/75/MS_Blue_Husky.png",
+      "summary": "Blue Husky is a special / fantasy pet from the MapleStory pet collection.",
+      "tags": [
+        "Special / Fantasy",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "white-baby-monkey",
+      "name": "White Baby Monkey",
+      "category": "Special / Fantasy",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/d/d5/MS_White_Baby_Monkey.png",
+      "summary": "White Baby Monkey is a special / fantasy pet from the MapleStory pet collection.",
+      "tags": [
+        "Special / Fantasy",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "jr-reaper",
+      "name": "Jr. Reaper",
+      "category": "Special / Fantasy",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/d/d5/MS_Jr._Reaper.png",
+      "summary": "Jr. Reaper is a special / fantasy pet from the MapleStory pet collection.",
+      "tags": [
+        "Special / Fantasy"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "porcupine",
+      "name": "Porcupine",
+      "category": "Special / Fantasy",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/1/1c/MS_Porcupine.png",
+      "summary": "Porcupine is a special / fantasy pet from the MapleStory pet collection.",
+      "tags": [
+        "Special / Fantasy"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "snowman",
+      "name": "Snowman",
+      "category": "Holiday / Event",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/3/3e/MS_Snowman.png",
+      "summary": "Snowman is a holiday / event pet from the MapleStory pet collection.",
+      "tags": [
+        "Holiday / Event",
+        "Event"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "kino",
+      "name": "Kino",
+      "category": "Special / Fantasy",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/e/e6/MS_Kino.png",
+      "summary": "Kino is a special / fantasy pet from the MapleStory pet collection.",
+      "tags": [
+        "Special / Fantasy"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "skunk",
+      "name": "Skunk",
+      "category": "Special / Fantasy",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/d/d4/MS_Skunk.png",
+      "summary": "Skunk is a special / fantasy pet from the MapleStory pet collection.",
+      "tags": [
+        "Special / Fantasy"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "orange-tiger",
+      "name": "Orange Tiger",
+      "category": "Special / Fantasy",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/4/43/MS_Orange_Tiger.png",
+      "summary": "Orange Tiger is a special / fantasy pet from the MapleStory pet collection.",
+      "tags": [
+        "Special / Fantasy",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "robo",
+      "name": "Robo",
+      "category": "Robo / Mechanical",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/9/9c/MS_Robo.png",
+      "summary": "Robo is a robo / mechanical pet from the MapleStory pet collection.",
+      "tags": [
+        "Robo / Mechanical",
+        "Mechanical"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "baby-robo",
+      "name": "Baby Robo",
+      "category": "Robo / Mechanical",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/d/d1/MS_Baby_Robo.png",
+      "summary": "Baby Robo is a robo / mechanical pet from the MapleStory pet collection.",
+      "tags": [
+        "Robo / Mechanical",
+        "Mechanical"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "blue-robo",
+      "name": "Blue Robo",
+      "category": "Robo / Mechanical",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/5/5d/MS_Blue_Robo.png",
+      "summary": "Blue Robo is a robo / mechanical pet from the MapleStory pet collection.",
+      "tags": [
+        "Robo / Mechanical",
+        "Mechanical"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "green-robo",
+      "name": "Green Robo",
+      "category": "Robo / Mechanical",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/a/a0/MS_Green_Robo.png",
+      "summary": "Green Robo is a robo / mechanical pet from the MapleStory pet collection.",
+      "tags": [
+        "Robo / Mechanical",
+        "Mechanical"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "red-robo",
+      "name": "Red Robo",
+      "category": "Robo / Mechanical",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/a/a5/MS_Red_Robo.png",
+      "summary": "Red Robo is a robo / mechanical pet from the MapleStory pet collection.",
+      "tags": [
+        "Robo / Mechanical",
+        "Mechanical"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "gold-robo",
+      "name": "Gold Robo",
+      "category": "Robo / Mechanical",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/a/aa/MS_Gold_Robo.png",
+      "summary": "Gold Robo is a robo / mechanical pet from the MapleStory pet collection.",
+      "tags": [
+        "Robo / Mechanical",
+        "Mechanical"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "gorilla-robo",
+      "name": "Gorilla Robo",
+      "category": "Robo / Mechanical",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/0/0d/MS_Gorilla_Robo.png",
+      "summary": "Gorilla Robo is a robo / mechanical pet from the MapleStory pet collection.",
+      "tags": [
+        "Robo / Mechanical",
+        "Mechanical"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "snail",
+      "name": "Snail",
+      "category": "Classic Companions",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/d/df/MS_Snail.png",
+      "summary": "Snail is a classic companions pet from the MapleStory pet collection.",
+      "tags": [
+        "Classic Companions",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "crystal-rudolph",
+      "name": "Crystal Rudolph",
+      "category": "Holiday / Event",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/8/8d/MS_Crystal_Rudolph.png",
+      "summary": "Crystal Rudolph is a holiday / event pet from the MapleStory pet collection.",
+      "tags": [
+        "Holiday / Event",
+        "Event"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "toucan",
+      "name": "Toucan",
+      "category": "Classic Companions",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/6/6c/MS_Toucan.png",
+      "summary": "Toucan is a classic companions pet from the MapleStory pet collection.",
+      "tags": [
+        "Classic Companions",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "white-duck",
+      "name": "White Duck",
+      "category": "Classic Companions",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/5/57/MS_White_Duck.png",
+      "summary": "White Duck is a classic companions pet from the MapleStory pet collection.",
+      "tags": [
+        "Classic Companions",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "pink-bean",
+      "name": "Pink Bean",
+      "category": "Holiday / Event",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/7/74/MS_Pink_Bean.png",
+      "summary": "Pink Bean is a holiday / event pet from the MapleStory pet collection.",
+      "tags": [
+        "Holiday / Event",
+        "Event"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "raccoon",
+      "name": "Raccoon",
+      "category": "Classic Companions",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/d/de/MS_Raccoon.png",
+      "summary": "Raccoon is a classic companions pet from the MapleStory pet collection.",
+      "tags": [
+        "Classic Companions",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "ninja",
+      "name": "Ninja",
+      "category": "Special / Fantasy",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/7/7d/MS_Ninja.png",
+      "summary": "Ninja is a special / fantasy pet from the MapleStory pet collection.",
+      "tags": [
+        "Special / Fantasy"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "baby-tiger",
+      "name": "Baby Tiger",
+      "category": "Special / Fantasy",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/2/20/MS_Baby_Tiger.png",
+      "summary": "Baby Tiger is a special / fantasy pet from the MapleStory pet collection.",
+      "tags": [
+        "Special / Fantasy",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "weird-alien",
+      "name": "Weird Alien",
+      "category": "Holiday / Event",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/e/e0/MS_Weird_Alien.png",
+      "summary": "Weird Alien is a holiday / event pet from the MapleStory pet collection.",
+      "tags": [
+        "Holiday / Event",
+        "Event"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "mir",
+      "name": "Mir",
+      "category": "Dragon Line",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/5/5a/MS_Mir.png",
+      "summary": "Mir is a dragon line pet from the MapleStory pet collection.",
+      "tags": [
+        "Dragon Line",
+        "Dragon"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "ruby",
+      "name": "Ruby",
+      "category": "Dragon Line",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/5/53/MS_Ruby.png",
+      "summary": "Ruby is a dragon line pet from the MapleStory pet collection.",
+      "tags": [
+        "Dragon Line",
+        "Dragon"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    },
+    {
+      "id": "bing-monkey",
+      "name": "Bing Monkey",
+      "category": "Holiday / Event",
+      "image": "https://cdn.wikimg.net/en/strategywiki/images/1/18/MS_Bing_Monkey.png",
+      "summary": "Bing Monkey is a holiday / event pet from the MapleStory pet collection.",
+      "tags": [
+        "Holiday / Event",
+        "Event",
+        "Companion"
+      ],
+      "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets"
+    }
+  ],
+  "meta": {
+    "sourceName": "StrategyWiki",
+    "sourceUrl": "https://strategywiki.org/wiki/MapleStory/Pets",
+    "copyrightLabel": "Source: StrategyWiki / curated pet preview",
+    "updatedAt": "2026-04-10T22:32:38.400Z",
+    "syncState": "synced",
+    "itemCount": 59
+  }
+}

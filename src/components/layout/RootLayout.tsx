@@ -7,6 +7,7 @@ import { Header } from "../navigation/Header";
 import { MobileMenu } from "../navigation/MobileMenu";
 import { MockAuthProvider } from "../../features/profile/MockAuthContext";
 import { AuthModal } from "./AuthModal";
+import { GoogleAnalytics } from "../analytics/GoogleAnalytics";
 
 function RootLayoutContent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -97,6 +98,7 @@ function RootLayoutContent() {
       <main id="main-content">
         <Outlet />
       </main>
+      <GoogleAnalytics />
       <AuthModal />
       <Footer groups={footerGroups} />
     </div>

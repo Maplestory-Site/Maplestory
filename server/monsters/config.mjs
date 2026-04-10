@@ -1,7 +1,7 @@
 import os from "node:os";
 import path from "node:path";
 
-export const MONSTERS_SOURCE_URL = "https://maplestorywiki.github.io/MonsterTable/";
+export const MONSTERS_SOURCE_URL = "https://maplestory.fandom.com/wiki/Monster";
 export const MONSTERS_CACHE_TTL_MINUTES = 360;
 export const MONSTERS_FETCH_TIMEOUT_MS = 12000;
 
@@ -17,7 +17,7 @@ export const MONSTERS_RUNTIME_CACHE_FILE = path.join(
 );
 
 export const MONSTERS_SOURCE_META = {
-  sourceName: "MapleStory Monster Table",
+  sourceName: "MapleStory Fandom",
   sourceUrl: MONSTERS_SOURCE_URL,
-  copyrightLabel: "Source: MapleStory Monster Table / curated preview",
+  copyrightLabel: "Source: MapleStory Fandom / curated preview",
 };

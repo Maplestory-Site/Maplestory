@@ -1,6 +1,7 @@
 export type NavItem = {
   label: string;
   href: string;
+  children?: NavItem[];
 };
 
 export type VideoItem = {
@@ -43,7 +44,17 @@ export const navigationItems: NavItem[] = [
   { label: "Videos", href: "/videos" },
   { label: "Live", href: "/live" },
   { label: "Community", href: "/community" },
-  { label: "Monsters", href: "/monsters" }
+  {
+    label: "DataBase",
+    href: "/database/monster",
+    children: [
+      { label: "Monster", href: "/database/monster" },
+      { label: "Items", href: "/database/items" },
+      { label: "Maps", href: "/database/maps" },
+      { label: "Pets", href: "/database/pets" },
+      { label: "Quests", href: "/database/quests" }
+    ]
+  }
 ];
 
 export const secondaryNavigationItems: NavItem[] = [

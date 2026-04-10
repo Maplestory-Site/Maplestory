@@ -2,15 +2,25 @@ type MonstersHeroProps = {
   total: number;
   bosses: number;
   farmingTargets: number;
+  title?: string;
+  eyebrow?: string;
+  subtitle?: string;
 };
 
-export function MonstersHero({ total, bosses, farmingTargets }: MonstersHeroProps) {
+export function MonstersHero({
+  total,
+  bosses,
+  farmingTargets,
+  title = "Monster",
+  eyebrow = "Database",
+  subtitle = "Browse monsters, bosses, drops, and maps fast."
+}: MonstersHeroProps) {
   return (
     <section className="monsters-hero reveal-on-scroll">
       <div className="monsters-hero__copy">
-        <span className="monsters-hero__eyebrow">Monster index</span>
-        <h1>Monsters</h1>
-        <p>Browse monsters, bosses, drops, and maps fast.</p>
+        <span className="monsters-hero__eyebrow">{eyebrow}</span>
+        <h1>{title}</h1>
+        <p>{subtitle}</p>
 
         <div className="monsters-hero__stats">
           <div>
