@@ -1,9 +1,7 @@
-import type { ClassCategory } from "../../data/classesJobs";
-
 type CategoryNavProps = {
-  categories: Array<{ label: "All" | ClassCategory; count: number }>;
-  selected: "All" | ClassCategory;
-  onSelect: (category: "All" | ClassCategory) => void;
+  categories: Array<{ label: string; count: number }>;
+  selected: string;
+  onSelect: (category: string) => void;
 };
 
 export function CategoryNav({ categories, selected, onSelect }: CategoryNavProps) {

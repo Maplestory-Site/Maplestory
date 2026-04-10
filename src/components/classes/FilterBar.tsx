@@ -1,4 +1,4 @@
-import type { ClassCategory, ClassDifficulty, ClassPlaystyle } from "../../data/classesJobs";
+import type { ClassDifficulty, ClassPlaystyle } from "../../data/classesJobs";
 
 type FilterBarProps = {
   search: string;
@@ -9,7 +9,7 @@ type FilterBarProps = {
   onDifficultyChange: (value: "All" | ClassDifficulty) => void;
   playstyles: ClassPlaystyle[];
   difficulties: ClassDifficulty[];
-  selectedCategory: "All" | ClassCategory;
+  selectedCategory: string;
 };
 
 export function FilterBar({

@@ -7,11 +7,9 @@ import { FilterBar } from "../components/classes/FilterBar";
 import { PageHero } from "../components/classes/PageHero";
 import { attachClassPreviewVideos } from "../data/classPreviewVideos";
 import {
-  classCategories,
   classDifficulties,
   classJobs,
   classPlaystyles,
-  type ClassCategory,
   type ClassDifficulty,
   type ClassJob,
   type ClassPlaystyle
@@ -24,29 +22,30 @@ export function ClassesJobsPage() {
     "Browse MapleStory classes by faction, playstyle, and difficulty inside the SNAILSLAYER class directory."
   );
 
-  const [selectedCategory, setSelectedCategory] = useState<"All" | ClassCategory>("All");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [selectedPlaystyle, setSelectedPlaystyle] = useState<"All" | ClassPlaystyle>("All");
   const [selectedDifficulty, setSelectedDifficulty] = useState<"All" | ClassDifficulty>("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedClass, setSelectedClass] = useState<ClassJob | null>(null);
   const classesWithPreview = useMemo(() => attachClassPreviewVideos(classJobs), []);
+  const getCategoryLabel = (item: ClassJob) => item.previewVideoFaction ?? item.category;
 
   const categoryCounts = useMemo(
     () => [
       { label: "All" as const, count: classJobs.length },
-      ...classCategories.map((category) => ({
+      ...Array.from(new Set(classesWithPreview.map(getCategoryLabel))).map((category) => ({
         label: category,
-        count: classJobs.filter((item) => item.category === category).length
+        count: classesWithPreview.filter((item) => getCategoryLabel(item) === category).length
       }))
     ],
-    []
+    [classesWithPreview]
   );
 
   const filteredClasses = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
     return classesWithPreview.filter((item) => {
-      const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
+      const matchesCategory = selectedCategory === "All" || getCategoryLabel(item) === selectedCategory;
       const matchesPlaystyle = selectedPlaystyle === "All" || item.playstyle === selectedPlaystyle;
       const matchesDifficulty = selectedDifficulty === "All" || item.difficulty === selectedDifficulty;
       const matchesSearch =

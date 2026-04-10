@@ -1,4 +1,4 @@
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ClassJob } from "../../data/classesJobs";
 
 type ClassCardProps = {
@@ -7,27 +7,56 @@ type ClassCardProps = {
 };
 
 export function ClassCard({ item, onSelect }: ClassCardProps) {
+  const cardRef = useRef<HTMLButtonElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const [isVisibleOnScreen, setIsVisibleOnScreen] = useState(false);
 
-  const startPreview = () => {
+  useEffect(() => {
+    if (!item.previewVideo || typeof window === "undefined" || !cardRef.current) {
+      setIsVisibleOnScreen(false);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        setIsVisibleOnScreen(entry.isIntersecting && entry.intersectionRatio >= 0.35);
+      },
+      {
+        threshold: [0.15, 0.35, 0.6],
+        rootMargin: "96px 0px"
+      }
+    );
+
+    observer.observe(cardRef.current);
+
+    return () => observer.disconnect();
+  }, [item.previewVideo]);
+
+  useEffect(() => {
     if (!item.previewVideo || !videoRef.current) {
       return;
     }
 
-    videoRef.current.play().catch(() => {});
-  };
-
-  const stopPreview = () => {
-    if (!item.previewVideo || !videoRef.current) {
+    if (isVisibleOnScreen) {
+      videoRef.current.play().catch(() => {});
       return;
     }
 
     videoRef.current.pause();
     videoRef.current.currentTime = 0;
+  }, [isVisibleOnScreen, item.previewVideo]);
+
+  const startPreview = () => {
+    return;
+  };
+
+  const stopPreview = () => {
+    return;
   };
 
   return (
     <button
+      ref={cardRef}
       type="button"
       className="class-card reveal-on-scroll"
       onClick={() => onSelect(item)}
@@ -45,6 +74,7 @@ export function ClassCard({ item, onSelect }: ClassCardProps) {
               muted
               loop
               playsInline
+              autoPlay={isVisibleOnScreen}
               preload="metadata"
               aria-hidden="true"
             >
@@ -59,7 +89,7 @@ export function ClassCard({ item, onSelect }: ClassCardProps) {
       <div className="class-card__content">
         <div className="class-card__identity">
           <h3>{item.name}</h3>
-          <p>{item.category}</p>
+          <p>{item.previewVideoFaction ?? item.category}</p>
         </div>
         <div className="class-card__footer">
           <span className="class-card__difficulty">{item.difficulty}</span>
