@@ -37,6 +37,8 @@ export type ClassJob = {
   survivabilityRating: number;
   tags: string[];
   image?: string;
+  previewVideo?: string;
+  previewVideoFaction?: string;
 };
 
 type ClassSeed = Omit<ClassJob, "id">;

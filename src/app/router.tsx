@@ -6,6 +6,7 @@ import { CommunityPage } from "../pages/CommunityPage";
 import { ContactPage } from "../pages/ContactPage";
 import { HomePage } from "../pages/HomePage";
 import { LivePage } from "../pages/LivePage";
+import { MonstersPage } from "../pages/MonstersPage";
 import { NewsPage } from "../pages/NewsPage";
 import { ProfilePage } from "../pages/ProfilePage";
 import { VideosPage } from "../pages/VideosPage";
@@ -17,6 +18,7 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <HomePage /> },
       { path: "classes", element: <ClassesJobsPage /> },
+      { path: "monsters", element: <MonstersPage /> },
       { path: "news", element: <NewsPage /> },
       { path: "videos", element: <VideosPage /> },
       { path: "live", element: <LivePage /> },

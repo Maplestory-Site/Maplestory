@@ -72,16 +72,17 @@ export function HomePage() {
 
   return (
     <>
-      <HeroBlock
-        description="Bossing, progression, and live MapleStory content that gets to the point."
-        eyebrow="SNAILSLAYER | Live bossing | Sharp guides"
-        featuredDescription="Live runs, fresh uploads, and the Discord that keeps you in the loop."
-        featuredTitle="Everything worth watching starts here."
-        statusLabel={isLive ? "LIVE NOW" : "OFFLINE NOW"}
-        statusTone={isLive ? "live" : "offline"}
-        title="Clean clears. Sharp calls."
-        urgencyText={isLive ? "Live now. Get in before the run ends." : "Next push starts soon. Get the ping first."}
-      />
+        <HeroBlock
+          description="Watch smarter runs, better boss calls, and the drops worth coming back for."
+          eyebrow="SNAILSLAYER | Live bossing | Sharp guides"
+          featuredDescription="Follow once and stay close to every live run, new upload, and next alert."
+          featuredTitle="Watch better. Follow earlier."
+          statusLabel={isLive ? "LIVE NOW" : "OFFLINE NOW"}
+          statusTone={isLive ? "live" : "offline"}
+          title="Clean clears. Sharp calls."
+          valueLine="Best bossing strategies that pay off."
+          urgencyText={isLive ? "Live now. Get in before the run ends." : "Next push starts soon. Get the ping first."}
+        />
 
       <section className="section" data-reveal>
         <div className="container two-column">

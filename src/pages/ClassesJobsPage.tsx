@@ -5,6 +5,7 @@ import { ClassDetailsPanel } from "../components/classes/ClassDetailsPanel";
 import { ClassGrid } from "../components/classes/ClassGrid";
 import { FilterBar } from "../components/classes/FilterBar";
 import { PageHero } from "../components/classes/PageHero";
+import { attachClassPreviewVideos } from "../data/classPreviewVideos";
 import {
   classCategories,
   classDifficulties,
@@ -28,6 +29,7 @@ export function ClassesJobsPage() {
   const [selectedDifficulty, setSelectedDifficulty] = useState<"All" | ClassDifficulty>("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedClass, setSelectedClass] = useState<ClassJob | null>(null);
+  const classesWithPreview = useMemo(() => attachClassPreviewVideos(classJobs), []);
 
   const categoryCounts = useMemo(
     () => [
@@ -43,7 +45,7 @@ export function ClassesJobsPage() {
   const filteredClasses = useMemo(() => {
     const query = searchQuery.trim().toLowerCase();
 
-    return classJobs.filter((item) => {
+    return classesWithPreview.filter((item) => {
       const matchesCategory = selectedCategory === "All" || item.category === selectedCategory;
       const matchesPlaystyle = selectedPlaystyle === "All" || item.playstyle === selectedPlaystyle;
       const matchesDifficulty = selectedDifficulty === "All" || item.difficulty === selectedDifficulty;
@@ -54,7 +56,7 @@ export function ClassesJobsPage() {
 
       return matchesCategory && matchesPlaystyle && matchesDifficulty && matchesSearch;
     });
-  }, [searchQuery, selectedCategory, selectedPlaystyle, selectedDifficulty]);
+  }, [classesWithPreview, searchQuery, selectedCategory, selectedPlaystyle, selectedDifficulty]);
 
   return (
     <div className="classes-page">

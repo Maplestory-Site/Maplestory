@@ -4,15 +4,16 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "predev": "node ./scripts/sync-youtube.mjs && node ./scripts/sync-twitch.mjs && node ./scripts/sync-news.mjs",
-    "prebuild": "node ./scripts/sync-youtube.mjs && node ./scripts/sync-twitch.mjs && node ./scripts/sync-news.mjs",
+    "predev": "node ./scripts/sync-youtube.mjs && node ./scripts/sync-twitch.mjs && node ./scripts/sync-news.mjs && node ./scripts/sync-monsters.mjs",
+    "prebuild": "node ./scripts/sync-youtube.mjs && node ./scripts/sync-twitch.mjs && node ./scripts/sync-news.mjs && node ./scripts/sync-monsters.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "sync:news": "node ./scripts/sync-news.mjs",
     "sync:youtube": "node ./scripts/sync-youtube.mjs",
-    "sync:twitch": "node ./scripts/sync-twitch.mjs"
+    "sync:twitch": "node ./scripts/sync-twitch.mjs",
+    "sync:monsters": "node ./scripts/sync-monsters.mjs"
   },
   "dependencies": {
     "react": "^19.2.4",

@@ -1,8 +1,10 @@
 import { Badge } from "../ui/Badge";
+import heroPhoto from "../../assets/hero-photo.jpg";
 
 type HeroBlockProps = {
   eyebrow: string;
   title: string;
+  valueLine?: string;
   description: string;
   urgencyText?: string;
   statusLabel: string;
@@ -14,6 +16,7 @@ type HeroBlockProps = {
 export function HeroBlock({
   eyebrow,
   title,
+  valueLine,
   description,
   urgencyText,
   statusLabel,
@@ -42,6 +45,7 @@ export function HeroBlock({
             <span>{statusCopy}</span>
           </div>
           <h1>{title}</h1>
+          {valueLine ? <strong className="hero__value-line">{valueLine}</strong> : null}
           <p>{description}</p>
           {urgencyText ? <strong className="hero__hook">{urgencyText}</strong> : null}
         </div>
@@ -59,7 +63,7 @@ export function HeroBlock({
                 fetchPriority="high"
                 height="740"
                 loading="eager"
-                src="/hero-photo.jpg"
+                src={heroPhoto}
                 width="740"
               />
             </div>

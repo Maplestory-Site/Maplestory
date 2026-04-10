@@ -42,7 +42,8 @@ export const navigationItems: NavItem[] = [
   { label: "News", href: "/news" },
   { label: "Videos", href: "/videos" },
   { label: "Live", href: "/live" },
-  { label: "Community", href: "/community" }
+  { label: "Community", href: "/community" },
+  { label: "Monsters", href: "/monsters" }
 ];
 
 export const secondaryNavigationItems: NavItem[] = [
