@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import { Analytics } from "@vercel/analytics/react";
 import { footerGroups, headerActions, navigationItems, secondaryNavigationItems, socialLinks } from "../../data/siteContent";
 import { twitchLiveStatus } from "../../data/twitchFeed";
 import { Footer } from "./Footer";
@@ -108,7 +107,6 @@ export function RootLayout() {
   return (
     <MockAuthProvider>
       <RootLayoutContent />
-      <Analytics />
     </MockAuthProvider>
   );
 }
