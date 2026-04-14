@@ -426,7 +426,7 @@ export function BossDodgeGame() {
         }`}
       >
         <GameCard
-          className={`boss-dodge__board ${dodgeFlash ? "is-dodging" : ""} ${nearMissFlash ? "is-near-miss" : ""}`}
+          className={`boss-dodge__board ${dodgeFlash ? "is-dodging" : ""} ${nearMissFlash ? "is-near-miss" : ""} ${scorePulse ? "is-score-pulse" : ""}`}
           tone="highlight"
         >
           <div className="boss-dodge__arena" role="img" aria-label="Three lane dodge arena">

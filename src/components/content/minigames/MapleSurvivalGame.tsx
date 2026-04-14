@@ -182,6 +182,7 @@ export function MapleSurvivalGame() {
       aspectRatio="16 / 9"
       stats={
         <>
+          <StatDisplay label="Score" value={score} />
           <StatDisplay label="Level" value={level} />
           <StatDisplay label="XP" value={`${xp}/${xpToNext}`} />
         </>

@@ -7,7 +7,6 @@ import { useMiniGamesSound } from "./shared/MiniGamesSound";
 import { ScoreBadge } from "./shared/ScoreBadge";
 import { StatDisplay } from "./shared/StatDisplay";
 import { SwipeControls } from "./shared/SwipeControls";
-import { TapZoneControls } from "./shared/TapZoneControls";
 import { TouchControls } from "./shared/TouchControls";
 import { gameDebug } from "./shared/gameDebug";
 import { updateGameMeta } from "./shared/gameMeta";
@@ -103,14 +102,8 @@ export function LaneSwitchRunnerGame() {
 
         if (spawnTimerRef.current >= spawnInterval) {
           spawnTimerRef.current = 0;
-          spawnCountRef.current += 1;
-          gameDebug("lane-runner:spawn", {
-            count: spawnCountRef.current,
-            speed: Math.round(speedBase),
-            pattern: pattern.length
-          });
-          const roll = Math.random();
           let pattern: number[] = [];
+          const roll = Math.random();
           if (roll > 0.82) {
             pattern = [0, 2];
           } else if (roll > 0.64) {
@@ -118,6 +111,12 @@ export function LaneSwitchRunnerGame() {
           } else {
             pattern = [Math.floor(Math.random() * LANE_COUNT)];
           }
+          spawnCountRef.current += 1;
+          gameDebug("lane-runner:spawn", {
+            count: spawnCountRef.current,
+            speed: Math.round(speedBase),
+            pattern: pattern.length
+          });
           next = next.concat(
             pattern.map((laneIndex, idx) => ({
               id: nextId.current++,

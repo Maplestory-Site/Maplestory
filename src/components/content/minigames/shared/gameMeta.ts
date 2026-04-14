@@ -62,7 +62,7 @@ export type GameMetaState = {
   gameBest: Record<GameId, number>;
   gamePlays: Record<GameId, number>;
   recent: { gameId: GameId; score: number; at: string }[];
-  runs: { gameId: GameId; score: number; duration?: number; at: string }[];
+  runs: { gameId: GameId; score: number; duration: number | undefined; at: string }[];
   achievements: string[];
   rewardBadges: string[];
   rewardTitles: string[];
@@ -322,7 +322,7 @@ export function extractUserProgress(state: { xp?: number; level?: number; coins?
   const lootBoxes = Math.max(0, meta.lootBoxes ?? 0);
   const highScores = {
     ...DEFAULT_STATE.gameBest,
-    ...(meta.gameBest ?? meta.highScores ?? {})
+    ...(meta.gameBest ?? ("highScores" in state ? state.highScores ?? {} : {}))
   } as Record<GameId, number>;
   return { xp, level, coins, ownedItems, lootBoxes, highScores };
 }
@@ -368,7 +368,12 @@ export function loadGameMeta(): GameMetaState {
         ...(parsed.gamePlays ?? {})
       },
       recent: Array.isArray(parsed.recent) ? parsed.recent.slice(0, 6) : [],
-      runs: Array.isArray(parsed.runs) ? parsed.runs.slice(0, 80) : []
+      runs: Array.isArray(parsed.runs)
+        ? (parsed.runs.slice(0, 80).map((run) => ({
+            ...run,
+            duration: run.duration ?? undefined
+          })) as GameMetaState["runs"])
+        : []
     };
     return applyProgressSnapshot(ensureDailyMissions(merged));
   } catch {
@@ -407,14 +412,22 @@ export function updateGameMeta(result: GameResult): GameMetaState {
   const coinGain = Math.max(5, Math.round(score * 0.25 + duration * 2 + 6));
   const previousLevel = current.level;
   const newXp = current.xp + xpGain;
+  const now = new Date().toISOString();
+  const latestRecent: GameMetaState["recent"][number] = { gameId: result.gameId, score, at: now };
+  const latestRun: GameMetaState["runs"][number] = {
+    gameId: result.gameId,
+    score,
+    duration: result.duration ?? undefined,
+    at: now
+  };
   const next: GameMetaState = {
     ...current,
     xp: newXp,
     lastXpGain: xpGain,
-    lastXpAt: new Date().toISOString(),
+    lastXpAt: now,
     coins: current.coins + coinGain,
     lastCoinGain: coinGain,
-    lastCoinAt: new Date().toISOString(),
+    lastCoinAt: now,
     totalPlays: current.totalPlays + 1,
     totalScore: current.totalScore + score,
     lastPlayedGameId: result.gameId,
@@ -426,12 +439,12 @@ export function updateGameMeta(result: GameResult): GameMetaState {
       ...current.gamePlays,
       [result.gameId]: (current.gamePlays[result.gameId] ?? 0) + 1
     },
-    recent: [{ gameId: result.gameId, score, at: new Date().toISOString() }]
+    recent: [latestRecent]
       .concat(current.recent)
-      .slice(0, 6),
-    runs: [{ gameId: result.gameId, score, duration: result.duration, at: new Date().toISOString() }]
+      .slice(0, 6) as GameMetaState["recent"],
+    runs: [latestRun]
       .concat(current.runs)
-      .slice(0, 80),
+      .slice(0, 80) as GameMetaState["runs"],
     achievements: current.achievements.slice(),
     rewardBadges: current.rewardBadges.slice(),
     rewardTitles: current.rewardTitles.slice(),

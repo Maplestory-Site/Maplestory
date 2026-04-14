@@ -19,7 +19,7 @@ export function GameHubPage() {
   const progress = useMemo(() => getProgressSnapshot(meta), [meta]);
 
   const categoryMap = useMemo(
-    () => ({
+    (): Record<string, string[]> => ({
       Arcade: ["Arcade", "Runner", "Reflex"],
       Reaction: ["Timing", "Reflex"],
       Skill: ["Accuracy", "Precision"],

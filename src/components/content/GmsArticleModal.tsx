@@ -7,18 +7,19 @@ import { useI18n } from "../../i18n/I18nProvider";
 type GmsSection = {
   title: string;
   summary: string;
-  details: Array<
-    | { type: "text"; value: string }
-    | { type: "image"; src: string; alt?: string }
-    | { type: "list"; items: string[] }
-    | { type: "subheading"; value: string }
-    | string
-  >;
+  details: GmsDetail[];
   topic: {
     key: string;
     label: string;
   };
 };
+
+type GmsDetail =
+  | { type: "text"; value: string }
+  | { type: "image"; src: string; alt?: string }
+  | { type: "list"; items: string[] }
+  | { type: "subheading"; value: string }
+  | { type: string; value: string };
 
 type GmsPayload = {
   sourceName: string;
@@ -43,7 +44,7 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
   const [openTopics, setOpenTopics] = useState<string[]>([]);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const bodyRef = useRef<HTMLDivElement | null>(null);
-  const sectionRefs = useMemo(() => new Map<string, HTMLDivElement>(), []);
+  const sectionRefs = useMemo(() => new Map<string, HTMLElement>(), []);
 
   useEffect(() => {
     let active = true;
@@ -259,29 +260,14 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
                         <div className="kms-section__details">
                           <div className="kms-section__content">
                             {section.details.map((detail, detailIndex) => {
-                              if (typeof detail === "string") {
-                                if (detail.startsWith("__IMAGE__:")) {
-                                  const src = detail.replace("__IMAGE__:", "");
-                                  return (
-                                    <div key={`${detail}-${detailIndex}`} className="kms-section__image">
-                                      <img src={src} alt={td(section.title)} loading="lazy" />
-                                    </div>
-                                  );
-                                }
-                                return (
-                                  <p key={`${detail}-${detailIndex}`} className="kms-section__text">
-                                    {td(detail)}
-                                  </p>
-                                );
-                              }
-                              if (detail.type === "image") {
+                              if (isImageDetail(detail)) {
                                 return (
                                   <div key={`${detail.src}-${detailIndex}`} className="kms-section__image">
                                     <img src={detail.src} alt={td(detail.alt || section.title)} loading="lazy" />
                                   </div>
                                 );
                               }
-                              if (detail.type === "list") {
+                              if (isListDetail(detail)) {
                                 return (
                                   <ul key={`${detail.items.join("-")}-${detailIndex}`} className="kms-section__list">
                                     {detail.items.map((item, itemIndex) => (
@@ -290,7 +276,7 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
                                   </ul>
                                 );
                               }
-                              if (detail.type === "subheading") {
+                              if (isSubheadingDetail(detail)) {
                                 return (
                                   <h4 key={`${detail.value}-${detailIndex}`} className="kms-section__subheading">
                                     {td(detail.value)}
@@ -335,4 +321,16 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
       </div>
     </div>
   );
+}
+
+function isImageDetail(detail: { type?: string }): detail is Extract<GmsDetail, { type: "image" }> {
+  return detail.type === "image";
+}
+
+function isListDetail(detail: { type?: string }): detail is Extract<GmsDetail, { type: "list" }> {
+  return detail.type === "list";
+}
+
+function isSubheadingDetail(detail: { type?: string }): detail is Extract<GmsDetail, { type: "subheading" }> {
+  return detail.type === "subheading";
 }

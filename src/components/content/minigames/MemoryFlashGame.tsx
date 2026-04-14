@@ -27,8 +27,6 @@ export function MemoryFlashGame() {
 
   const playbackRef = useRef<number | null>(null);
   const sequenceRef = useRef<TileId[]>([]);
-  const indexRef = useRef(0);
-
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
     if (saved) {

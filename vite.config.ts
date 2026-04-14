@@ -1,7 +1,10 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+// @ts-expect-error local Node-side mjs helper
 import { fetchKmsArticle } from './server/news/kmsArticle.mjs'
+// @ts-expect-error local Node-side mjs helper
 import { fetchGmsArticle } from './server/news/gmsArticle.mjs'
+// @ts-expect-error local Node-side mjs helper
 import { getKmsFeed } from './server/news/kmsFeed.mjs'
 
 // https://vite.dev/config/

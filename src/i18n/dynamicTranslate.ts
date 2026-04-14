@@ -46,6 +46,7 @@ type DetailBlock =
   | { type: "image"; src: string; alt?: string }
   | { type: "list"; items: string[] }
   | { type: "subheading"; value: string }
+  | { type: string; value: string }
   | string;
 
 type Section = {
@@ -92,10 +93,10 @@ export async function translateArticleData<T extends KmsPayload>(
                   if (detail.type === "text") {
                     return { ...detail, value: await translateDynamic(detail.value, language) };
                   }
-                  if (detail.type === "list") {
+                  if (detail.type === "list" && "items" in detail) {
                     return {
                       ...detail,
-                      items: await Promise.all(detail.items.map((item) => translateDynamic(item, language)))
+                      items: await Promise.all(detail.items.map((item: string) => translateDynamic(item, language)))
                     };
                   }
                   if (detail.type === "subheading") {

@@ -8,13 +8,7 @@ import { translateArticleData } from "../../i18n/dynamicTranslate";
 type KmsSection = {
   title: string;
   summary: string;
-  details: Array<
-    | { type: "text"; value: string }
-    | { type: "image"; src: string; alt?: string }
-    | { type: "list"; items: string[] }
-    | { type: "subheading"; value: string }
-    | string
-  >;
+  details: KmsDetail[];
   impact: string;
   topic: {
     key: string;
@@ -22,7 +16,15 @@ type KmsSection = {
   };
 };
 
+type KmsDetail =
+  | { type: "text"; value: string }
+  | { type: "image"; src: string; alt?: string }
+  | { type: "list"; items: string[] }
+  | { type: "subheading"; value: string }
+  | { type: string; value: string };
+
 type KmsPayload = {
+  title?: string;
   sourceName: string;
   sourceUrl: string;
   date: string;
@@ -35,6 +37,7 @@ type KmsPayload = {
   categories?: Array<{ key: string; label: string; sections: KmsSection[] }>;
   heroImage?: string;
   fullText?: string;
+  debug?: unknown;
 };
 
 type KmsArticleModalProps = {
@@ -50,7 +53,7 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
   const [openTopics, setOpenTopics] = useState<string[]>([]);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const bodyRef = useRef<HTMLDivElement | null>(null);
-  const sectionRefs = useMemo(() => new Map<string, HTMLDivElement>(), []);
+  const sectionRefs = useMemo(() => new Map<string, HTMLElement>(), []);
 
   useEffect(() => {
     let active = true;
@@ -61,7 +64,7 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
         return;
       }
 
-      if (process.env.NODE_ENV !== "production") {
+      if (import.meta.env.DEV) {
         console.log("[KMS Modal] open", {
           url: item.sourceUrl,
           hasBreakdown: Boolean(item.kmsBreakdown)
@@ -77,7 +80,7 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
           throw new Error("Failed to load KMS article.");
         }
         const payload = (await response.json()) as KmsPayload;
-        if (process.env.NODE_ENV !== "production") {
+        if (import.meta.env.DEV) {
           const payloadDetails =
             payload?.sections?.reduce((sum, section) => sum + (section.details?.length || 0), 0) ?? 0;
           console.log("[KMS Modal] fetched payload", {
@@ -94,7 +97,7 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
           setOpenTopics([]);
         }
       } catch (error) {
-        if (process.env.NODE_ENV !== "production") {
+        if (import.meta.env.DEV) {
           console.error("[KMS Modal] fallback to summary", { url: item.sourceUrl, error });
         }
         if (active) {
@@ -168,11 +171,6 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
       active = false;
     };
   }, [data, language]);
-
-  const sectionKeys = useMemo(
-    () => sectionList.map((section, index) => `${section.title}-${index}`),
-    [sectionList]
-  );
 
   if (!item) return null;
 
@@ -341,7 +339,7 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
                         <div className="kms-section__details">
                           <div className="kms-section__content">
                             {section.details.map((detail, detailIndex) => {
-                              if (detail.type === "image") {
+                              if (isImageDetail(detail)) {
                                 return (
                                   <div key={`${detail.src}-${detailIndex}`} className="kms-section__image">
                                     <img
@@ -353,7 +351,7 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
                                   </div>
                                 );
                               }
-                              if (detail.type === "list") {
+                              if (isListDetail(detail)) {
                                 return (
                                   <ul key={`${detail.items.join("-")}-${detailIndex}`} className="kms-section__list">
                                     {detail.items.map((item, itemIndex) => (
@@ -362,7 +360,7 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
                                   </ul>
                                 );
                               }
-                              if (detail.type === "subheading") {
+                              if (isSubheadingDetail(detail)) {
                                 return (
                                   <h4 key={`${detail.value}-${detailIndex}`} className="kms-section__subheading">
                                     {td(detail.value)}
@@ -417,4 +415,16 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
       </div>
     </div>
   );
+}
+
+function isImageDetail(detail: { type?: string }): detail is Extract<KmsDetail, { type: "image" }> {
+  return detail.type === "image";
+}
+
+function isListDetail(detail: { type?: string }): detail is Extract<KmsDetail, { type: "list" }> {
+  return detail.type === "list";
+}
+
+function isSubheadingDetail(detail: { type?: string }): detail is Extract<KmsDetail, { type: "subheading" }> {
+  return detail.type === "subheading";
 }

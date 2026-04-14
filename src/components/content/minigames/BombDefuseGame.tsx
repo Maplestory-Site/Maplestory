@@ -108,7 +108,7 @@ export function BombDefuseGame() {
     setTimeLeft(baseTime);
     const baitChance = Math.min(0.4, 0.12 + nextRound * 0.04);
     if (Math.random() < baitChance) {
-      const baitOptions = nextWires.filter((wire, index) => index !== correctIndex);
+      const baitOptions = nextWires.filter((_, index) => index !== correctIndex);
       const bait = baitOptions[Math.floor(Math.random() * baitOptions.length)];
       setBaitId(bait?.id ?? null);
       window.setTimeout(() => setBaitId(null), 700 + Math.random() * 400);
@@ -153,9 +153,9 @@ export function BombDefuseGame() {
     });
   }
 
-  function handleChoice(wire: Wire) {
+  function handleChoice(selectedWire: Wire) {
     if (phase !== "running") return;
-    if (!wire.isCorrect) {
+    if (!selectedWire.isCorrect) {
       finishRun();
       return;
     }
