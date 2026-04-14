@@ -1,5 +1,6 @@
 import { Badge } from "../ui/Badge";
 import heroPhoto from "../../assets/hero-photo.jpg";
+import { useI18n } from "../../i18n/I18nProvider";
 
 type HeroBlockProps = {
   eyebrow: string;
@@ -24,7 +25,8 @@ export function HeroBlock({
   featuredTitle,
   featuredDescription
 }: HeroBlockProps) {
-  const statusCopy = statusTone === "live" ? "Live now on Twitch" : "Live, clips, and alerts";
+  const { t } = useI18n();
+  const statusCopy = statusTone === "live" ? t("Live now on Twitch") : t("Live, clips, and alerts");
 
   return (
     <section className="hero" data-reveal>
@@ -36,18 +38,18 @@ export function HeroBlock({
             </span>
             <div className="hero__brand-copy">
               <strong>SNAILSLAYER</strong>
-              <small>MapleStory Creator</small>
+              <small>{t("MapleStory Creator")}</small>
             </div>
           </div>
-          <span className="hero__eyebrow">{eyebrow}</span>
+          <span className="hero__eyebrow">{t(eyebrow)}</span>
           <div className="hero__status-row">
-            <Badge label={statusLabel} tone={statusTone} />
+            <Badge label={t(statusLabel)} tone={statusTone} />
             <span>{statusCopy}</span>
           </div>
-          <h1>{title}</h1>
-          {valueLine ? <strong className="hero__value-line">{valueLine}</strong> : null}
-          <p>{description}</p>
-          {urgencyText ? <strong className="hero__hook">{urgencyText}</strong> : null}
+          <h1>{t(title)}</h1>
+          {valueLine ? <strong className="hero__value-line">{t(valueLine)}</strong> : null}
+          <p>{t(description)}</p>
+          {urgencyText ? <strong className="hero__hook">{t(urgencyText)}</strong> : null}
         </div>
 
         <div className="hero__feature card">
@@ -68,8 +70,8 @@ export function HeroBlock({
               />
             </div>
           </div>
-          <h2>{featuredTitle}</h2>
-          <p>{featuredDescription}</p>
+          <h2>{t(featuredTitle)}</h2>
+          <p>{t(featuredDescription)}</p>
         </div>
       </div>
     </section>

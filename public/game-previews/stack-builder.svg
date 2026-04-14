@@ -1,0 +1,15 @@
+<svg width="800" height="480" viewBox="0 0 800 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="480" rx="28" fill="#0B1017"/>
+  <rect width="800" height="480" rx="28" fill="url(#bg)"/>
+  <rect x="320" y="312" width="160" height="38" rx="12" fill="#FF7A6D"/>
+  <rect x="340" y="268" width="148" height="38" rx="12" fill="#FFB761"/>
+  <rect x="328" y="224" width="168" height="38" rx="12" fill="#7BE5D7"/>
+  <rect x="356" y="180" width="132" height="38" rx="12" fill="#EFF8FF"/>
+  <text x="48" y="428" fill="#F4F7FF" font-family="Arial, sans-serif" font-size="54" font-weight="700">Stack Builder</text>
+  <defs>
+    <linearGradient id="bg" x1="116" y1="72" x2="684" y2="410" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1D1718"/>
+      <stop offset="1" stop-color="#0F141E"/>
+    </linearGradient>
+  </defs>
+</svg>

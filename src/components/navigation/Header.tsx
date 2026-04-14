@@ -2,6 +2,12 @@ import { NavLink, useLocation } from "react-router-dom";
 import type { NavItem } from "../../data/siteContent";
 import { Button } from "../ui/Button";
 import { Badge } from "../ui/Badge";
+import { LanguageSwitcher } from "./LanguageSwitcher";
+import { useI18n } from "../../i18n/I18nProvider";
+import { useGameMeta } from "../content/minigames/shared/useGameMeta";
+import { getProgressSnapshot } from "../content/minigames/shared/gameMeta";
+import { useMockAuth } from "../../features/profile/MockAuthContext";
+import { useEffect, useState } from "react";
 
 type HeaderProps = {
   navItems: NavItem[];
@@ -21,9 +27,23 @@ export function Header({
   secondaryCta
 }: HeaderProps) {
   const location = useLocation();
+  const { t } = useI18n();
+  const meta = useGameMeta();
+  const progress = getProgressSnapshot(meta);
+  const { user, isAuthenticated, openAuth, logout } = useMockAuth();
+  const [showCoinGain, setShowCoinGain] = useState(false);
+
+  useEffect(() => {
+    if (!meta.lastCoinAt || meta.lastCoinGain <= 0) return;
+    const timeAgo = Date.now() - new Date(meta.lastCoinAt).getTime();
+    if (timeAgo > 8000) return;
+    setShowCoinGain(true);
+    const timer = window.setTimeout(() => setShowCoinGain(false), 2000);
+    return () => window.clearTimeout(timer);
+  }, [meta.lastCoinAt, meta.lastCoinGain]);
 
   function isDatabaseItem(item: NavItem) {
-    return item.label === "DataBase";
+    return item.href === "/database/monster";
   }
 
   function isActiveNavItem(item: NavItem) {
@@ -42,7 +62,7 @@ export function Header({
             item.children?.length ? (
               <div className="site-nav__item site-nav__item--has-children" key={item.label}>
                 <NavLink className={`site-nav__link ${isActiveNavItem(item) ? "is-active" : ""}`} to={item.href}>
-                  {item.label}
+                  {t(item.label)}
                 </NavLink>
                 <div className="site-nav__submenu">
                   {item.children.map((child) => (
@@ -51,15 +71,15 @@ export function Header({
                       key={child.href}
                       to={child.href}
                     >
-                      {child.label}
+                      {t(child.label)}
                     </NavLink>
                   ))}
                 </div>
               </div>
             ) : (
               <NavLink className={({ isActive }) => `site-nav__link ${isActive ? "is-active" : ""}`} key={item.href} to={item.href}>
-                {item.label}
-                {item.label === "Live" && liveStatus === "live" ? <Badge label="Live" tone="live" /> : null}
+                {t(item.label)}
+                {item.label === "Live" && liveStatus === "live" ? <Badge label={t("Live")} tone="live" /> : null}
               </NavLink>
             )
           )}
@@ -69,13 +89,37 @@ export function Header({
           <div className="site-header__utility">
             {utilityItems.map((item) => (
               <NavLink className={({ isActive }) => `site-header__utility-link ${isActive ? "is-active" : ""}`} key={item.href} to={item.href}>
-                {item.label}
+                {t(item.label)}
               </NavLink>
             ))}
           </div>
-          <Button href={secondaryCta.href} size="sm" variant="secondary">{secondaryCta.label}</Button>
-          <Button href={primaryCta.href} size="sm">{primaryCta.label}</Button>
-          <button aria-label="Open menu" className="menu-trigger" onClick={onOpenMenu} type="button">
+          <div className="site-header__level">
+            <span>Level {progress.level}</span>
+            <div className="site-header__level-bar">
+              <span style={{ width: `${progress.progress}%` }} />
+            </div>
+          </div>
+          <div className={`site-header__coins ${showCoinGain ? "is-gaining" : ""}`}>
+            <span>Coins</span>
+            <strong>{meta.coins}</strong>
+            {showCoinGain ? <em className="site-header__coins-gain">+{meta.lastCoinGain}</em> : null}
+          </div>
+          {isAuthenticated && user ? (
+            <div className="site-header__user">
+              <span>{user.username}</span>
+              <button className="site-header__user-action" type="button" onClick={logout}>
+                Logout
+              </button>
+            </div>
+          ) : (
+            <button className="site-header__login" type="button" onClick={openAuth}>
+              Login
+            </button>
+          )}
+          <LanguageSwitcher />
+          <Button href={secondaryCta.href} size="sm" variant="secondary">{t(secondaryCta.label)}</Button>
+          <Button href={primaryCta.href} size="sm">{t(primaryCta.label)}</Button>
+          <button aria-label={t("Open menu")} className="menu-trigger" onClick={onOpenMenu} type="button">
             <span />
             <span />
           </button>

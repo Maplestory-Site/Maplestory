@@ -1,11 +1,14 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { GameButton } from "./shared/GameButton";
 import { GameCard } from "./shared/GameCard";
+import { GameOverlay } from "./shared/GameOverlay";
 import { GameShell } from "./shared/GameShell";
 import { useMiniGamesSound } from "./shared/MiniGamesSound";
 import { ProgressBar } from "./shared/ProgressBar";
 import { ScoreBadge } from "./shared/ScoreBadge";
 import { StatDisplay } from "./shared/StatDisplay";
+import { TouchControls } from "./shared/TouchControls";
+import { updateGameMeta } from "./shared/gameMeta";
 
 type UpgradeId = "focus" | "weights" | "boots";
 
@@ -32,6 +35,7 @@ const BASE_COSTS: Record<UpgradeId, number> = {
   boots: 95
 };
 
+const STORAGE_KEY = "snailslayer-training-best";
 const XP_PER_LEVEL = 120;
 const BREAKTHROUGH_TARGET = 5;
 
@@ -44,6 +48,7 @@ function getBuildRank(score: number) {
 
 export function MapleTrainingGame() {
   const { playFailure, playSuccess } = useMiniGamesSound();
+  const [phase, setPhase] = useState<"ready" | "running" | "paused">("ready");
   const [power, setPower] = useState(38);
   const [speed, setSpeed] = useState(26);
   const [level, setLevel] = useState(1);
@@ -53,6 +58,10 @@ export function MapleTrainingGame() {
   const [breakthroughs, setBreakthroughs] = useState(0);
   const [upgrades, setUpgrades] = useState<UpgradeState>({ focus: 0, weights: 0, boots: 0 });
   const [lastAction, setLastAction] = useState("Warm up the build and stack a clean training loop.");
+  const [bestScore, setBestScore] = useState(() => {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    return saved ? Number(saved) || 0 : 0;
+  });
 
   const progressPercent = Math.min((xp / XP_PER_LEVEL) * 100, 100);
   const efficiency = 1 + upgrades.weights * 0.18 + momentum * 0.025;
@@ -67,7 +76,33 @@ export function MapleTrainingGame() {
   );
   const buildRank = getBuildRank(trainingScore);
 
+  useEffect(() => {
+    if (trainingScore > bestScore) {
+      setBestScore(trainingScore);
+      window.localStorage.setItem(STORAGE_KEY, String(trainingScore));
+    }
+  }, [trainingScore, bestScore]);
+
+  function startTraining() {
+    setPhase("running");
+  }
+
+  function pauseTraining() {
+    if (phase !== "running") return;
+    setPhase("paused");
+  }
+
+  function resumeTraining() {
+    if (phase !== "paused") return;
+    setPhase("running");
+  }
+
   function train() {
+    if (phase !== "running") {
+      setLastAction("Tap start to begin the training run.");
+      return;
+    }
+
     const momentumGain = 1 + Math.floor(Math.random() * 2);
     const nextMomentum = Math.min(momentum + momentumGain, 18);
     const nextXpGain = Math.round((16 + Math.random() * 8) * efficiency);
@@ -100,7 +135,7 @@ export function MapleTrainingGame() {
     setBreakthroughs(breakthroughsEarned);
     setLastAction(
       breakthroughHit
-        ? `Breakthrough unlocked. Build pressure rising fast.`
+        ? "Breakthrough unlocked. Build pressure rising fast."
         : leveledUp
           ? `Level ${nextLevel} reached. Keep the momentum clean.`
           : `+${nextPowerGain} Power, +${nextSpeedGain} Speed, +${nextCoinsGain} Coins`
@@ -109,6 +144,11 @@ export function MapleTrainingGame() {
   }
 
   function buyUpgrade(upgradeId: UpgradeId) {
+    if (phase !== "running") {
+      setLastAction("Start the session before upgrading.");
+      return;
+    }
+
     const currentLevel = upgrades[upgradeId];
     const cost = BASE_COSTS[upgradeId] + currentLevel * 55;
 
@@ -129,6 +169,12 @@ export function MapleTrainingGame() {
   }
 
   function resetTraining() {
+    updateGameMeta({
+      gameId: "maple-training",
+      score: trainingScore,
+      outcome: "session"
+    });
+    setPhase("ready");
     setPower(38);
     setSpeed(26);
     setLevel(1);
@@ -138,6 +184,21 @@ export function MapleTrainingGame() {
     setBreakthroughs(0);
     setUpgrades({ focus: 0, weights: 0, boots: 0 });
     setLastAction("Training reset. Fresh push ready.");
+  }
+
+  function buyCheapestUpgrade() {
+    const candidates = (["focus", "weights", "boots"] as UpgradeId[]).map((id) => {
+      const currentLevel = upgrades[id];
+      return { id, cost: BASE_COSTS[id] + currentLevel * 55 };
+    });
+    const affordable = candidates.filter((candidate) => coins >= candidate.cost);
+    if (!affordable.length) {
+      setLastAction("Stack more coins before the next upgrade lands.");
+      playFailure();
+      return;
+    }
+    affordable.sort((a, b) => a.cost - b.cost);
+    buyUpgrade(affordable[0].id);
   }
 
   return (
@@ -153,12 +214,16 @@ export function MapleTrainingGame() {
           <StatDisplay label="Momentum" value={momentum} />
         </>
       }
+      aspectRatio="4 / 3"
       title="Maple Training"
       footer={
         <div className="game-shell__footer-row">
           <ScoreBadge label="Training Score" value={trainingScore} />
           <div className="game-shell__actions">
             <GameButton onClick={train}>Train</GameButton>
+            <GameButton onClick={phase === "running" ? pauseTraining : resumeTraining} variant="secondary">
+              {phase === "paused" ? "Resume" : "Pause"}
+            </GameButton>
             <GameButton onClick={resetTraining} variant="secondary">
               Reset
             </GameButton>
@@ -246,6 +311,34 @@ export function MapleTrainingGame() {
             })}
           </aside>
         </div>
+        <TouchControls
+          leftLabel="Train"
+          rightLabel="Boost"
+          onLeft={train}
+          onRight={buyCheapestUpgrade}
+          repeatDelay={200}
+        />
+        <GameOverlay
+          title={phase === "ready" ? "Training Session" : phase === "paused" ? "Paused" : ""}
+          description={
+            phase === "ready"
+              ? "Build power, speed, and momentum. Quick taps stack upgrades fast."
+              : phase === "paused"
+                ? "Hold your progress. Resume when ready."
+                : undefined
+          }
+          helper={
+            phase === "ready" ? `Best score ${bestScore}` : phase === "paused" ? `Current score ${trainingScore}` : undefined
+          }
+          actions={
+            phase === "ready" ? (
+              <GameButton onClick={startTraining}>Start Training</GameButton>
+            ) : phase === "paused" ? (
+              <GameButton onClick={resumeTraining}>Resume</GameButton>
+            ) : null
+          }
+          visible={phase === "ready" || phase === "paused"}
+        />
       </div>
     </GameShell>
   );

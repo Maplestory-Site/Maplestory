@@ -1,3 +1,5 @@
+import { useI18n } from "../../i18n/I18nProvider";
+
 type PageHeroProps = {
   title: string;
   subtitle: string;
@@ -5,16 +7,17 @@ type PageHeroProps = {
 };
 
 export function PageHero({ title, subtitle, total }: PageHeroProps) {
+  const { t } = useI18n();
   return (
     <section className="classes-hero reveal-on-scroll">
       <div className="classes-hero__copy">
-        <span className="classes-hero__eyebrow">Class Directory</span>
-        <h1>{title}</h1>
-        <p>{subtitle}</p>
+        <span className="classes-hero__eyebrow">{t("Class Directory")}</span>
+        <h1>{t(title)}</h1>
+        <p>{t(subtitle)}</p>
         <div className="classes-hero__proof">
-          <span>{total} jobs</span>
-          <span>Premium discovery</span>
-          <span>Build-ready filters</span>
+          <span>{total} {t("jobs")}</span>
+          <span>{t("Premium discovery")}</span>
+          <span>{t("Build-ready filters")}</span>
         </div>
       </div>
       <div className="classes-hero__visual" aria-hidden="true">
@@ -25,8 +28,8 @@ export function PageHero({ title, subtitle, total }: PageHeroProps) {
         />
         <div className="classes-hero__orb" />
         <div className="classes-hero__visual-card">
-          <span>Browse by faction</span>
-          <strong>Find your next main</strong>
+          <span>{t("Browse by faction")}</span>
+          <strong>{t("Find your next main")}</strong>
         </div>
       </div>
     </section>

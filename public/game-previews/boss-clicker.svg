@@ -1,0 +1,17 @@
+<svg width="800" height="480" viewBox="0 0 800 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="480" rx="28" fill="#0B1017"/>
+  <rect width="800" height="480" rx="28" fill="url(#bg)"/>
+  <circle cx="554" cy="224" r="96" fill="#FF8764"/>
+  <circle cx="554" cy="224" r="52" fill="#301A25"/>
+  <path d="M252 320C286 258 330 222 382 214" stroke="#7AE1D9" stroke-width="20" stroke-linecap="round"/>
+  <circle cx="236" cy="344" r="42" fill="#7AE1D9"/>
+  <rect x="146" y="108" width="508" height="24" rx="12" fill="#242C3D"/>
+  <rect x="146" y="108" width="338" height="24" rx="12" fill="#F1646A"/>
+  <text x="48" y="428" fill="#F4F7FF" font-family="Arial, sans-serif" font-size="54" font-weight="700">Boss Clicker</text>
+  <defs>
+    <linearGradient id="bg" x1="104" y1="58" x2="694" y2="422" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#201719"/>
+      <stop offset="1" stop-color="#0E1621"/>
+    </linearGradient>
+  </defs>
+</svg>

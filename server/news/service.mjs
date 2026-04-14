@@ -8,6 +8,7 @@ import {
   OFFICIAL_SOURCE
 } from "./config.mjs";
 import { getBestAvailableFeed, readBundledFeed, writeBundledFeed, writeCacheFeed } from "./cache.mjs";
+import { fetchKmsRss, normalizeKmsItem } from "./kms.mjs";
 import { normalizeNewsItem, sortNewsItems } from "./normalize.mjs";
 
 let memoryFeed = null;
@@ -61,7 +62,14 @@ async function refreshNewsFeed({ persistBundled = false } = {}) {
   const previousIds = new Set((existing?.items ?? []).map((item) => String(item.id)));
   const fetchedAt = new Date().toISOString();
 
-  const [newsItems, archivedItems] = await Promise.all([fetchJson(NEWS_ENDPOINT), fetchJson(ARCHIVED_ENDPOINT)]);
+  const [newsItems, archivedItems, kmsRssItems] = await Promise.all([
+    fetchJson(NEWS_ENDPOINT),
+    fetchJson(ARCHIVED_ENDPOINT),
+    fetchKmsRss().catch((error) => {
+      console.warn("[news-sync] KMST feed fetch failed. Continuing without KMS.", error instanceof Error ? error.message : error);
+      return [];
+    })
+  ]);
   const featuredIds = new Set(
     [...newsItems, ...archivedItems]
       .filter((item) => item && item.featured)
@@ -69,6 +77,13 @@ async function refreshNewsFeed({ persistBundled = false } = {}) {
   );
 
   const deduped = new Map();
+
+  kmsRssItems.forEach((item) => {
+    const normalized = normalizeKmsItem(item, previousIds, fetchedAt);
+    if (normalized?.id && !deduped.has(normalized.id)) {
+      deduped.set(normalized.id, normalized);
+    }
+  });
 
   [...newsItems, ...archivedItems].forEach((item) => {
     if (!item?.id || deduped.has(String(item.id))) {
@@ -78,7 +93,17 @@ async function refreshNewsFeed({ persistBundled = false } = {}) {
     deduped.set(String(item.id), normalizeNewsItem(item, featuredIds, previousIds, fetchedAt));
   });
 
-  const items = sortNewsItems([...deduped.values()]).slice(0, MAX_ITEMS);
+  const sortedItems = sortNewsItems([...deduped.values()]);
+  const grouped = sortedItems.reduce(
+    (acc, item) => {
+      const key = item.region === "kms" ? "kms" : "gms";
+      acc[key].push(item);
+      return acc;
+    },
+    { gms: [], kms: [] }
+  );
+
+  const items = [...grouped.gms.slice(0, MAX_ITEMS), ...grouped.kms.slice(0, MAX_ITEMS)];
   const freshItemCount = items.filter((item) => item.isNew).length;
 
   const payload = {

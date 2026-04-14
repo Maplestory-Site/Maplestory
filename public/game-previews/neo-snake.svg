@@ -1,0 +1,17 @@
+<svg width="800" height="480" viewBox="0 0 800 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="480" rx="28" fill="#081018"/>
+  <rect width="800" height="480" rx="28" fill="url(#bg)"/>
+  <path d="M150 320C220 260 256 232 324 232C396 232 430 276 492 276C560 276 596 222 654 150" stroke="#7AFFB6" stroke-width="32" stroke-linecap="round"/>
+  <circle cx="654" cy="150" r="24" fill="#7AFFB6"/>
+  <circle cx="662" cy="144" r="5" fill="#0A1418"/>
+  <circle cx="546" cy="144" r="11" fill="#FFD96A"/>
+  <circle cx="590" cy="110" r="11" fill="#FFD96A"/>
+  <circle cx="622" cy="210" r="11" fill="#FFD96A"/>
+  <text x="48" y="428" fill="#F4F7FF" font-family="Arial, sans-serif" font-size="54" font-weight="700">Neo Snake</text>
+  <defs>
+    <linearGradient id="bg" x1="94" y1="82" x2="674" y2="410" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#0D1B22"/>
+      <stop offset="1" stop-color="#091018"/>
+    </linearGradient>
+  </defs>
+</svg>

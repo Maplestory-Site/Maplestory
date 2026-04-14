@@ -4,7 +4,7 @@ export type InAppNotification = {
   detail: string;
   href: string;
   timestamp: string;
-  kind: "live" | "clip" | "upload" | "community";
+  kind: "live" | "clip" | "upload" | "community" | "reward" | "mission";
   unread?: boolean;
 };
 

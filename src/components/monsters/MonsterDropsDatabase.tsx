@@ -96,7 +96,7 @@ function getLocationQueryScore(locationLabel: string, query: string) {
   return 0;
 }
 
-function getDropBestSource(drop: MonsterDropDatabaseEntry) {
+function getDropBestPick(drop: MonsterDropDatabaseEntry) {
   return [...drop.sourceMonsters]
     .sort((a, b) => b.farmingScore - a.farmingScore || a.difficulty - b.difficulty)
     [0];
@@ -170,7 +170,7 @@ function DropDetailsPanel({ item, comparedIds, onClose, onOpenMonster, onToggleC
                     type="button"
                     onClick={() => onToggleCompare(monster)}
                   >
-                    {comparedIds.includes(monster.id) ? "Added to compare" : "Compare source"}
+                    {comparedIds.includes(monster.id) ? "Added to compare" : "Compare"}
                   </button>
                 </div>
               </article>
@@ -350,14 +350,14 @@ export function MonsterDropsDatabase({
     }> = [];
 
     if (topDropMatch) {
-      const bestSource = getDropBestSource(topDropMatch);
+      const bestSource = getDropBestPick(topDropMatch);
       highlights.push({
         id: `drop-${topDropMatch.id}`,
-        eyebrow: "Best source for this drop",
+        eyebrow: "Best pick for this drop",
         title: topDropMatch.name,
         body: bestSource
-          ? `${bestSource.name} in ${bestSource.locations[0]?.map ?? "Unknown route"} is the strongest farming source right now.`
-          : "No farming source available yet.",
+          ? `${bestSource.name} in ${bestSource.locations[0]?.map ?? "Unknown route"} is the strongest farming pick right now.`
+          : "No farming pick available yet.",
         action: "Open drop view",
         onClick: () => {
           setView("Drops");
@@ -415,7 +415,7 @@ export function MonsterDropsDatabase({
           <span>Monster drops database</span>
           <h2>Search monsters, drops, and routes fast</h2>
         </div>
-        <p>Track item sources, map routes, rare drops, and the best monster target for what you need next.</p>
+        <p>Track item drops, map routes, rare loot, and the best monster target for what you need next.</p>
       </header>
 
       <div className="monster-database__shell">
@@ -686,13 +686,13 @@ export function MonsterDropsDatabase({
           dropResults.length ? (
             <div className="monster-database__drop-results">
               {dropResults.map((drop) => {
-                const bestSource = getDropBestSource(drop);
+                const bestSource = getDropBestPick(drop);
                 return (
                   <article key={drop.id} className="monster-database__drop-card">
                     <div className="monster-database__drop-top">
                       <div>
                         <h3>{drop.name}</h3>
-                        <p>{drop.sourceMonsters.length} source monsters</p>
+                        <p>{drop.sourceMonsters.length} monsters</p>
                       </div>
                       <div className="monster-database__drop-badges">
                         <span>{drop.rarity}</span>
@@ -701,7 +701,7 @@ export function MonsterDropsDatabase({
                     </div>
 
                     <div className="monster-database__drop-meta">
-                      <span>Best source: {bestSource?.name ?? "Unknown"}</span>
+                      <span>Best pick: {bestSource?.name ?? "Unknown"}</span>
                       <span>Value {drop.estimatedValue}</span>
                     </div>
 
@@ -732,7 +732,7 @@ export function MonsterDropsDatabase({
                       </button>
                       {bestSource ? (
                         <button type="button" onClick={() => onOpenMonster(bestSource)}>
-                          View best source
+                          View best pick
                         </button>
                       ) : null}
                     </div>

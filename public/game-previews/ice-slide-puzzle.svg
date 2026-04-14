@@ -1,0 +1,17 @@
+<svg width="800" height="480" viewBox="0 0 800 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="480" rx="28" fill="#08111A"/>
+  <rect width="800" height="480" rx="28" fill="url(#bg)"/>
+  <rect x="190" y="92" width="420" height="268" rx="26" fill="#C8F1FF" fill-opacity="0.22" stroke="#7BE1FF" stroke-width="8"/>
+  <rect x="238" y="142" width="92" height="30" rx="10" fill="#7BE1FF"/>
+  <rect x="238" y="142" width="30" height="130" rx="10" fill="#7BE1FF"/>
+  <rect x="360" y="242" width="170" height="30" rx="10" fill="#7BE1FF"/>
+  <circle cx="284" cy="292" r="26" fill="#FFF6DE"/>
+  <circle cx="548" cy="138" r="24" fill="#8BFFB0"/>
+  <text x="48" y="428" fill="#F4F7FF" font-family="Arial, sans-serif" font-size="54" font-weight="700">Ice Slide Puzzle</text>
+  <defs>
+    <linearGradient id="bg" x1="92" y1="56" x2="698" y2="418" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#132231"/>
+      <stop offset="1" stop-color="#09121D"/>
+    </linearGradient>
+  </defs>
+</svg>

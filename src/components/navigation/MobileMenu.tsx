@@ -1,6 +1,8 @@
 import { NavLink } from "react-router-dom";
 import type { NavItem, SocialItem } from "../../data/siteContent";
 import { Button } from "../ui/Button";
+import { useI18n } from "../../i18n/I18nProvider";
+import { LanguageSwitcher } from "./LanguageSwitcher";
 
 type MobileMenuProps = {
   open: boolean;
@@ -21,20 +23,21 @@ export function MobileMenu({
   secondaryCta,
   onClose
 }: MobileMenuProps) {
+  const { t } = useI18n();
   function renderSocialLink(platform: SocialItem) {
     const isExternal = /^https?:\/\//.test(platform.href);
 
     if (isExternal) {
       return (
         <a className="mobile-menu__social-link" href={platform.href} key={platform.platform} rel="noreferrer" target="_blank">
-          {platform.platform}
+          {t(platform.platform)}
         </a>
       );
     }
 
     return (
       <NavLink className="mobile-menu__social-link" key={platform.platform} onClick={onClose} to={platform.href}>
-        {platform.platform}
+        {t(platform.platform)}
       </NavLink>
     );
   }
@@ -49,17 +52,17 @@ export function MobileMenu({
             </span>
             <div>
             <strong>SNAILSLAYER</strong>
-            <p>Premium creator hub</p>
+            <p>{t("MapleStory Creator")}</p>
             </div>
           </div>
-          <button aria-label="Close menu" className="mobile-menu__close" onClick={onClose} type="button">
-            Close
+          <button aria-label={t("Close")} className="mobile-menu__close" onClick={onClose} type="button">
+            {t("Close")}
           </button>
         </div>
 
         <div className="mobile-menu__actions">
-          <Button fullWidth href={primaryCta.href}>{primaryCta.label}</Button>
-          <Button fullWidth href={secondaryCta.href} variant="secondary">{secondaryCta.label}</Button>
+          <Button fullWidth href={primaryCta.href}>{t(primaryCta.label)}</Button>
+          <Button fullWidth href={secondaryCta.href} variant="secondary">{t(secondaryCta.label)}</Button>
         </div>
 
         <nav aria-label="Mobile" className="mobile-menu__nav">
@@ -67,19 +70,19 @@ export function MobileMenu({
             item.children?.length ? (
               <div className="mobile-menu__group" key={item.label}>
                 <NavLink className="mobile-menu__link" onClick={onClose} to={item.href}>
-                  {item.label}
+                  {t(item.label)}
                 </NavLink>
                 <div className="mobile-menu__sublinks">
                   {item.children.map((child) => (
                     <NavLink className="mobile-menu__sublink" key={child.href} onClick={onClose} to={child.href}>
-                      {child.label}
+                      {t(child.label)}
                     </NavLink>
                   ))}
                 </div>
               </div>
             ) : (
               <NavLink className="mobile-menu__link" key={item.href} onClick={onClose} to={item.href}>
-                {item.label}
+                {t(item.label)}
               </NavLink>
             )
           )}
@@ -89,14 +92,19 @@ export function MobileMenu({
           <div className="mobile-menu__utility">
             {utilityItems.map((item) => (
               <NavLink className="mobile-menu__utility-link" key={item.href} onClick={onClose} to={item.href}>
-                {item.label}
+                {t(item.label)}
               </NavLink>
             ))}
           </div>
         ) : null}
 
+        <div className="mobile-menu__language">
+          <span className="mobile-menu__label">{t("Language")}</span>
+          <LanguageSwitcher compact />
+        </div>
+
         <div className="mobile-menu__socials">
-          <span>Watch</span>
+          <span>{t("Watch Live")}</span>
           {socialLinks.map((item) => renderSocialLink(item))}
         </div>
       </div>

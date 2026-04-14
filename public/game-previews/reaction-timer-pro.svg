@@ -1,0 +1,15 @@
+<svg width="800" height="480" viewBox="0 0 800 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="480" rx="28" fill="#0B1118"/>
+  <rect width="800" height="480" rx="28" fill="url(#bg)"/>
+  <circle cx="400" cy="224" r="98" fill="#232A3D"/>
+  <circle cx="400" cy="224" r="78" fill="#FF9071"/>
+  <rect x="378" y="130" width="44" height="110" rx="22" fill="#FFF3E3"/>
+  <circle cx="400" cy="224" r="18" fill="#232A3D"/>
+  <text x="48" y="428" fill="#F4F7FF" font-family="Arial, sans-serif" font-size="54" font-weight="700">Reaction Timer Pro</text>
+  <defs>
+    <linearGradient id="bg" x1="96" y1="56" x2="696" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#21161C"/>
+      <stop offset="1" stop-color="#111925"/>
+    </linearGradient>
+  </defs>
+</svg>

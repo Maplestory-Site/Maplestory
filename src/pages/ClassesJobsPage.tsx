@@ -15,11 +15,13 @@ import {
   type ClassPlaystyle
 } from "../data/classesJobs";
 import { usePageMeta } from "../app/usePageMeta";
+import { useI18n } from "../i18n/I18nProvider";
 
 export function ClassesJobsPage() {
+  const { t } = useI18n();
   usePageMeta(
-    "Classes & Jobs",
-    "Browse MapleStory classes by faction, playstyle, and difficulty inside the SNAILSLAYER class directory."
+    t("Classes & Jobs"),
+    t("Browse MapleStory classes by faction, playstyle, and difficulty inside the SNAILSLAYER class directory.")
   );
 
   const [selectedCategory, setSelectedCategory] = useState("All");
@@ -61,8 +63,8 @@ export function ClassesJobsPage() {
     <div className="classes-page">
       <div className="page-shell">
         <PageHero
-          title="Classes & Jobs"
-          subtitle="Discover each faction, compare playstyles, and find the class that fits your next main."
+          title={t("Classes & Jobs")}
+          subtitle={t("Discover each faction, compare playstyles, and find the class that fits your next main.")}
           total={classJobs.length}
         />
 
@@ -82,10 +84,10 @@ export function ClassesJobsPage() {
 
         <section className="classes-results reveal-on-scroll">
           <div>
-            <span>Discovery</span>
-            <h2>{filteredClasses.length} classes ready to browse</h2>
+            <span>{t("Discovery")}</span>
+            <h2>{filteredClasses.length} {t("classes ready to browse")}</h2>
           </div>
-          <p>Tap any job to open strengths, weaknesses, playstyle, and ratings.</p>
+          <p>{t("Tap any job to open strengths, weaknesses, playstyle, and ratings.")}</p>
         </section>
 
         <ClassGrid items={filteredClasses} onSelect={setSelectedClass} />

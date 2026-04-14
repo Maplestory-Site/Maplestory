@@ -1,0 +1,16 @@
+<svg width="800" height="480" viewBox="0 0 800 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="480" rx="28" fill="#101419"/>
+  <rect width="800" height="480" rx="28" fill="url(#bg)"/>
+  <rect x="184" y="150" width="430" height="182" rx="26" fill="#1B2434"/>
+  <rect x="228" y="196" width="94" height="18" rx="9" fill="#FFB55C"/>
+  <rect x="228" y="232" width="194" height="18" rx="9" fill="#79E0D8"/>
+  <rect x="228" y="268" width="146" height="18" rx="9" fill="#FFF1DA"/>
+  <circle cx="544" cy="236" r="46" fill="#7CE1D8"/>
+  <text x="48" y="428" fill="#F4F7FF" font-family="Arial, sans-serif" font-size="54" font-weight="700">Maple Training</text>
+  <defs>
+    <linearGradient id="bg" x1="96" y1="58" x2="700" y2="420" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#20211A"/>
+      <stop offset="1" stop-color="#101822"/>
+    </linearGradient>
+  </defs>
+</svg>

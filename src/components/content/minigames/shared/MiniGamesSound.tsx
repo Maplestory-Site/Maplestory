@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useGameSettings } from "./gameSettings";
 
 type MiniGamesSoundContextValue = {
   muted: boolean;
@@ -21,10 +22,57 @@ export function MiniGamesSoundProvider({ children }: { children: ReactNode }) {
     return window.localStorage.getItem(STORAGE_KEY) === "true";
   });
   const audioContextRef = useRef<AudioContext | null>(null);
+  const musicRef = useRef<{ osc: OscillatorNode; lfo: OscillatorNode; gain: GainNode } | null>(null);
+  const { settings } = useGameSettings();
 
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, String(muted));
   }, [muted]);
+
+  useEffect(() => {
+    if (muted || !settings.music) {
+      if (musicRef.current) {
+        musicRef.current.osc.stop();
+        musicRef.current.lfo.stop();
+        musicRef.current.osc.disconnect();
+        musicRef.current.lfo.disconnect();
+        musicRef.current.gain.disconnect();
+        musicRef.current = null;
+      }
+      return;
+    }
+
+    const audioContext = getAudioContext();
+    if (!audioContext) {
+      return;
+    }
+
+    if (musicRef.current) {
+      return;
+    }
+
+    const osc = audioContext.createOscillator();
+    const lfo = audioContext.createOscillator();
+    const lfoGain = audioContext.createGain();
+    const gain = audioContext.createGain();
+
+    osc.type = "sine";
+    osc.frequency.value = 120;
+    lfo.type = "sine";
+    lfo.frequency.value = 0.25;
+    lfoGain.gain.value = 18;
+    gain.gain.value = 0.02;
+
+    lfo.connect(lfoGain);
+    lfoGain.connect(osc.frequency);
+    osc.connect(gain);
+    gain.connect(audioContext.destination);
+
+    osc.start();
+    lfo.start();
+
+    musicRef.current = { osc, lfo, gain };
+  }, [muted, settings.music]);
 
   function getAudioContext() {
     if (typeof window === "undefined") {
