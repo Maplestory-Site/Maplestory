@@ -1,6 +1,6 @@
 import { fetchGmsArticle } from "../server/news/gmsArticle.mjs";
 import { fetchHtml } from "../server/news/fetchHtml.mjs";
-import { fetchKmsArticle } from "../server/news/kmsArticle.mjs";
+import { buildKmsPayloadFromHtml, fetchKmsArticle } from "../server/news/kmsArticle.mjs";
 import { getKmsFeed } from "../server/news/kmsFeed.mjs";
 import { sanitizeText } from "../server/news/normalize.mjs";
 import { getLatestNews, getNewsFeed, getNewsItemById } from "../server/news/service.mjs";
@@ -139,7 +139,16 @@ async function fetchKms(url, force, res) {
     try {
       const response = await fetchHtml(url);
       if (response && response.statusCode >= 200 && response.statusCode < 300) {
-        const fallback = buildKmsFallbackPayload(url, response.text || "");
+        let fallback = buildKmsFallbackPayload(url, response.text || "");
+
+        try {
+          fallback = buildKmsPayloadFromHtml(url, response.text || "");
+        } catch (parseError) {
+          if (process.env.NODE_ENV !== "production") {
+            console.warn("[KMS] Structured fallback parse failed.", parseError);
+          }
+        }
+
         res.status(200).json({
           ...fallback,
           debug: process.env.NODE_ENV !== "production" ? { warning: message } : undefined

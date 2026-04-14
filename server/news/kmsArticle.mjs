@@ -89,6 +89,38 @@ function enrichSections(sections = []) {
   });
 }
 
+export function buildKmsPayloadFromHtml(url, html = "") {
+  const parsed = parseArticleHtml(html, url);
+  const enrichedSections = enrichSections(parsed.sections);
+  const totalDetails = enrichedSections.reduce((sum, section) => sum + (section.details?.length || 0), 0);
+
+  return {
+    parserVersion: PARSER_VERSION,
+    sourceName: KMS_SOURCE.sourceName,
+    sourceUrl: url,
+    date: extractDate(html),
+    summary: parsed.summary || "",
+    tags: extractTags(html),
+    highlights: buildHighlights(enrichedSections),
+    keyChanges: buildKeyChanges(enrichedSections),
+    audience: buildAudience(enrichedSections),
+    sections: enrichedSections,
+    categories: parsed.categories,
+    heroImage: parsed.heroImage,
+    fullText: parsed.fullText,
+    debug:
+      process.env.NODE_ENV !== "production"
+        ? {
+            url,
+            htmlLength: html.length,
+            stats: parsed.stats,
+            sectionCount: enrichedSections.length,
+            detailCount: totalDetails
+          }
+        : undefined
+  };
+}
+
 async function readJson(file) {
   try {
     const raw = await readFile(file, "utf8");
@@ -120,37 +152,16 @@ export async function fetchKmsArticle(url, { forceRefresh = false } = {}) {
   }
 
   const html = response.text || "";
-  const parsed = parseArticleHtml(html, url);
+  const payload = buildKmsPayloadFromHtml(url, html);
 
-  const enrichedSections = enrichSections(parsed.sections);
-  const totalDetails = enrichedSections.reduce((sum, section) => sum + (section.details?.length || 0), 0);
-  const payload = {
-    parserVersion: PARSER_VERSION,
-    sourceName: KMS_SOURCE.sourceName,
-    sourceUrl: url,
-    date: extractDate(html),
-    summary: parsed.summary || "",
-    tags: extractTags(html),
-    highlights: buildHighlights(enrichedSections),
-    keyChanges: buildKeyChanges(enrichedSections),
-    audience: buildAudience(enrichedSections),
-    sections: enrichedSections,
-    categories: parsed.categories,
-    heroImage: parsed.heroImage,
-    fullText: parsed.fullText,
-    debug:
-      process.env.NODE_ENV !== "production"
-        ? {
-            url,
-            htmlLength: html.length,
-            stats: parsed.stats,
-            sectionCount: enrichedSections.length,
-            detailCount: totalDetails
-          }
-        : undefined
-  };
+  try {
+    cache[url] = { cachedAt: new Date().toISOString(), payload };
+    await writeJson(KMS_ARTICLE_CACHE_FILE, cache);
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[KMS] Failed to persist article cache.", error);
+    }
+  }
 
-  cache[url] = { cachedAt: new Date().toISOString(), payload };
-  await writeJson(KMS_ARTICLE_CACHE_FILE, cache);
   return payload;
 }
