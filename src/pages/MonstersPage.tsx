@@ -78,7 +78,7 @@ export function MonstersPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemQuery, setItemQuery] = useState("");
   const [itemTypeFilter, setItemTypeFilter] = useState<"All" | ItemEntry["type"]>("All");
-  const [itemSort, setItemSort] = useState<"Alphabetical" | "Highest level" | "Most sources">("Alphabetical");
+  const [itemSort, setItemSort] = useState<"Alphabetical" | "Highest level" | "Most drops">("Alphabetical");
   const [itemCurrentPage, setItemCurrentPage] = useState(1);
   const [mapQuery, setMapQuery] = useState("");
   const [mapRegionFilter, setMapRegionFilter] = useState("All");
@@ -151,7 +151,7 @@ export function MonstersPage() {
       if (itemSort === "Highest level") {
         return (right.level || 0) - (left.level || 0) || left.name.localeCompare(right.name);
       }
-      if (itemSort === "Most sources") {
+      if (itemSort === "Most drops") {
         return right.sourceCount - left.sourceCount || left.name.localeCompare(right.name);
       }
       return left.name.localeCompare(right.name);
@@ -353,12 +353,12 @@ export function MonstersPage() {
             activeSection === "monster"
               ? "Browse monsters, bosses, drops, and maps fast."
               : activeSection === "items"
-                ? "Search item sources, drop rarity, and farming routes."
-                : activeSection === "maps"
-                  ? "Browse maps, regions, and the monsters found there."
-                  : activeSection === "pets"
-                    ? "Track pet-related routes, sources, and preview entries."
-                    : "Track quest monsters, quest drops, and useful routes."
+        ? "Search item drops, rarity, and farming routes."
+        : activeSection === "maps"
+          ? "Browse maps, regions, and the monsters found there."
+          : activeSection === "pets"
+            ? "Track pet-related routes, tags, and preview entries."
+            : "Track quest monsters, quest drops, and useful routes."
           }
           title={databaseSections.find((section) => section.id === activeSection)?.label ?? "Monster"}
           total={heroTotal}
@@ -462,7 +462,7 @@ export function MonstersPage() {
                 <label className="item-browser__field">
                   <span>Search</span>
                   <input
-                    placeholder="Search item, category, or source monster"
+                    placeholder="Search item, category, or monster"
                     type="search"
                     value={itemQuery}
                     onChange={(event) => setItemQuery(event.target.value)}
@@ -482,10 +482,10 @@ export function MonstersPage() {
 
                 <label className="item-browser__field">
                   <span>Sort</span>
-                  <select value={itemSort} onChange={(event) => setItemSort(event.target.value as "Alphabetical" | "Highest level" | "Most sources")}>
+                  <select value={itemSort} onChange={(event) => setItemSort(event.target.value as "Alphabetical" | "Highest level" | "Most drops")}>
                     <option value="Alphabetical">Alphabetical</option>
                     <option value="Highest level">Highest level</option>
-                    <option value="Most sources">Most sources</option>
+                    <option value="Most drops">Most drops</option>
                   </select>
                 </label>
               </div>

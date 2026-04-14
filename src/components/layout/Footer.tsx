@@ -1,5 +1,6 @@
 import { NavLink } from "react-router-dom";
 import { businessEmail, type NavItem } from "../../data/siteContent";
+import { useI18n } from "../../i18n/I18nProvider";
 
 type FooterGroup = {
   title: string;
@@ -11,18 +12,20 @@ type FooterProps = {
 };
 
 export function Footer({ groups }: FooterProps) {
+  const { t } = useI18n();
+
   function renderLink(link: NavItem) {
     const isExternal = /^(https?:\/\/|mailto:)/.test(link.href);
 
     if (isExternal) {
       return (
         <a href={link.href} rel={link.href.startsWith("http") ? "noreferrer" : undefined} target={link.href.startsWith("http") ? "_blank" : undefined}>
-          {link.label}
+          {t(link.label)}
         </a>
       );
     }
 
-    return <NavLink to={link.href}>{link.label}</NavLink>;
+    return <NavLink to={link.href}>{t(link.label)}</NavLink>;
   }
 
   return (
@@ -35,12 +38,12 @@ export function Footer({ groups }: FooterProps) {
             </span>
             <strong>SNAILSLAYER</strong>
           </div>
-          <p>Live MapleStory. Sharp guides. Real progression.</p>
+          <p>{t("Live MapleStory. Sharp guides. Real progression.")}</p>
         </div>
 
         {groups.map((group) => (
           <div key={group.title}>
-            <h3>{group.title}</h3>
+            <h3>{t(group.title)}</h3>
             <ul>
               {group.links.map((link) => (
                 <li key={link.href}>{renderLink(link)}</li>
@@ -51,9 +54,9 @@ export function Footer({ groups }: FooterProps) {
       </div>
       <div className="container site-footer__bottom">
         <span>
-          Contact: <a href={`mailto:${businessEmail}`}>{businessEmail}</a>
+          {t("Contact")}: <a href={`mailto:${businessEmail}`}>{businessEmail}</a>
         </span>
-        <span>© 2026 SNAILSLAYER</span>
+        <span>{t("© 2026 SNAILSLAYER")}</span>
       </div>
     </footer>
   );

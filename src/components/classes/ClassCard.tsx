@@ -10,6 +10,7 @@ export function ClassCard({ item, onSelect }: ClassCardProps) {
   const cardRef = useRef<HTMLButtonElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isVisibleOnScreen, setIsVisibleOnScreen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
 
   useEffect(() => {
     if (!item.previewVideo || typeof window === "undefined" || !cardRef.current) {
@@ -37,21 +38,21 @@ export function ClassCard({ item, onSelect }: ClassCardProps) {
       return;
     }
 
-    if (isVisibleOnScreen) {
+    if (isVisibleOnScreen && isHovered) {
       videoRef.current.play().catch(() => {});
       return;
     }
 
     videoRef.current.pause();
     videoRef.current.currentTime = 0;
-  }, [isVisibleOnScreen, item.previewVideo]);
+  }, [isVisibleOnScreen, isHovered, item.previewVideo]);
 
   const startPreview = () => {
-    return;
+    setIsHovered(true);
   };
 
   const stopPreview = () => {
-    return;
+    setIsHovered(false);
   };
 
   return (
@@ -74,7 +75,7 @@ export function ClassCard({ item, onSelect }: ClassCardProps) {
               muted
               loop
               playsInline
-              autoPlay={isVisibleOnScreen}
+              autoPlay={false}
               preload="metadata"
               aria-hidden="true"
             >

@@ -1,10 +1,35 @@
 import { OFFICIAL_NEWS_ROOT, OFFICIAL_SOURCE } from "./config.mjs";
 
+export function decodeHtmlEntities(value = "") {
+  const input = typeof value === "string" ? value : "";
+  if (!input.includes("&") && !input.includes("&#")) {
+    return input;
+  }
+
+  const named = {
+    "&nbsp;": " ",
+    "&amp;": "&",
+    "&quot;": "\"",
+    "&apos;": "'",
+    "&#39;": "'",
+    "&lt;": "<",
+    "&gt;": ">",
+    "&ndash;": "–",
+    "&mdash;": "—"
+  };
+
+  const withNamed = Object.keys(named).reduce((acc, entity) => acc.replaceAll(entity, named[entity]), input);
+
+  return withNamed
+    .replace(/&#(\d+);/g, (_, num) => String.fromCharCode(Number(num)))
+    .replace(/&#x([0-9a-fA-F]+);/g, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
+}
+
 export function sanitizeText(value = "") {
   const raw = typeof value === "string" ? value : "";
-  const decoded = raw.includes("â") || raw.includes("Ã") ? Buffer.from(raw, "latin1").toString("utf8") : raw;
+  const decoded = raw.includes("ÃƒÂ¢") || raw.includes("ÃƒÆ’") ? Buffer.from(raw, "latin1").toString("utf8") : raw;
 
-  return decoded
+  return decodeHtmlEntities(decoded)
     .replace(/\u00a0/g, " ")
     .replace(/\s+/g, " ")
     .trim();
@@ -97,6 +122,7 @@ export function normalizeNewsItem(item, featuredIds, previousIds, fetchedAt) {
     id,
     title,
     category: mapCategory(item.category, item.name),
+    region: "gms",
     publishedAt: item.liveDate || fetchedAt,
     summary: shorten(item.summary),
     image: normalizeImage(item.imageThumbnail),

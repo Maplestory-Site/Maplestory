@@ -62,10 +62,6 @@ export function ClipEditorStudio({
           <h3>Pick the moment. Cut it clean.</h3>
           <p>Preview the hit, trim the timeline, and lock the best part fast.</p>
         </div>
-        <div className="clip-editor__meta">
-          <span>Source</span>
-          <strong>{sourceTitle}</strong>
-        </div>
       </div>
 
       <div className="clip-editor__grid">

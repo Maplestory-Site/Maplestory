@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import type { ClassJob } from "../../data/classesJobs";
 import { Button } from "../ui/Button";
 import { RatingDisplay } from "./RatingDisplay";
+import { useI18n } from "../../i18n/I18nProvider";
 
 type ClassDetailsPanelProps = {
   item: ClassJob | null;
@@ -9,6 +10,7 @@ type ClassDetailsPanelProps = {
 };
 
 export function ClassDetailsPanel({ item, onClose }: ClassDetailsPanelProps) {
+  const { t } = useI18n();
   useEffect(() => {
     if (!item) {
       return;
@@ -29,17 +31,17 @@ export function ClassDetailsPanel({ item, onClose }: ClassDetailsPanelProps) {
   }
 
   return (
-    <div className="class-details" role="dialog" aria-modal="true" aria-label={`${item.name} details`}>
-      <button type="button" className="class-details__backdrop" aria-label="Close class details" onClick={onClose} />
+    <div className="class-details" role="dialog" aria-modal="true" aria-label={`${item.name} ${t("details")}`}>
+      <button type="button" className="class-details__backdrop" aria-label={t("Close")} onClick={onClose} />
       <aside className="class-details__panel">
         <div className="class-details__top">
           <div>
-            <span className="class-details__eyebrow">{item.previewVideoFaction ?? item.category}</span>
+            <span className="class-details__eyebrow">{t(item.previewVideoFaction ?? item.category)}</span>
             <h2>{item.name}</h2>
             <p>{item.overview}</p>
           </div>
-          <button type="button" className="class-details__close" aria-label="Close class details" onClick={onClose}>
-            Close
+          <button type="button" className="class-details__close" aria-label={t("Close")} onClick={onClose}>
+            {t("Close")}
           </button>
         </div>
 
@@ -73,22 +75,22 @@ export function ClassDetailsPanel({ item, onClose }: ClassDetailsPanelProps) {
           <div className="class-details__body">
             <div className="class-details__stats">
               <div className="class-details__badge">
-                <span>Playstyle</span>
-                <strong>{item.playstyle}</strong>
+                <span>{t("Playstyle")}</span>
+                <strong>{t(item.playstyle)}</strong>
               </div>
               <div className="class-details__badge">
-                <span>Difficulty</span>
-                <strong>{item.difficulty}</strong>
+                <span>{t("Difficulty")}</span>
+                <strong>{t(item.difficulty)}</strong>
               </div>
               <div className="class-details__badge">
-                <span>Entry</span>
-                <strong>{item.beginnerFriendly ? "Friendly" : "Advanced"}</strong>
+                <span>{t("Entry")}</span>
+                <strong>{item.beginnerFriendly ? t("Friendly") : t("Advanced")}</strong>
               </div>
             </div>
 
             <div className="class-details__split">
               <div className="class-details__card">
-                <h3>Strengths</h3>
+                <h3>{t("Strengths")}</h3>
                 <ul>
                   {item.strengths.map((entry) => (
                     <li key={entry}>{entry}</li>
@@ -96,7 +98,7 @@ export function ClassDetailsPanel({ item, onClose }: ClassDetailsPanelProps) {
                 </ul>
               </div>
               <div className="class-details__card">
-                <h3>Weaknesses</h3>
+                <h3>{t("Weaknesses")}</h3>
                 <ul>
                   {item.weaknesses.map((entry) => (
                     <li key={entry}>{entry}</li>
@@ -106,24 +108,24 @@ export function ClassDetailsPanel({ item, onClose }: ClassDetailsPanelProps) {
             </div>
 
             <div className="class-details__ratings">
-              <RatingDisplay label="Bossing" value={item.bossingRating} />
-              <RatingDisplay label="Farming" value={item.farmingRating} />
-              <RatingDisplay label="Mobility" value={item.mobilityRating} />
-              <RatingDisplay label="Survivability" value={item.survivabilityRating} />
+              <RatingDisplay label={t("Bossing")} value={item.bossingRating} />
+              <RatingDisplay label={t("Farming")} value={item.farmingRating} />
+              <RatingDisplay label={t("Mobility")} value={item.mobilityRating} />
+              <RatingDisplay label={t("Survivability")} value={item.survivabilityRating} />
             </div>
 
             <div className="class-details__footer">
               <div className="class-details__tags">
                 {item.tags.map((tag) => (
-                  <span key={tag}>{tag}</span>
+                  <span key={tag}>{t(tag)}</span>
                 ))}
               </div>
               <div className="class-details__actions">
                 <Button href="/videos" variant="primary">
-                  Related Videos
+                  {t("Related Videos")}
                 </Button>
                 <Button href="/community" variant="secondary">
-                  Ask the Community
+                  {t("Ask the Community")}
                 </Button>
               </div>
             </div>

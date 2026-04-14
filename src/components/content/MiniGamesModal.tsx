@@ -1,9 +1,11 @@
-import { useEffect, useMemo, useRef, type RefObject } from "react";
+import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import type { MiniGameDefinition, MiniGameId } from "../../data/miniGames";
 import { miniGames } from "../../data/miniGames";
 import { miniGamesRegistry } from "./minigames/miniGamesRegistry";
-import { MiniGamesSoundProvider, useMiniGamesSound } from "./minigames/shared/MiniGamesSound";
+import { MiniGamesSoundProvider } from "./minigames/shared/MiniGamesSound";
+import { useGameFavorites } from "./minigames/shared/gameFavorites";
+import { useGameMeta } from "./minigames/shared/useGameMeta";
 
 type MiniGamesModalProps = {
   open: boolean;
@@ -75,7 +77,27 @@ function MiniGamesModalContent({
   onSelectGame: (gameId: MiniGameId) => void;
   panelRef: RefObject<HTMLDivElement | null>;
 }) {
-  const { muted, toggleMuted } = useMiniGamesSound();
+  const [isLoading, setIsLoading] = useState(true);
+  const meta = useGameMeta();
+  const { favorites } = useGameFavorites();
+  const featuredGame = useMemo(() => miniGames.find((game) => game.id === "boss-dodge") ?? miniGames[0], []);
+  const favoriteGames = useMemo(
+    () => favorites.map((id) => miniGames.find((game) => game.id === id)).filter(Boolean) as MiniGameDefinition[],
+    [favorites]
+  );
+  const recentGames = useMemo(
+    () =>
+      meta.recent
+        .map((entry) => miniGames.find((game) => game.id === entry.gameId))
+        .filter(Boolean) as MiniGameDefinition[],
+    [meta.recent]
+  );
+
+  useEffect(() => {
+    setIsLoading(true);
+    const timer = window.setTimeout(() => setIsLoading(false), 260);
+    return () => window.clearTimeout(timer);
+  }, [activeGame.id]);
 
   return (
     <div className="mini-games-modal" role="dialog" aria-modal="true" aria-labelledby="mini-games-title">
@@ -83,20 +105,10 @@ function MiniGamesModalContent({
       <div className="mini-games-modal__panel" ref={panelRef} tabIndex={-1}>
         <div className="mini-games-modal__header">
           <div className="mini-games-modal__header-copy">
-            <span className="section-header__eyebrow">Train While Waiting</span>
-            <h2 id="mini-games-title">Quick mini challenges while the stream is offline</h2>
-            <p>Mini challenges for the community. Fast rounds. Clean UI. Back to stream in seconds.</p>
+            <span className="section-header__eyebrow">Mini Games</span>
+            <h2 id="mini-games-title">Pick a game. Play.</h2>
           </div>
           <div className="mini-games-modal__header-actions">
-            <button
-              aria-label={muted ? "Unmute mini games sounds" : "Mute mini games sounds"}
-              aria-pressed={!muted}
-              className="mini-games-modal__utility"
-              onClick={toggleMuted}
-              type="button"
-            >
-              {muted ? "Sound Off" : "Sound On"}
-            </button>
             <button aria-label="Close mini games" className="mini-games-modal__close" onClick={onClose} type="button">
               Close
             </button>
@@ -107,24 +119,67 @@ function MiniGamesModalContent({
           <aside className="mini-games-modal__sidebar" aria-label="Mini game selection">
             <div className="mini-games-modal__sidebar-head">
               <span className="mini-games-modal__sidebar-label">Game Library</span>
-              <strong>Pick a quick challenge</strong>
-              <span>Three compact games built for the wait between runs.</span>
+              <strong>All games</strong>
             </div>
 
-            <div className="mini-games-modal__sidebar-list" role="tablist" aria-label="Mini game library">
-              {miniGames.map((game) => (
+            <div className="mini-games-modal__sidebar-section">
+              <span>Featured</span>
+              <div className="mini-games-modal__sidebar-list" role="tablist" aria-label="Featured game">
                 <MiniGameCard
-                  game={game}
-                  isActive={game.id === activeGame.id}
-                  key={game.id}
-                  onSelect={() => onSelectGame(game.id)}
+                  game={featuredGame}
+                  isActive={featuredGame.id === activeGame.id}
+                  key={featuredGame.id}
+                  onSelect={() => onSelectGame(featuredGame.id)}
                 />
-              ))}
+              </div>
             </div>
 
-            <div className="mini-games-modal__sidebar-foot">
-              <span>Compact, fast, and built to stay inside the creator world.</span>
+            {favoriteGames.length ? (
+              <div className="mini-games-modal__sidebar-section">
+                <span>Favorites</span>
+                <div className="mini-games-modal__sidebar-list" role="tablist" aria-label="Favorite games">
+                  {favoriteGames.map((game) => (
+                    <MiniGameCard
+                      game={game}
+                      isActive={game.id === activeGame.id}
+                      key={game.id}
+                      onSelect={() => onSelectGame(game.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            {recentGames.length ? (
+              <div className="mini-games-modal__sidebar-section">
+                <span>Recently Played</span>
+                <div className="mini-games-modal__sidebar-list" role="tablist" aria-label="Recently played games">
+                  {recentGames.map((game) => (
+                    <MiniGameCard
+                      game={game}
+                      isActive={game.id === activeGame.id}
+                      key={game.id}
+                      onSelect={() => onSelectGame(game.id)}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
+            <div className="mini-games-modal__sidebar-section">
+              <span>All Games</span>
+              <div className="mini-games-modal__sidebar-list" role="tablist" aria-label="Mini game library">
+                {miniGames.map((game) => (
+                  <MiniGameCard
+                    game={game}
+                    isActive={game.id === activeGame.id}
+                    key={game.id}
+                    onSelect={() => onSelectGame(game.id)}
+                  />
+                ))}
+              </div>
             </div>
+
           </aside>
 
           <section className="mini-games-modal__play">
@@ -136,16 +191,12 @@ function MiniGamesModalContent({
                   <span>{activeGame.description}</span>
                 </div>
               </div>
-              <div className="mini-games-modal__play-tags">
-                <span className="mini-games-modal__chip">{activeGame.type}</span>
-                {activeGame.difficulty ? <span className="mini-games-modal__chip">{activeGame.difficulty}</span> : null}
-                <span className="mini-games-modal__chip mini-games-modal__chip--live">Ready to Play</span>
-              </div>
             </div>
-            <div className="mini-games-modal__canvas">
+            <div className={`mini-games-modal__canvas ${isLoading ? "is-loading" : ""}`}>
               <div className="mini-games-modal__canvas-content" key={activeGame.id}>
                 {renderGame(activeGame.id)}
               </div>
+              {isLoading ? <div className="mini-games-modal__canvas-loading" aria-hidden="true" /> : null}
             </div>
           </section>
         </div>
@@ -175,11 +226,6 @@ function MiniGameCard({
       <span className="mini-game-card__icon">{game.icon}</span>
       <div className="mini-game-card__copy">
         <strong>{game.title}</strong>
-        <span>{game.description}</span>
-        <div className="mini-game-card__meta">
-          <span>{game.type}</span>
-          {game.difficulty ? <span>{game.difficulty}</span> : null}
-        </div>
       </div>
       <span className="mini-game-card__action">{isActive ? "Playing" : "Play"}</span>
     </button>

@@ -44,6 +44,7 @@ export const navigationItems: NavItem[] = [
   { label: "Videos", href: "/videos" },
   { label: "Live", href: "/live" },
   { label: "Community", href: "/community" },
+  { label: "Games", href: "/games" },
   {
     label: "DataBase",
     href: "/database/monster",

@@ -1,21 +1,65 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { inAppNotifications } from "../../data/inAppNotifications";
+import { useGameMeta } from "../content/minigames/shared/useGameMeta";
+
+const READ_KEY = "snailslayer-notifications-read";
 
 export function NotificationDropdown() {
   const [open, setOpen] = useState(false);
-  const [readIds, setReadIds] = useState<string[]>([]);
+  const [readIds, setReadIds] = useState<string[]>(() => {
+    if (typeof window === "undefined") return [];
+    const raw = window.localStorage.getItem(READ_KEY);
+    if (!raw) return [];
+    try {
+      return JSON.parse(raw) as string[];
+    } catch {
+      return [];
+    }
+  });
   const wrapperRef = useRef<HTMLDivElement | null>(null);
+  const meta = useGameMeta();
 
   const items = useMemo(
     () =>
-      inAppNotifications.map((item) => ({
+      [
+        ...inAppNotifications,
+        ...(meta.lootBoxes > 0
+          ? [
+              {
+                id: "reward-boxes",
+                title: "Rewards waiting",
+                detail: `Open ${meta.lootBoxes} reward box${meta.lootBoxes === 1 ? "" : "es"} and claim coins or cosmetics.`,
+                href: "/games",
+                timestamp: "Today",
+                kind: "reward" as const
+              }
+            ]
+          : []),
+        ...(meta.dailyMissions.missions.some((mission) => mission.completed)
+          ? [
+              {
+                id: "mission-complete",
+                title: "Mission complete",
+                detail: "Daily missions are ready to claim rewards.",
+                href: "/games",
+                timestamp: "Today",
+                kind: "mission" as const
+              }
+            ]
+          : [])
+      ].map((item) => ({
         ...item,
-        unread: item.unread && !readIds.includes(item.id)
+        unread: (item.unread ?? true) && !readIds.includes(item.id)
       })),
-    [readIds]
+    [meta.dailyMissions.missions, meta.lootBoxes, readIds]
   );
   const unreadCount = items.filter((item) => item.unread).length;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem(READ_KEY, JSON.stringify(readIds));
+  }, [readIds]);
 
   useEffect(() => {
     if (!open) return;

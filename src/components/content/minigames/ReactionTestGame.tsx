@@ -1,10 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { GameButton } from "./shared/GameButton";
 import { GameCard } from "./shared/GameCard";
+import { GameOverlay } from "./shared/GameOverlay";
 import { GameShell } from "./shared/GameShell";
 import { useMiniGamesSound } from "./shared/MiniGamesSound";
 import { ScoreBadge } from "./shared/ScoreBadge";
 import { StatDisplay } from "./shared/StatDisplay";
+import { TouchControls } from "./shared/TouchControls";
+import { updateGameMeta } from "./shared/gameMeta";
+import { shouldVibrate } from "./shared/gameSettings";
 
 type ReactionResult = {
   label: "Perfect" | "Good" | "Miss";
@@ -19,7 +23,7 @@ const STORAGE_KEY = "snailslayer-reaction-best";
 
 export function ReactionTestGame() {
   const { playFailure, playSuccess } = useMiniGamesSound();
-  const [phase, setPhase] = useState<"ready" | "running" | "result">("ready");
+  const [phase, setPhase] = useState<"ready" | "running" | "result" | "paused" | "over">("ready");
   const [position, setPosition] = useState(0.14);
   const [direction, setDirection] = useState(1);
   const [zoneCenter, setZoneCenter] = useState(() => randomZoneCenter());
@@ -28,6 +32,7 @@ export function ReactionTestGame() {
   const [bestScore, setBestScore] = useState(0);
   const [round, setRound] = useState(1);
   const [result, setResult] = useState<ReactionResult | null>(null);
+  const [shake, setShake] = useState(false);
   const rafRef = useRef<number | null>(null);
   const lastFrameRef = useRef<number | null>(null);
   const positionRef = useRef(position);
@@ -121,6 +126,11 @@ export function ReactionTestGame() {
         return;
       }
 
+      if (phase === "paused") {
+        resumeRun();
+        return;
+      }
+
       startRound();
     };
 
@@ -135,6 +145,21 @@ export function ReactionTestGame() {
     setDirection(1);
     positionRef.current = 0.12;
     directionRef.current = 1;
+    setPhase("running");
+  }
+
+  function pauseRun() {
+    if (phase !== "running") {
+      return;
+    }
+    setPhase("paused");
+  }
+
+  function resumeRun() {
+    if (phase !== "paused") {
+      return;
+    }
+    lastFrameRef.current = null;
     setPhase("running");
   }
 
@@ -153,12 +178,25 @@ export function ReactionTestGame() {
     setCombo(nextCombo);
     setScore(nextScore);
     setRound(nextRound);
-    setPhase("result");
+    setPhase(nextResult.label === "Miss" ? "over" : "result");
 
     if (nextResult.label === "Miss") {
       playFailure();
+      updateGameMeta({
+        gameId: "reaction-test",
+        score: nextScore,
+        outcome: "loss"
+      });
+      if (shouldVibrate()) {
+        navigator.vibrate([30, 40, 30]);
+      }
+      setShake(true);
+      window.setTimeout(() => setShake(false), 320);
     } else {
       playSuccess();
+      if (shouldVibrate()) {
+        navigator.vibrate(20);
+      }
     }
 
     if (nextScore > bestScore) {
@@ -176,6 +214,13 @@ export function ReactionTestGame() {
     setCombo(0);
     setRound(1);
     setResult(null);
+    setShake(false);
+    lastFrameRef.current = null;
+  }
+
+  function restartRun() {
+    resetSession();
+    window.setTimeout(startRound, 0);
   }
 
   return (
@@ -197,11 +242,33 @@ export function ReactionTestGame() {
           <ScoreBadge
             label="Round"
             tone={result?.tone === "perfect" ? "success" : result?.tone === "miss" ? "danger" : "default"}
-            value={result ? result.label : phase === "running" ? "Focus" : "Ready"}
+            value={
+              result
+                ? result.label
+                : phase === "running"
+                  ? "Focus"
+                  : phase === "paused"
+                    ? "Paused"
+                    : phase === "over"
+                      ? "Missed"
+                      : "Ready"
+            }
           />
           <div className="game-shell__actions">
             <GameButton onClick={phase === "running" ? stopRun : startRound}>
-              {phase === "running" ? "Stop" : phase === "result" ? "Next Round" : "Start Round"}
+              {phase === "running"
+                ? "Stop"
+                : phase === "result"
+                  ? "Next Round"
+                  : phase === "over"
+                    ? "Try Again"
+                    : "Start Round"}
+            </GameButton>
+            <GameButton
+              onClick={phase === "running" ? pauseRun : phase === "paused" ? resumeRun : undefined}
+              variant="secondary"
+            >
+              {phase === "paused" ? "Resume" : "Pause"}
             </GameButton>
             <GameButton onClick={resetSession} variant="secondary">
               Reset
@@ -210,7 +277,7 @@ export function ReactionTestGame() {
         </div>
       }
     >
-      <div className="reaction-test">
+      <div className={`reaction-test ${shake ? "is-shaking" : ""}`}>
         <GameCard className="reaction-test__board" tone="highlight">
           <div className="reaction-test__labels">
             <span>Miss</span>
@@ -243,6 +310,53 @@ export function ReactionTestGame() {
             />
           </div>
         </GameCard>
+
+        <TouchControls
+          leftLabel={phase === "running" ? "Stop" : "Start"}
+          rightLabel={phase === "running" ? "Stop" : "Start"}
+          onLeft={phase === "running" ? stopRun : startRound}
+          onRight={phase === "running" ? stopRun : startRound}
+          repeatDelay={180}
+        />
+
+        <GameOverlay
+          title={
+            phase === "ready"
+              ? "Reaction Test"
+              : phase === "paused"
+                ? "Paused"
+                : phase === "over"
+                  ? "Run Over"
+                  : ""
+          }
+          description={
+            phase === "ready"
+              ? "Time the stop inside the bright zone. Perfect hits build combo bonuses."
+              : phase === "paused"
+                ? "Take a breath. Resume when you are ready."
+                : phase === "over"
+                  ? "Missed the zone. Clean timing wins the streak."
+                  : undefined
+          }
+          helper={
+            phase === "over"
+              ? `Score ${score} • Best ${bestScore}`
+              : phase === "ready"
+                ? "Tap start or press Space."
+                : undefined
+          }
+          actions={
+            phase === "ready" ? (
+              <GameButton onClick={startRound}>Start Round</GameButton>
+            ) : phase === "paused" ? (
+              <GameButton onClick={resumeRun}>Resume</GameButton>
+            ) : phase === "over" ? (
+              <GameButton onClick={restartRun}>Try Again</GameButton>
+            ) : null
+          }
+          tone={phase === "over" ? "danger" : "default"}
+          visible={phase === "ready" || phase === "paused" || phase === "over"}
+        />
 
         <div className="reaction-test__hud-grid">
           <GameCard className={`game-feedback ${result ? `is-${result.tone}` : ""}`}>
@@ -313,7 +427,10 @@ function getReactionResult(distance: number, combo: number, perfectHalf: number,
   }
 
   if (distance <= goodHalf) {
-    const accuracy = Math.max(72, Math.round(100 - ((distance - perfectHalf) / Math.max(goodHalf - perfectHalf, 0.001)) * 25));
+    const accuracy = Math.max(
+      72,
+      Math.round(100 - ((distance - perfectHalf) / Math.max(goodHalf - perfectHalf, 0.001)) * 25)
+    );
     return {
       label: "Good",
       gain: 70,
