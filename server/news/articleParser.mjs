@@ -16,15 +16,32 @@ const STRIP_SELECTORS = [
   ".post-navigation",
   ".author-box",
   ".breadcrumb",
+  ".breadcrumbs",
   ".entry-meta",
-  ".meta"
+  ".meta",
+  "#comments",
+  ".comments-area",
+  ".comment-respond",
+  ".comments-title",
+  ".jp-relatedposts",
+  ".related-posts",
+  ".post-tags",
+  ".post-categories",
+  ".patreon-button",
+  ".patreon-widget",
+  ".yarpp-related",
+  ".sharedaddy.sd-sharing-enabled",
+  ".sd-content",
+  ".sd-like",
+  ".sd-sharing",
+  ".adsbygoogle"
 ];
 
 const ROOT_SELECTORS = [
-  ".post .content",
-  ".gms-body",
   ".post-content",
   ".entry-content",
+  ".post .content",
+  ".gms-body",
   "article",
   "main",
   ".content"
@@ -380,12 +397,18 @@ export function parseArticleHtml(html = "", baseUrl = "") {
   let root = null;
   let rootSelector = "";
 
-  for (const selector of ROOT_SELECTORS) {
-    const candidate = $(selector).first();
-    if (candidate.length) {
-      root = candidate;
-      rootSelector = selector;
-      break;
+  const postContent = $(".post-content").first();
+  if (postContent.length) {
+    root = postContent;
+    rootSelector = ".post-content";
+  } else {
+    for (const selector of ROOT_SELECTORS) {
+      const candidate = $(selector).first();
+      if (candidate.length) {
+        root = candidate;
+        rootSelector = selector;
+        break;
+      }
     }
   }
 
