@@ -1,11 +1,11 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { miniGames } from "../data/miniGames";
 import type { MiniGameId } from "../data/miniGames";
 import { MiniGamesModal } from "../components/content/MiniGamesModal";
+import { GamesHeader } from "../components/content/GamesHeader";
 import { getDailyChallenge } from "../components/content/minigames/shared/dailyChallenge";
 import { useGameMeta } from "../components/content/minigames/shared/useGameMeta";
 import { useGameFavorites } from "../components/content/minigames/shared/gameFavorites";
-import { ProgressBar } from "../components/content/minigames/shared/ProgressBar";
 import { getAchievementLabel, getProgressSnapshot, openLootBox, purchaseShopItem, type LootReward } from "../components/content/minigames/shared/gameMeta";
 
 export function GameHubPage() {
@@ -151,6 +151,8 @@ export function GameHubPage() {
     <>
       <section className="game-hub">
         <div className="container">
+          <GamesHeader className="game-hub__status-bar" />
+
           <div className="game-hub__hero card" data-reveal>
             <div className="game-hub__hero-copy">
               <span className="section-header__eyebrow">Game Hub</span>
@@ -262,19 +264,6 @@ export function GameHubPage() {
                 {meta.favoriteGameId ? miniGames.find((game) => game.id === meta.favoriteGameId)?.title : "None"}
               </strong>
             </div>
-          </div>
-
-          <div className="game-hub__progress" data-reveal>
-            <div>
-              <span>Player Level</span>
-              <strong>Level {progress.level}</strong>
-            </div>
-            <ProgressBar
-              label={`XP to level ${progress.level + 1}`}
-              value={`${progress.xpForNext} XP`}
-              progress={progress.progress}
-              accent="gold"
-            />
           </div>
 
           <div className="game-hub__profile" data-reveal>
@@ -573,40 +562,10 @@ function GameHubCard({
   onPlay: () => void;
   onToggleFavorite: () => void;
 }) {
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-
-  const handlePreviewStart = () => {
-    if (!videoRef.current) return;
-    const video = videoRef.current;
-    video.play().catch(() => undefined);
-  };
-
-  const handlePreviewStop = () => {
-    if (!videoRef.current) return;
-    const video = videoRef.current;
-    video.pause();
-    video.currentTime = 0;
-  };
-
   return (
-    <article
-      className="game-hub__card"
-      onMouseEnter={handlePreviewStart}
-      onMouseLeave={handlePreviewStop}
-      onFocus={handlePreviewStart}
-      onBlur={handlePreviewStop}
-    >
+    <article className="game-hub__card">
       <div className="game-hub__card-visual">
         <img src={game.previewImage} alt={`${game.title} preview`} loading="lazy" />
-        <video
-          ref={videoRef}
-          src="/classic-maple-nostalgia.mp4"
-          muted
-          playsInline
-          loop
-          preload="metadata"
-          aria-hidden="true"
-        />
       </div>
       <div className="game-hub__card-body">
         <div>

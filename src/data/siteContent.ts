@@ -42,7 +42,6 @@ export const navigationItems: NavItem[] = [
   { label: "Classes", href: "/classes" },
   { label: "News", href: "/news" },
   { label: "Videos", href: "/videos" },
-  { label: "Live", href: "/live" },
   { label: "Community", href: "/community" },
   { label: "Games", href: "/games" },
   {
@@ -144,21 +143,32 @@ export const socialLinks: SocialItem[] = [
 ];
 
 export const footerGroups = [
-  { title: "Explore", links: navigationItems },
   {
-    title: "Community",
+    title: "Navigation",
     links: [
-      { label: "Discord", href: "/community" },
-      { label: "Telegram", href: "https://t.me/snailslayermain" },
-      { label: "YouTube", href: "https://www.youtube.com/@snailslayermain" },
-      { label: "Twitch", href: "https://www.twitch.tv/snailslayermain" }
+      { label: "Home", href: "/" },
+      { label: "Classes", href: "/classes" },
+      { label: "News", href: "/news" },
+      { label: "Videos", href: "/videos" },
+      { label: "Games", href: "/games" }
     ]
   },
   {
-    title: "Contact",
+    title: "Community",
     links: [
-      { label: "Contact", href: "/contact" },
-      { label: "Email", href: "mailto:Snailslayermain@gmail.com" }
+      { label: "Community", href: "/community" },
+      { label: "Live", href: "/live" },
+      { label: "Join Discord", href: "/community" },
+      { label: "Contact", href: "/contact" }
+    ]
+  },
+  {
+    title: "Info",
+    links: [
+      { label: "About", href: "/about" },
+      { label: "Database", href: "/database/monster" },
+      { label: "Email", href: "mailto:Snailslayermain@gmail.com" },
+      { label: "Discord", href: "/community" }
     ]
   }
 ];

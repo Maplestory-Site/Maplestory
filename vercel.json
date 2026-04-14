@@ -7,6 +7,78 @@
   ],
   "rewrites": [
     {
+      "source": "/api/fetch-article",
+      "destination": "/api/content?resource=fetch-html"
+    },
+    {
+      "source": "/api/gms",
+      "destination": "/api/content?resource=gms-article"
+    },
+    {
+      "source": "/api/kms",
+      "destination": "/api/content?resource=kms-article"
+    },
+    {
+      "source": "/api/kms/feed",
+      "destination": "/api/content?resource=kms-feed"
+    },
+    {
+      "source": "/api/news/latest",
+      "destination": "/api/content?resource=news-latest"
+    },
+    {
+      "source": "/api/news/refresh",
+      "destination": "/api/content?resource=news-refresh"
+    },
+    {
+      "source": "/api/news/:id",
+      "destination": "/api/content?resource=news-item&id=:id"
+    },
+    {
+      "source": "/api/news",
+      "destination": "/api/content?resource=news-feed"
+    },
+    {
+      "source": "/api/items",
+      "destination": "/api/database?resource=items"
+    },
+    {
+      "source": "/api/maps/:id",
+      "destination": "/api/database?resource=map-detail&id=:id"
+    },
+    {
+      "source": "/api/maps",
+      "destination": "/api/database?resource=maps"
+    },
+    {
+      "source": "/api/monsters",
+      "destination": "/api/database?resource=monsters"
+    },
+    {
+      "source": "/api/pets",
+      "destination": "/api/database?resource=pets"
+    },
+    {
+      "source": "/api/quests/:id",
+      "destination": "/api/database?resource=quest-detail&id=:id"
+    },
+    {
+      "source": "/api/quests",
+      "destination": "/api/database?resource=quests"
+    },
+    {
+      "source": "/api/leaderboard",
+      "destination": "/api/game?resource=leaderboard"
+    },
+    {
+      "source": "/api/progress",
+      "destination": "/api/game?resource=progress"
+    },
+    {
+      "source": "/api/rooms",
+      "destination": "/api/game?resource=rooms"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     },

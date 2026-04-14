@@ -81,17 +81,14 @@ function RootLayoutContent() {
       <Header
         liveStatus={twitchLiveStatus}
         navItems={navigationItems}
-        utilityItems={secondaryNavigationItems}
         onOpenMenu={() => setMobileMenuOpen(true)}
         primaryCta={headerActions.primary}
-        secondaryCta={headerActions.secondary}
       />
       <MobileMenu
         navItems={navigationItems}
         onClose={() => setMobileMenuOpen(false)}
         open={mobileMenuOpen}
         primaryCta={headerActions.primary}
-        secondaryCta={headerActions.secondary}
         utilityItems={secondaryNavigationItems}
         socialLinks={socialLinks}
       />

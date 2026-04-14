@@ -49,7 +49,10 @@ export function LanguageSwitcher({ compact = false }: LanguageSwitcherProps) {
         onClick={toggleOpen}
         type="button"
       >
-        <span className="language-switcher__label">{languageMeta.label.toUpperCase()}</span>
+        <span className="language-switcher__label language-switcher__label--full">{languageMeta.label}</span>
+        <span className="language-switcher__label language-switcher__label--short" aria-hidden="true">
+          {languageMeta.code.toUpperCase()}
+        </span>
         <span className="language-switcher__chevron" aria-hidden="true" />
       </button>
       {isOpen ? (

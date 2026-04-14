@@ -3,6 +3,7 @@ import { createPortal } from "react-dom";
 import type { MiniGameDefinition, MiniGameId } from "../../data/miniGames";
 import { miniGames } from "../../data/miniGames";
 import { miniGamesRegistry } from "./minigames/miniGamesRegistry";
+import { GamesHeader } from "./GamesHeader";
 import { MiniGamesSoundProvider } from "./minigames/shared/MiniGamesSound";
 import { useGameFavorites } from "./minigames/shared/gameFavorites";
 import { useGameMeta } from "./minigames/shared/useGameMeta";
@@ -192,6 +193,7 @@ function MiniGamesModalContent({
                 </div>
               </div>
             </div>
+            <GamesHeader compact className="mini-games-modal__games-header" />
             <div className={`mini-games-modal__canvas ${isLoading ? "is-loading" : ""}`}>
               <div className="mini-games-modal__canvas-content" key={activeGame.id}>
                 {renderGame(activeGame.id)}

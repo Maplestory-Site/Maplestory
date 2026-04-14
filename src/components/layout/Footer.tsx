@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom";
-import { businessEmail, type NavItem } from "../../data/siteContent";
+import { businessEmail, socialLinks, type NavItem } from "../../data/siteContent";
 import { useI18n } from "../../i18n/I18nProvider";
 
 type FooterGroup = {
@@ -30,33 +30,77 @@ export function Footer({ groups }: FooterProps) {
 
   return (
     <footer className="site-footer">
-      <div className="container site-footer__grid">
-        <div className="site-footer__brand">
-          <div className="site-footer__brand-head">
-            <span className="brand-lockup__mark brand-lockup__mark--image brand-lockup__mark--footer">
-              <img alt="SNAILSLAYER logo" decoding="async" loading="lazy" src="/snailslayer-logo.jpeg" />
-            </span>
-            <strong>SNAILSLAYER</strong>
+      <div className="container site-footer__shell">
+        <div className="site-footer__grid">
+          <div className="site-footer__brand">
+            <div className="site-footer__brand-head">
+              <span className="brand-lockup__mark brand-lockup__mark--image brand-lockup__mark--footer">
+                <img alt="SNAILSLAYER logo" decoding="async" loading="lazy" src="/snailslayer-logo.jpeg" />
+              </span>
+              <div className="site-footer__brand-copy">
+                <strong>SNAILSLAYER</strong>
+                <span>{t("MapleStory Creator")}</span>
+              </div>
+            </div>
+
+            <p>{t("Clean guides, live runs, and sharper MapleStory progression in one place.")}</p>
+
+            <div className="site-footer__brand-meta">
+              <span>{t("Premium Maple platform")}</span>
+              <span>{t("Europe / Global")}</span>
+            </div>
           </div>
-          <p>{t("Live MapleStory. Sharp guides. Real progression.")}</p>
+
+          {groups.map((group) => (
+            <section className="site-footer__section" key={group.title}>
+              <h3>{t(group.title)}</h3>
+              <ul className="site-footer__links">
+                {group.links.map((link) => (
+                  <li key={link.href}>{renderLink(link)}</li>
+                ))}
+              </ul>
+            </section>
+          ))}
         </div>
 
-        {groups.map((group) => (
-          <div key={group.title}>
-            <h3>{t(group.title)}</h3>
-            <ul>
-              {group.links.map((link) => (
-                <li key={link.href}>{renderLink(link)}</li>
-              ))}
-            </ul>
+        <div className="site-footer__bottom">
+          <div className="site-footer__bottom-copy">
+            <span>{t("© 2026 SNAILSLAYER")}</span>
+            <span>{t("Made for players who want cleaner clears and better calls.")}</span>
           </div>
-        ))}
-      </div>
-      <div className="container site-footer__bottom">
-        <span>
-          {t("Contact")}: <a href={`mailto:${businessEmail}`}>{businessEmail}</a>
-        </span>
-        <span>{t("© 2026 SNAILSLAYER")}</span>
+
+          <div className="site-footer__bottom-meta">
+            <a href={`mailto:${businessEmail}`}>{businessEmail}</a>
+
+            <div className="site-footer__socials">
+              {socialLinks.map((item) => {
+                const isExternal = /^(https?:\/\/|mailto:)/.test(item.href);
+                const label = t(item.platform);
+
+                if (isExternal) {
+                  return (
+                    <a
+                      aria-label={label}
+                      className="site-footer__social-link"
+                      href={item.href}
+                      key={item.platform}
+                      rel={item.href.startsWith("http") ? "noreferrer" : undefined}
+                      target={item.href.startsWith("http") ? "_blank" : undefined}
+                    >
+                      {label.slice(0, 2).toUpperCase()}
+                    </a>
+                  );
+                }
+
+                return (
+                  <NavLink aria-label={label} className="site-footer__social-link" key={item.platform} to={item.href}>
+                    {label.slice(0, 2).toUpperCase()}
+                  </NavLink>
+                );
+              })}
+            </div>
+          </div>
+        </div>
       </div>
     </footer>
   );
