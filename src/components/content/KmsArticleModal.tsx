@@ -73,8 +73,10 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
 
       setLoading(true);
       try {
+        const cacheBust = `${Date.now()}`;
         const response = await fetch(
-          `/api/kms?url=${encodeURIComponent(item.sourceUrl)}&force=1`
+          `/api/kms?url=${encodeURIComponent(item.sourceUrl)}&force=1&ts=${cacheBust}`,
+          { cache: "no-store" }
         );
         if (!response.ok) {
           throw new Error("Failed to load KMS article.");

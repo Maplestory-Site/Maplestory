@@ -114,8 +114,13 @@ async function fetchKms(url, force, res) {
       });
     }
 
+    const cacheHeader =
+      force === "1" || force === "true"
+        ? "no-store, max-age=0"
+        : "s-maxage=1800, stale-while-revalidate=3600";
+
     if (process.env.NODE_ENV !== "production" && (!payload.sections || !payload.sections.length)) {
-      res.setHeader("Cache-Control", "s-maxage=300, stale-while-revalidate=600");
+      res.setHeader("Cache-Control", cacheHeader);
       res.status(200).json({
         ...payload,
         debug: {
@@ -126,7 +131,7 @@ async function fetchKms(url, force, res) {
       return;
     }
 
-    res.setHeader("Cache-Control", "s-maxage=1800, stale-while-revalidate=3600");
+    res.setHeader("Cache-Control", cacheHeader);
     res.status(200).json(payload);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unknown error";
@@ -158,7 +163,7 @@ async function fetchKms(url, force, res) {
   }
 }
 
-async function fetchGms(url, res) {
+async function fetchGms(url, force, res) {
   if (!url || typeof url !== "string") {
     res.status(400).json({ error: "Missing url parameter." });
     return;
@@ -172,7 +177,11 @@ async function fetchGms(url, res) {
     }
 
     const payload = await fetchGmsArticle(url);
-    res.setHeader("Cache-Control", "s-maxage=1800, stale-while-revalidate=3600");
+    const cacheHeader =
+      force === "1" || force === "true"
+        ? "no-store, max-age=0"
+        : "s-maxage=1800, stale-while-revalidate=3600";
+    res.setHeader("Cache-Control", cacheHeader);
     res.status(200).json(payload);
   } catch {
     res.status(500).json({ error: "Failed to load GMS article." });
@@ -198,7 +207,7 @@ export default async function handler(req, res) {
   }
 
   if (resource === "gms-article") {
-    await fetchGms(req.query?.url, res);
+    await fetchGms(req.query?.url, req.query?.force, res);
     return;
   }
 
