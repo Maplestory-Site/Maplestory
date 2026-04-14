@@ -1,0 +1,17 @@
+<svg width="800" height="480" viewBox="0 0 800 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="480" rx="28" fill="#0D1016"/>
+  <rect width="800" height="480" rx="28" fill="url(#bg)"/>
+  <circle cx="248" cy="230" r="88" fill="#1C2332"/>
+  <circle cx="248" cy="230" r="62" fill="#FF6C66"/>
+  <circle cx="248" cy="230" r="26" fill="#1C2332"/>
+  <path d="M418 168C514 178 582 176 676 144" stroke="#79E4D7" stroke-width="12" stroke-linecap="round"/>
+  <path d="M418 224C514 236 588 238 678 214" stroke="#FFB85B" stroke-width="12" stroke-linecap="round"/>
+  <path d="M418 280C514 286 580 304 672 332" stroke="#F86972" stroke-width="12" stroke-linecap="round"/>
+  <text x="48" y="428" fill="#F4F7FF" font-family="Arial, sans-serif" font-size="54" font-weight="700">Bomb Defuse</text>
+  <defs>
+    <linearGradient id="bg" x1="86" y1="64" x2="702" y2="416" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1D1619"/>
+      <stop offset="1" stop-color="#111823"/>
+    </linearGradient>
+  </defs>
+</svg>

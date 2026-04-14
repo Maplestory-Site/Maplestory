@@ -1,0 +1,15 @@
+<svg width="800" height="480" viewBox="0 0 800 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="480" rx="28" fill="#091018"/>
+  <rect width="800" height="480" rx="28" fill="url(#bg)"/>
+  <rect x="224" y="110" width="136" height="116" rx="24" fill="#7CE1D8"/>
+  <rect x="390" y="110" width="136" height="116" rx="24" fill="#FF8B69"/>
+  <rect x="224" y="252" width="136" height="116" rx="24" fill="#FFF1D5"/>
+  <rect x="390" y="252" width="136" height="116" rx="24" fill="#8D95FF"/>
+  <text x="48" y="428" fill="#F4F7FF" font-family="Arial, sans-serif" font-size="54" font-weight="700">Memory Flash</text>
+  <defs>
+    <linearGradient id="bg" x1="98" y1="64" x2="688" y2="424" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#15202C"/>
+      <stop offset="1" stop-color="#0B1119"/>
+    </linearGradient>
+  </defs>
+</svg>

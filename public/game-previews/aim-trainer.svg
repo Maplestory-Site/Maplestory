@@ -1,0 +1,18 @@
+<svg width="800" height="480" viewBox="0 0 800 480" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="800" height="480" rx="28" fill="#091019"/>
+  <rect width="800" height="480" rx="28" fill="url(#bg)"/>
+  <circle cx="286" cy="180" r="42" fill="#FFF4EA"/>
+  <circle cx="286" cy="180" r="27" fill="#FF8D67"/>
+  <circle cx="286" cy="180" r="12" fill="#0F1825"/>
+  <circle cx="522" cy="264" r="54" fill="#FFF4EA"/>
+  <circle cx="522" cy="264" r="34" fill="#78E0D8"/>
+  <circle cx="522" cy="264" r="14" fill="#0F1825"/>
+  <path d="M146 88L674 392" stroke="#23314A" stroke-width="8" stroke-dasharray="14 18"/>
+  <text x="48" y="428" fill="#F4F7FF" font-family="Arial, sans-serif" font-size="54" font-weight="700">Aim Trainer</text>
+  <defs>
+    <linearGradient id="bg" x1="102" y1="70" x2="676" y2="410" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#15202B"/>
+      <stop offset="1" stop-color="#0C121B"/>
+    </linearGradient>
+  </defs>
+</svg>
