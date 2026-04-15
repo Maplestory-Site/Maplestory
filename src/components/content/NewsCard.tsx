@@ -15,11 +15,12 @@ export function NewsCard({ item, featured = false, onSelect }: NewsCardProps) {
   const recentlyUpdated = isRecentlyUpdated(item.publishedAt);
   const published = formatNewsMetaDate(item.publishedAt);
   const kmsBrief = item.region === "kms" ? buildKmsBrief(item) : null;
+  const imageSrc = item.image || item.kmsBreakdown?.heroImage || item.gmsBreakdown?.heroImage || "";
 
   return (
     <article className={`card news-card ${featured ? "news-card--featured" : ""}`}>
       <div className="news-card__media" aria-hidden="true">
-        {item.image ? <img alt="" className="news-card__image" decoding="async" loading="lazy" src={item.image} /> : null}
+        {imageSrc ? <img alt="" className="news-card__image" decoding="async" loading="lazy" src={imageSrc} /> : null}
         <div className="news-card__media-overlay" />
         <div className="news-card__media-top">
           <span className="news-card__badge">{t(formatCategory(item.category))}</span>

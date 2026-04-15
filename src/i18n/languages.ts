@@ -59,3 +59,31 @@ export const LANGUAGES: LanguageMeta[] = [
   { code: "ms", label: "Malay", nativeLabel: "Bahasa Melayu", dir: "ltr" },
   { code: "hi", label: "Hindi", nativeLabel: "हिन्दी", dir: "ltr" }
 ];
+
+export const SUPPORTED_LANGUAGE_CODES: LanguageCode[] = [
+  "en",
+  "he",
+  "ru",
+  "de",
+  "fr",
+  "es",
+  "pt",
+  "it",
+  "tr",
+  "ar",
+  "ko",
+  "ja",
+  "zh",
+  "nl",
+  "pl",
+  "uk",
+  "ro",
+  "el",
+  "cs",
+  "hu",
+  "th",
+  "vi",
+  "id",
+  "ms",
+  "hi"
+];

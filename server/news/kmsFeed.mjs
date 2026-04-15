@@ -59,7 +59,7 @@ export async function getKmsFeed({ forceRefresh = false } = {}) {
         }
         try {
           const breakdown = await fetchKmsArticle(entry.sourceUrl);
-          return { ...entry, kmsBreakdown: breakdown };
+          return { ...entry, image: entry.image || breakdown.heroImage || "", kmsBreakdown: breakdown };
         } catch {
           return entry;
         }

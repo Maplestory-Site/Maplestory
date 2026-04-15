@@ -5,6 +5,51 @@ import { getKmsFeed } from "../server/news/kmsFeed.mjs";
 import { sanitizeText } from "../server/news/normalize.mjs";
 import { getLatestNews, getNewsFeed, getNewsItemById } from "../server/news/service.mjs";
 
+function decodeTranslatePayload(payload) {
+  if (!Array.isArray(payload) || !Array.isArray(payload[0])) return "";
+  return payload[0]
+    .map((part) => (Array.isArray(part) ? part[0] : ""))
+    .filter(Boolean)
+    .join("");
+}
+
+async function translateTexts(texts, language) {
+  const translations = {};
+
+  for (const text of texts) {
+    if (!text || typeof text !== "string") continue;
+
+    try {
+      const endpoint = new URL("https://translate.googleapis.com/translate_a/single");
+      endpoint.searchParams.set("client", "gtx");
+      endpoint.searchParams.set("sl", "auto");
+      endpoint.searchParams.set("tl", language);
+      endpoint.searchParams.set("dt", "t");
+      endpoint.searchParams.set("q", text);
+
+      const response = await fetch(endpoint, {
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
+          Accept: "application/json,text/plain,*/*"
+        }
+      });
+
+      if (!response.ok) {
+        translations[text] = text;
+        continue;
+      }
+
+      const payload = await response.json();
+      translations[text] = decodeTranslatePayload(payload) || text;
+    } catch {
+      translations[text] = text;
+    }
+  }
+
+  return translations;
+}
+
 function stripHtml(html = "") {
   return html
     .replace(/<script[\s\S]*?<\/script>/gi, " ")
@@ -202,6 +247,15 @@ export default async function handler(req, res) {
 
   if (!resource) {
     res.status(400).json({ error: "Missing resource parameter." });
+    return;
+  }
+
+  if (resource === "translate-batch" && req.method === "POST") {
+    const language = String(req.query?.language ?? "en").toLowerCase();
+    const texts = Array.isArray(req.body?.texts) ? req.body.texts.slice(0, 50) : [];
+    const translations = await translateTexts(texts, language);
+    res.setHeader("Cache-Control", "no-store, max-age=0");
+    res.status(200).json({ translations });
     return;
   }
 

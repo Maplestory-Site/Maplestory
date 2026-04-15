@@ -585,6 +585,7 @@ main,
   top: calc(100% + 10px);
   right: 0;
   min-width: 220px;
+  max-height: min(70vh, 560px);
   padding: 10px;
   border-radius: 16px;
   border: 1px solid rgba(201, 169, 102, 0.16);
@@ -592,7 +593,30 @@ main,
   box-shadow: 0 20px 40px rgba(8, 8, 10, 0.26);
   display: grid;
   gap: 6px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 191, 71, 0.45) rgba(255, 255, 255, 0.06);
   z-index: 60;
+}
+
+.language-switcher__menu::-webkit-scrollbar {
+  width: 10px;
+}
+
+.language-switcher__menu::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 999px;
+}
+
+.language-switcher__menu::-webkit-scrollbar-thumb {
+  background: rgba(255, 191, 71, 0.38);
+  border-radius: 999px;
+  border: 2px solid rgba(10, 15, 22, 0.96);
+}
+
+.language-switcher__menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 191, 71, 0.56);
 }
 
 .language-switcher__option {
@@ -626,6 +650,7 @@ main,
 .language-switcher--compact .language-switcher__menu {
   position: static;
   min-width: auto;
+  max-height: min(52vh, 420px);
   border-radius: 14px;
 }
 

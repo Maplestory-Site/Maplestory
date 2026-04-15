@@ -1,5 +1,6 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
-import { LANGUAGES, type LanguageCode, type LanguageMeta } from "./languages";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { LANGUAGES, SUPPORTED_LANGUAGE_CODES, type LanguageCode, type LanguageMeta } from "./languages";
+import { requestDynamicTranslations } from "./dynamicTranslate";
 import { TRANSLATIONS } from "./translations";
 
 type I18nContextValue = {
@@ -38,13 +39,26 @@ function decodeHtmlEntities(value = "") {
 function normalizeLanguage(input?: string | null): LanguageCode {
   if (!input) return "en";
   const lower = input.toLowerCase();
-  const direct = LANGUAGES.find((lang) => lang.code === lower);
-  if (direct) return direct.code;
+  const direct = SUPPORTED_LANGUAGE_CODES.find((code) => code === lower);
+  if (direct) return direct;
   const base = lower.split("-")[0];
-  return (LANGUAGES.find((lang) => lang.code === base)?.code ?? "en") as LanguageCode;
+  return (SUPPORTED_LANGUAGE_CODES.find((code) => code === base) ?? "en") as LanguageCode;
 }
 
 export function I18nProvider({ children }: { children: React.ReactNode }) {
+  const supportedLanguages = useMemo(
+    () => LANGUAGES.filter((lang) => SUPPORTED_LANGUAGE_CODES.includes(lang.code)),
+    []
+  );
+  const [dynamicCache, setDynamicCache] = useState<Record<string, Record<string, string>>>(() => {
+    if (typeof window === "undefined") return {};
+    try {
+      const raw = window.localStorage.getItem(DYNAMIC_CACHE_KEY);
+      return raw ? (JSON.parse(raw) as Record<string, Record<string, string>>) : {};
+    } catch {
+      return {};
+    }
+  });
   const [language, setLanguageState] = useState<LanguageCode>(() => {
     if (typeof window === "undefined") return "en";
     const stored = window.localStorage.getItem(STORAGE_KEY);
@@ -52,8 +66,8 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   });
 
   const languageMeta = useMemo(
-    () => LANGUAGES.find((lang) => lang.code === language) ?? LANGUAGES[0],
-    [language]
+    () => supportedLanguages.find((lang) => lang.code === language) ?? supportedLanguages[0],
+    [language, supportedLanguages]
   );
 
   const isRtl = languageMeta.dir === "rtl";
@@ -74,45 +88,97 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     setLanguageState(next);
   }, []);
 
+  const pendingTranslationsRef = useRef(new Map<LanguageCode, Set<string>>());
+  const flushTimerRef = useRef<number | null>(null);
+
+  const flushPendingTranslations = useCallback(
+    async (targetLanguage: LanguageCode) => {
+      const queue = pendingTranslationsRef.current.get(targetLanguage);
+      if (!queue || !queue.size) return;
+      const texts = Array.from(queue);
+      pendingTranslationsRef.current.set(targetLanguage, new Set());
+
+      try {
+        const translations = await requestDynamicTranslations(texts, targetLanguage);
+        if (Object.keys(translations).length) {
+          setDynamicCache((current) => ({
+            ...current,
+            [targetLanguage]: {
+              ...(current[targetLanguage] ?? {}),
+              ...translations
+            }
+          }));
+        }
+      } catch {
+        texts.forEach((text) => queue.add(text));
+      }
+    },
+    []
+  );
+
+  const queueTranslation = useCallback(
+    (text: string) => {
+      const value = text?.trim();
+      if (!value || language === "en") return;
+      if (TRANSLATIONS[language]?.[value]) return;
+      if (dynamicCache?.[language]?.[value]) return;
+
+      const queue = pendingTranslationsRef.current.get(language) ?? new Set<string>();
+      queue.add(value);
+      pendingTranslationsRef.current.set(language, queue);
+
+      if (typeof window !== "undefined" && flushTimerRef.current == null) {
+        flushTimerRef.current = window.setTimeout(() => {
+          flushTimerRef.current = null;
+          void flushPendingTranslations(language);
+        }, 120);
+      }
+    },
+    [dynamicCache, flushPendingTranslations, language]
+  );
+
   const t = useCallback(
     (key: string) => {
       const table = TRANSLATIONS[language];
       if (table && table[key]) return table[key];
+      const cached = dynamicCache?.[language]?.[key];
+      if (cached) return cached;
+      queueTranslation(key);
       const fallback = TRANSLATIONS.en[key];
       return fallback ?? key;
     },
-    [language]
+    [dynamicCache, language, queueTranslation]
   );
 
   const td = useCallback(
     (text: string) => {
       if (!text) return text;
       if (language === "en") return decodeHtmlEntities(text);
-      if (typeof window === "undefined") return text;
-      const cacheRaw = window.localStorage.getItem(DYNAMIC_CACHE_KEY);
-      if (!cacheRaw) return decodeHtmlEntities(text);
-      try {
-        const cache = JSON.parse(cacheRaw) as Record<string, Record<string, string>>;
-        const translated = cache?.[language]?.[text] ?? text;
-        return decodeHtmlEntities(translated);
-      } catch {
-        return decodeHtmlEntities(text);
+      const table = TRANSLATIONS[language];
+      if (table?.[text]) {
+        return decodeHtmlEntities(table[text]);
       }
+      const translated = dynamicCache?.[language]?.[text];
+      if (translated) {
+        return decodeHtmlEntities(translated);
+      }
+      queueTranslation(text);
+      return decodeHtmlEntities(text);
     },
-    [language]
+    [dynamicCache, language, queueTranslation]
   );
 
   const value = useMemo<I18nContextValue>(
     () => ({
       language,
       languageMeta,
-      languages: LANGUAGES,
+      languages: supportedLanguages,
       setLanguage,
       t,
       td,
       isRtl
     }),
-    [isRtl, language, languageMeta, setLanguage, t, td]
+    [isRtl, language, languageMeta, setLanguage, supportedLanguages, t, td]
   );
 
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;

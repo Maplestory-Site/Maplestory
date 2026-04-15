@@ -23,6 +23,7 @@ export type NewsItem = {
     sourceUrl: string;
     date: string;
     summary: string;
+    heroImage?: string;
     tags: string[];
     highlights: string[];
     keyChanges: string[];

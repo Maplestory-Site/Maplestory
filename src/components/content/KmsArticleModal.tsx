@@ -164,7 +164,7 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
       setTranslatedData(null);
       return;
     }
-    translateArticleData(data, language, { scope: "summary+titles" }).then((next) => {
+    translateArticleData(data, language, { scope: "full" }).then((next) => {
       if (active) {
         setTranslatedData(next);
       }

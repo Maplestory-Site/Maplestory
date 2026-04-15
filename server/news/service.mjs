@@ -8,11 +8,13 @@ import {
   OFFICIAL_SOURCE
 } from "./config.mjs";
 import { getBestAvailableFeed, readBundledFeed, writeBundledFeed, writeCacheFeed } from "./cache.mjs";
+import { fetchKmsArticle } from "./kmsArticle.mjs";
 import { fetchKmsRss, normalizeKmsItem } from "./kms.mjs";
 import { normalizeNewsItem, sortNewsItems } from "./normalize.mjs";
 
 let memoryFeed = null;
 let inFlightRefresh = null;
+const KMS_CARD_IMAGE_ENRICH_LIMIT = 8;
 
 function isFresh(feed) {
   if (!feed?.meta?.lastUpdated) {
@@ -57,6 +59,36 @@ function buildMeta({ status, itemCount, freshItemCount = 0, updatedAt, lastSucce
   };
 }
 
+async function enrichKmsCardImages(items) {
+  let remaining = KMS_CARD_IMAGE_ENRICH_LIMIT;
+
+  return Promise.all(
+    items.map(async (item) => {
+      if (item.region !== "kms" || item.image || !item.sourceUrl || remaining <= 0) {
+        return item;
+      }
+
+      remaining -= 1;
+
+      try {
+        const breakdown = await fetchKmsArticle(item.sourceUrl);
+        return {
+          ...item,
+          image: breakdown.heroImage || item.image || "",
+          kmsBreakdown: breakdown
+        };
+      } catch (error) {
+        console.warn(
+          "[news-sync] KMS card image enrichment failed.",
+          item.sourceUrl,
+          error instanceof Error ? error.message : error
+        );
+        return item;
+      }
+    })
+  );
+}
+
 async function refreshNewsFeed({ persistBundled = false } = {}) {
   const existing = memoryFeed ?? (await getBestAvailableFeed()) ?? (await readBundledFeed());
   const previousIds = new Set((existing?.items ?? []).map((item) => String(item.id)));
@@ -93,7 +125,8 @@ async function refreshNewsFeed({ persistBundled = false } = {}) {
     deduped.set(String(item.id), normalizeNewsItem(item, featuredIds, previousIds, fetchedAt));
   });
 
-  const sortedItems = sortNewsItems([...deduped.values()]);
+  const enrichedItems = await enrichKmsCardImages([...deduped.values()]);
+  const sortedItems = sortNewsItems(enrichedItems);
   const grouped = sortedItems.reduce(
     (acc, item) => {
       const key = item.region === "kms" ? "kms" : "gms";

@@ -3,6 +3,7 @@ import type { NewsItem } from "../../data/newsHub";
 import { formatNewsMetaDate } from "../../lib/newsHub";
 import { Button } from "../ui/Button";
 import { useI18n } from "../../i18n/I18nProvider";
+import { translateArticleData } from "../../i18n/dynamicTranslate";
 
 type GmsSection = {
   title: string;
@@ -38,8 +39,9 @@ type GmsArticleModalProps = {
 };
 
 export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
-  const { t, td } = useI18n();
+  const { t, td, language } = useI18n();
   const [data, setData] = useState<GmsPayload | null>(null);
+  const [translatedData, setTranslatedData] = useState<GmsPayload | null>(null);
   const [loading, setLoading] = useState(false);
   const [openTopics, setOpenTopics] = useState<string[]>([]);
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -85,8 +87,9 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
   }, [item]);
 
   const published = useMemo(() => formatNewsMetaDate(item?.publishedAt ?? ""), [item]);
-  const sectionList = useMemo(() => data?.sections ?? [], [data]);
-  const categories = useMemo(() => data?.categories ?? [], [data]);
+  const renderData = translatedData ?? data;
+  const sectionList = useMemo(() => renderData?.sections ?? [], [renderData]);
+  const categories = useMemo(() => renderData?.categories ?? [], [renderData]);
   const fallbackSections = useMemo(() => {
     if (!item) return [];
     return [
@@ -116,6 +119,22 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
     }
   }, [item?.id]);
 
+  useEffect(() => {
+    let active = true;
+    if (!data) {
+      setTranslatedData(null);
+      return;
+    }
+    translateArticleData(data, language, { scope: "full" }).then((next) => {
+      if (active) {
+        setTranslatedData(next);
+      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [data, language]);
+
   if (!item) return null;
 
   return (
@@ -127,7 +146,7 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
             <span className="kms-modal__eyebrow">{t("GMS Update")}</span>
             <h2 id="gms-modal-title">{td(item.title)}</h2>
             <p className="kms-modal__meta">
-              <span>{data?.date || published}</span>
+              <span>{renderData?.date || published}</span>
               <span>{t(item.category.replace("-", " "))}</span>
             </p>
           </div>
@@ -147,21 +166,21 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
           <div className="kms-modal__block">
             <h3 className="kms-modal__section-title">{t("Summary")}</h3>
             <div className="kms-modal__summary card">
-              {(data?.heroImage || item.image) && (
+              {(renderData?.heroImage || item.image) && (
                 <div className="kms-modal__hero">
-                  <img src={data?.heroImage || item.image} alt={td(item.title)} loading="lazy" />
+                  <img src={renderData?.heroImage || item.image} alt={td(item.title)} loading="lazy" />
                 </div>
               )}
               <h4>{t("Official summary")}</h4>
-              <p>{td(data?.summary || item.summary)}</p>
+              <p>{td(renderData?.summary || item.summary)}</p>
             </div>
           </div>
 
-          {data?.keyPoints?.length ? (
+          {renderData?.keyPoints?.length ? (
             <div className="kms-modal__block">
               <h3 className="kms-modal__section-title">{t("Key points")}</h3>
               <div className="kms-modal__highlights">
-                {data.keyPoints.map((note, index) => (
+                {renderData.keyPoints.map((note, index) => (
                   <div className="kms-modal__highlight card" key={`${note}-${index}`}>
                     <strong>{t("Key point")}</strong>
                     <p>{td(note)}</p>

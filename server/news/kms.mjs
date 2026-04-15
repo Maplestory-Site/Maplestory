@@ -26,9 +26,62 @@ function stripHtml(value = "") {
   return value.replace(/<[^>]*>/g, " ");
 }
 
-function extractImage(html = "") {
-  const match = /<img[^>]+src=["']([^"']+)["']/i.exec(html);
-  return match ? normalizeImage(match[1]) : "";
+function resolveImageUrl(src = "", baseUrl = "") {
+  const normalized = normalizeImage(sanitizeText(stripCdata(src)));
+  if (!normalized) {
+    return "";
+  }
+
+  if (normalized.startsWith("http://") || normalized.startsWith("https://") || normalized.startsWith("//")) {
+    return normalizeImage(normalized);
+  }
+
+  if (!baseUrl) {
+    return normalized;
+  }
+
+  try {
+    return new URL(normalized, baseUrl).toString();
+  } catch {
+    return normalized;
+  }
+}
+
+function getAttribute(tag = "", attribute = "") {
+  const pattern = new RegExp(`${attribute}\\s*=\\s*["']([^"']+)["']`, "i");
+  return pattern.exec(tag)?.[1] || "";
+}
+
+function pickFirstSrcsetCandidate(value = "") {
+  return (
+    value
+      .split(",")
+      .map((part) => part.trim().split(/\s+/)[0])
+      .find(Boolean) || ""
+  );
+}
+
+function extractImage(html = "", baseUrl = "") {
+  const imageTags = html.match(/<img\b[^>]*>/gi) || [];
+
+  for (const tag of imageTags) {
+    const candidate =
+      getAttribute(tag, "src") ||
+      getAttribute(tag, "data-src") ||
+      getAttribute(tag, "data-lazy-src") ||
+      getAttribute(tag, "data-original") ||
+      getAttribute(tag, "data-orig-file") ||
+      getAttribute(tag, "data-large-file") ||
+      pickFirstSrcsetCandidate(getAttribute(tag, "srcset")) ||
+      pickFirstSrcsetCandidate(getAttribute(tag, "data-srcset"));
+
+    const image = resolveImageUrl(candidate, baseUrl);
+    if (image) {
+      return image;
+    }
+  }
+
+  return "";
 }
 
 function mapKmsCategory(category = "", title = "") {
@@ -81,7 +134,7 @@ export function normalizeKmsItem(item, previousIds, fetchedAt) {
   const idBase = `${slugify(rawTitle)}-${rawDate ? new Date(rawDate).getTime() : "kms"}`;
   const id = `kms-${idBase}`;
   const summary = shorten(stripHtml(rawContent));
-  const image = extractImage(rawContent);
+  const image = extractImage(rawContent, rawLink);
 
   return {
     id,
