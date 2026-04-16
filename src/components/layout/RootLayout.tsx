@@ -8,7 +8,6 @@ import { MobileMenu } from "../navigation/MobileMenu";
 import { MockAuthProvider } from "../../features/profile/MockAuthContext";
 import { AuthModal } from "./AuthModal";
 import { GoogleAnalytics } from "../analytics/GoogleAnalytics";
-import { DynamicPageTranslator } from "../../i18n/DynamicPageTranslator";
 
 function RootLayoutContent() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -99,7 +98,6 @@ function RootLayoutContent() {
       <GoogleAnalytics />
       <AuthModal />
       <Footer groups={footerGroups} />
-      <DynamicPageTranslator />
     </div>
   );
 }

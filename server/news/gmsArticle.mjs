@@ -4,7 +4,7 @@ import { sanitizeText } from "./normalize.mjs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-const PARSER_VERSION = 3;
+const PARSER_VERSION = 4;
 
 function extractIdFromUrl(url = "") {
   const match = /\/news\/[^/]+\/(\d+)/.exec(url);
@@ -23,28 +23,164 @@ function extractDate(html = "") {
   return "";
 }
 
+function isTitleLike(value = "") {
+  const text = sanitizeText(value || "");
+  if (!text) return false;
+  if (text.length > 70) return false;
+  if (/^[0-9]+\.\s+/.test(text)) return true;
+  if (/^[A-Z][A-Za-z0-9 '&:/+\-]{2,}$/.test(text)) return true;
+  return text.split(/\s+/).length <= 5;
+}
+
+function normalizeInlineTitle(value = "") {
+  return sanitizeText(String(value || "").replace(/^[0-9]+\.\s*/, "").replace(/:$/, ""));
+}
+
+function pickSectionSummary(details = []) {
+  return (
+    details.find((detail) => detail?.type === "text" && detail.value && !isTitleLike(detail.value) && detail.value.length > 50)?.value ||
+    details.find((detail) => detail?.type === "list" && detail.items?.length)?.items?.[0] ||
+    details.find((detail) => detail?.type === "text" && detail.value)?.value ||
+    ""
+  );
+}
+
+function deriveSectionTitle(section, index) {
+  const genericTitles = new Set(["Overview", "Main Changes", "Details", "Additional Info", "Full Article"]);
+  const details = section?.details || [];
+  if (!genericTitles.has(section?.title || "")) {
+    return sanitizeText(section.title || "");
+  }
+
+  const firstSubheading = details.find((detail) => detail?.type === "subheading" && detail.value)?.value;
+  if (firstSubheading) {
+    return normalizeInlineTitle(firstSubheading);
+  }
+
+  const firstText = details.find((detail) => detail?.type === "text" && detail.value)?.value;
+  if (firstText && isTitleLike(firstText)) {
+    return normalizeInlineTitle(firstText);
+  }
+
+  return index === 0 ? "Overview" : section.title || "Overview";
+}
+
+function promoteSectionTitles(sections = []) {
+  return sections.map((section, index) => {
+    const nextTitle = deriveSectionTitle(section, index);
+    const details = [...(section.details || [])];
+
+    const firstTextIndex = details.findIndex((detail) => detail?.type === "text" && detail.value);
+    if (firstTextIndex >= 0) {
+      const firstText = sanitizeText(details[firstTextIndex].value || "");
+      if (firstText && normalizeInlineTitle(firstText) === nextTitle && isTitleLike(firstText)) {
+        details.splice(firstTextIndex, 1);
+      }
+    }
+
+    const summary = pickSectionSummary(details);
+    return {
+      ...section,
+      title: nextTitle,
+      summary,
+      details
+    };
+  });
+}
+
+function splitSectionsOnInlineTitles(sections = []) {
+  const split = [];
+
+  sections.forEach((section, sectionIndex) => {
+    const details = [...(section.details || [])];
+    if (!details.length) {
+      split.push(section);
+      return;
+    }
+
+    const baseTitle = deriveSectionTitle(section, sectionIndex);
+    let bucket = {
+      ...section,
+      title: baseTitle,
+      details: []
+    };
+
+    const flushBucket = () => {
+      if (!bucket.details.length) return;
+      split.push(bucket);
+    };
+
+    details.forEach((detail, detailIndex) => {
+      const titleCandidate =
+        detail?.type === "subheading"
+          ? normalizeInlineTitle(detail.value)
+          : detail?.type === "text" && isTitleLike(detail.value)
+            ? normalizeInlineTitle(detail.value)
+            : "";
+
+      const canStartNewSection =
+        Boolean(titleCandidate) &&
+        titleCandidate !== bucket.title &&
+        bucket.details.length >= 2 &&
+        detailIndex < details.length - 1;
+
+      if (canStartNewSection) {
+        flushBucket();
+        bucket = {
+          ...section,
+          title: titleCandidate,
+          details: []
+        };
+        return;
+      }
+
+      bucket.details.push(detail);
+    });
+
+    flushBucket();
+  });
+
+  return split;
+}
+
 function buildKeyPoints(sections = []) {
   const points = [];
+  const seen = new Set();
   sections.forEach((section) => {
+    const summary = sanitizeText(section.summary || "");
+    if (summary && summary.length > 45 && !seen.has(summary)) {
+      seen.add(summary);
+      points.push(summary);
+    }
+
     section.details.forEach((detail) => {
       if (points.length >= 6) return;
       if (detail?.type === "text" && detail.value) {
-        points.push(detail.value);
+        const value = sanitizeText(detail.value);
+        if (value.length > 45 && !isTitleLike(value) && !seen.has(value)) {
+          seen.add(value);
+          points.push(value);
+        }
       }
       if (detail?.type === "list" && detail.items?.length) {
-        points.push(detail.items[0]);
+        const firstItem = sanitizeText(detail.items[0] || "");
+        if (firstItem.length > 45 && !seen.has(firstItem)) {
+          seen.add(firstItem);
+          points.push(firstItem);
+        }
       }
     });
   });
+
   return points.slice(0, 6);
 }
 
 function enrichSections(sections = []) {
-  return sections.map((section) => {
-    const firstText = section.details.find((detail) => detail?.type === "text")?.value || "";
+  return promoteSectionTitles(splitSectionsOnInlineTitles(sections)).map((section) => {
+    const firstText = pickSectionSummary(section.details);
     return {
       ...section,
-      summary: firstText || "",
+      summary: firstText || section.summary || "",
       topic: detectCategory(section)
     };
   });

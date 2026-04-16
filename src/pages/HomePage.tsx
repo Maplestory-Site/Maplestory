@@ -4,7 +4,6 @@ import { AboutBlock } from "../components/content/AboutBlock";
 import { ContentFilterBar } from "../components/content/ContentFilterBar";
 import { HeroBlock } from "../components/content/HeroBlock";
 import { HighlightCard } from "../components/content/HighlightCard";
-import { MiniGamesLauncher } from "../components/content/MiniGamesLauncher";
 import { SocialLinkCard } from "../components/content/SocialLinkCard";
 import { StreamStatusCard } from "../components/content/StreamStatusCard";
 import { VideoCard } from "../components/content/VideoCard";
@@ -108,12 +107,6 @@ export function HomePage() {
             </div>
           </div>
           <StreamStatusCard {...liveCardDetails} />
-        </div>
-      </section>
-
-      <section className="section section--tight" data-reveal>
-        <div className="container">
-          <MiniGamesLauncher />
         </div>
       </section>
 

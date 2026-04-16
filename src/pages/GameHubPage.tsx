@@ -7,8 +7,10 @@ import { getDailyChallenge } from "../components/content/minigames/shared/dailyC
 import { useGameMeta } from "../components/content/minigames/shared/useGameMeta";
 import { useGameFavorites } from "../components/content/minigames/shared/gameFavorites";
 import { getAchievementLabel, getProgressSnapshot, openLootBox, purchaseShopItem, type LootReward } from "../components/content/minigames/shared/gameMeta";
+import { useI18n } from "../i18n/I18nProvider";
 
 export function GameHubPage() {
+  const { t, td } = useI18n();
   const [open, setOpen] = useState(false);
   const [activeGameId, setActiveGameId] = useState<MiniGameId>("reaction-test");
   const [search, setSearch] = useState("");
@@ -155,9 +157,9 @@ export function GameHubPage() {
 
           <div className="game-hub__hero card" data-reveal>
             <div className="game-hub__hero-copy">
-              <span className="section-header__eyebrow">Game Hub</span>
-              <h1>Arcade-ready. Mobile-first. Built to replay.</h1>
-              <p>Discover premium mini games, track your best runs, and dive back in instantly.</p>
+              <span className="section-header__eyebrow">{t("Game Hub")}</span>
+              <h1>{t("Arcade-ready. Mobile-first. Built to replay.")}</h1>
+              <p>{t("Discover premium mini games, track your best runs, and dive back in instantly.")}</p>
               <div className="game-hub__hero-actions">
                 <button
                   className="button button--primary"
@@ -167,7 +169,7 @@ export function GameHubPage() {
                   }}
                   type="button"
                 >
-                  Play {featured.title}
+                  {t("Play")} {td(featured.title)}
                 </button>
                 <button
                   className="button button--ghost"
@@ -177,10 +179,10 @@ export function GameHubPage() {
                   }}
                   type="button"
                 >
-                  Play this next
+                  {t("Play this next")}
                 </button>
                 <button className="button button--ghost" type="button" onClick={() => setOpen(true)}>
-                  Browse Games
+                  {t("Browse Games")}
                 </button>
               </div>
             </div>
@@ -189,13 +191,13 @@ export function GameHubPage() {
                 <div className="game-hub__featured-art" aria-hidden="true">
                   <img src={featured.previewImage} alt="" loading="lazy" />
                 </div>
-                <span className="game-hub__featured-label">Featured Today</span>
-                <strong>{featured.title}</strong>
-                <p>{featured.description}</p>
+                <span className="game-hub__featured-label">{t("Featured Today")}</span>
+                <strong>{td(featured.title)}</strong>
+                <p>{td(featured.description)}</p>
                 <div className="game-hub__featured-meta">
-                  <span>{featured.type}</span>
-                  {featured.difficulty ? <span>{featured.difficulty}</span> : null}
-                  <span>High score {meta.gameBest[featured.id] ?? 0}</span>
+                  <span>{td(featured.type)}</span>
+                  {featured.difficulty ? <span>{td(featured.difficulty)}</span> : null}
+                  <span>{t("High score")} {meta.gameBest[featured.id] ?? 0}</span>
                 </div>
                 <button
                   className="button button--ghost"
@@ -205,16 +207,16 @@ export function GameHubPage() {
                   }}
                   type="button"
                 >
-                  Play Now
+                  {t("Play Now")}
                 </button>
               </div>
               <div className={`game-hub__daily ${daily.completed ? "is-complete" : ""}`}>
-                <span>Daily Challenge</span>
-                <strong>{daily.challenge.title}</strong>
-                <p>{daily.challenge.description}</p>
+                <span>{t("Daily Challenge")}</span>
+                <strong>{td(daily.challenge.title)}</strong>
+                <p>{td(daily.challenge.description)}</p>
                 <div className="game-hub__daily-meta">
-                  <span>{daily.challenge.targetLabel}</span>
-                  <span>{daily.completed ? "Complete" : "Active"}</span>
+                  <span>{td(daily.challenge.targetLabel)}</span>
+                  <span>{daily.completed ? t("Complete") : t("Active")}</span>
                 </div>
               </div>
             </div>
@@ -222,11 +224,11 @@ export function GameHubPage() {
 
           <div className="game-hub__filters" data-reveal>
             <div className="game-hub__search">
-              <label htmlFor="game-search">Search</label>
+              <label htmlFor="game-search">{t("Search")}</label>
               <input
                 id="game-search"
                 type="search"
-                placeholder="Search game, type, or keyword"
+                placeholder={t("Search game, type, or keyword")}
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
               />
@@ -239,7 +241,7 @@ export function GameHubPage() {
                   key={category}
                   onClick={() => setActiveCategory(category)}
                 >
-                  {category}
+                  {t(category)}
                 </button>
               ))}
             </div>
@@ -247,84 +249,84 @@ export function GameHubPage() {
 
           <div className="game-hub__stats" data-reveal>
             <div>
-              <span>Total plays</span>
+              <span>{t("Total plays")}</span>
               <strong>{meta.totalPlays}</strong>
             </div>
             <div>
-              <span>Total score</span>
+              <span>{t("Total score")}</span>
               <strong>{meta.totalScore}</strong>
             </div>
             <div>
-              <span>Best score</span>
+              <span>{t("Best score")}</span>
               <strong>{meta.bestScore}</strong>
             </div>
             <div>
-              <span>Favorite game</span>
+              <span>{t("Favorite game")}</span>
               <strong>
-                {meta.favoriteGameId ? miniGames.find((game) => game.id === meta.favoriteGameId)?.title : "None"}
+                {meta.favoriteGameId ? td(miniGames.find((game) => game.id === meta.favoriteGameId)?.title ?? "") : t("None")}
               </strong>
             </div>
           </div>
 
           <div className="game-hub__profile" data-reveal>
             <div className="game-hub__section-head">
-              <h2>Player profile</h2>
-              <span>Levels, achievements, and unlocks.</span>
+              <h2>{t("Player profile")}</h2>
+              <span>{t("Levels, achievements, and unlocks.")}</span>
             </div>
             <div className="game-hub__profile-grid">
               <div className="game-hub__profile-card">
-                <span>Current Level</span>
-                <strong>Level {progress.level}</strong>
-                <p>{progress.xpForNext} XP to level {progress.level + 1}</p>
+                <span>{t("Current Level")}</span>
+                <strong>{t("Level")} {progress.level}</strong>
+                <p>{progress.xpForNext} {t("XP to level")} {progress.level + 1}</p>
               </div>
               <div className="game-hub__profile-card">
-                <span>Achievements</span>
+                <span>{t("Achievements")}</span>
                 <div className="game-hub__profile-badges">
                   {topAchievements.length ? (
                     topAchievements.map((id) => (
                       <span className="game-hub__badge" key={id}>
-                        {getAchievementLabel(id)}
+                        {td(getAchievementLabel(id))}
                       </span>
                     ))
                   ) : (
-                    <span className="game-hub__badge game-hub__badge--muted">No achievements yet</span>
+                    <span className="game-hub__badge game-hub__badge--muted">{t("No achievements yet")}</span>
                   )}
                 </div>
               </div>
               <div className="game-hub__profile-card">
-                <span>Rewards</span>
+                <span>{t("Rewards")}</span>
                 <div className="game-hub__profile-badges">
                   {meta.rewardBadges.slice(0, 2).map((reward) => (
                     <span className="game-hub__badge" key={`badge-${reward}`}>
-                      {reward}
+                      {td(reward)}
                     </span>
                   ))}
                   {meta.rewardTitles.slice(0, 2).map((reward) => (
                     <span className="game-hub__badge game-hub__badge--title" key={`title-${reward}`}>
-                      {reward}
+                      {td(reward)}
                     </span>
                   ))}
                   {meta.rewardEffects.slice(0, 1).map((reward) => (
                     <span className="game-hub__badge game-hub__badge--effect" key={`effect-${reward}`}>
-                      {reward}
+                      {td(reward)}
                     </span>
                   ))}
                   {!meta.rewardBadges.length && !meta.rewardTitles.length && !meta.rewardEffects.length ? (
-                    <span className="game-hub__badge game-hub__badge--muted">No rewards yet</span>
+                    <span className="game-hub__badge game-hub__badge--muted">{t("No rewards yet")}</span>
                   ) : null}
                 </div>
               </div>
             </div>
             <div className="game-hub__profile-actions">
               <button className="button button--ghost" type="button" onClick={() => (window.location.href = "/games/achievements")}>
-                View all achievements
+                {t("View all achievements")}
               </button>
             </div>
           </div>
 
           <div className="game-hub__missions" data-reveal>
             <div className="game-hub__section-head">
-              <h2>Daily Missions</h2>
+              <h2>{t("Daily Missions")}</h2>
               <span>
                 {dailyCompleteCount}/{dailyTotal} completed
               </span>
@@ -333,7 +335,7 @@ export function GameHubPage() {
               {dailyMissions.map((mission) => (
                 <div className={`game-hub__mission ${mission.completed ? "is-complete" : ""}`} key={mission.id}>
                   <div>
-                    <strong>{mission.label}</strong>
+                    <strong>{td(mission.label)}</strong>
                     <span>
                       {mission.type === "score"
                         ? `${Math.min(mission.current, mission.target)} / ${mission.target}`
@@ -341,8 +343,8 @@ export function GameHubPage() {
                     </span>
                   </div>
                   <div className="game-hub__mission-meta">
-                    <span>{mission.completed ? "Complete" : "In progress"}</span>
-                    <span>+{mission.xpReward} XP</span>
+                    <span>{mission.completed ? t("Complete") : t("In progress")}</span>
+                    <span>+{mission.xpReward} {t("XP")}</span>
                   </div>
                 </div>
               ))}
@@ -351,8 +353,8 @@ export function GameHubPage() {
 
           <div className="game-hub__loot" data-reveal>
             <div className="game-hub__section-head">
-              <h2>Reward boxes</h2>
-              <span>Earn boxes from missions, level ups, and achievements.</span>
+              <h2>{t("Reward boxes")}</h2>
+              <span>{t("Earn boxes from missions, level ups, and achievements.")}</span>
             </div>
             <div className="game-hub__loot-panel">
               <div className={`loot-box ${isOpeningLoot ? "is-opening" : ""}`}>
@@ -361,13 +363,13 @@ export function GameHubPage() {
                 <div className="loot-box__shine" />
               </div>
               <div className="game-hub__loot-meta">
-                <strong>{meta.lootBoxes} box{meta.lootBoxes === 1 ? "" : "es"} ready</strong>
-                <p>Open a box to reveal coins or exclusive cosmetics.</p>
+                <strong>{meta.lootBoxes} {meta.lootBoxes === 1 ? t("box") : t("boxes")} {t("ready")}</strong>
+                <p>{t("Open a box to reveal coins or exclusive cosmetics.")}</p>
                 <div className="game-hub__loot-actions">
                   <button className="button button--primary" disabled={meta.lootBoxes <= 0} onClick={openBox} type="button">
-                    {meta.lootBoxes > 0 ? "Open box" : "No boxes yet"}
+                    {meta.lootBoxes > 0 ? t("Open box") : t("No boxes yet")}
                   </button>
-                  {rewardLabel ? <span className="game-hub__loot-reward">Reward: {rewardLabel}</span> : null}
+                  {rewardLabel ? <span className="game-hub__loot-reward">{t("Reward")}: {td(rewardLabel)}</span> : null}
                 </div>
               </div>
             </div>
@@ -375,13 +377,13 @@ export function GameHubPage() {
 
           <div className="game-hub__shop" data-reveal>
             <div className="game-hub__section-head">
-              <h2>Arcade Shop</h2>
-              <span>Spend coins on themes, effects, and premium looks.</span>
+              <h2>{t("Arcade Shop")}</h2>
+              <span>{t("Spend coins on themes, effects, and premium looks.")}</span>
             </div>
             <div className="game-hub__shop-balance">
-              <strong>{meta.coins} Coins</strong>
-              <span>Balance</span>
-              {shopMessage ? <em>{shopMessage}</em> : null}
+              <strong>{meta.coins} {t("Coins")}</strong>
+              <span>{t("Balance")}</span>
+              {shopMessage ? <em>{t(shopMessage)}</em> : null}
             </div>
             <div className="game-hub__shop-grid">
               {shopItems.map((item) => {
@@ -389,22 +391,22 @@ export function GameHubPage() {
                 return (
                   <article className={`shop-card ${owned ? "is-owned" : ""}`} key={item.id}>
                     <div className="shop-card__top">
-                      <span>{item.type}</span>
-                      {owned ? <strong className="shop-card__owned">Owned</strong> : null}
+                      <span>{td(item.type)}</span>
+                      {owned ? <strong className="shop-card__owned">{t("Owned")}</strong> : null}
                     </div>
                     <div className="shop-card__body">
-                      <h3>{item.name}</h3>
-                      <p>{item.preview}</p>
+                      <h3>{td(item.name)}</h3>
+                      <p>{td(item.preview)}</p>
                     </div>
                     <div className="shop-card__footer">
-                      <span className="shop-card__price">{item.price} coins</span>
+                      <span className="shop-card__price">{item.price} {t("coins")}</span>
                       <button
                         className="button button--ghost"
                         disabled={owned || meta.coins < item.price}
                         onClick={() => handlePurchase(item.id, item.price)}
                         type="button"
                       >
-                        {owned ? "Owned" : meta.coins < item.price ? "Need coins" : "Buy"}
+                        {owned ? t("Owned") : meta.coins < item.price ? t("Need coins") : t("Buy")}
                       </button>
                     </div>
                   </article>
@@ -416,8 +418,8 @@ export function GameHubPage() {
           {favoriteGames.length ? (
             <div className="game-hub__section" data-reveal>
               <div className="game-hub__section-head">
-                <h2>Favorites</h2>
-                <span>Quick access to your saved games.</span>
+                <h2>{t("Favorites")}</h2>
+                <span>{t("Quick access to your saved games.")}</span>
               </div>
               <div className="game-hub__grid">
                 {favoriteGames.map((game) => (
@@ -440,8 +442,8 @@ export function GameHubPage() {
           {mostPlayed.length ? (
             <div className="game-hub__section" data-reveal>
               <div className="game-hub__section-head">
-                <h2>Most played</h2>
-                <span>Your personal hits and high traffic picks.</span>
+                <h2>{t("Most played")}</h2>
+                <span>{t("Your personal hits and high traffic picks.")}</span>
               </div>
               <div className="game-hub__grid">
                 {mostPlayed.map((game) => (
@@ -466,8 +468,8 @@ export function GameHubPage() {
               games.length ? (
                 <div className="game-hub__section" data-reveal key={category}>
                   <div className="game-hub__section-head">
-                    <h2>{category}</h2>
-                    <span>Curated {category.toLowerCase()} experiences.</span>
+                    <h2>{t(category)}</h2>
+                    <span>{td(`Curated ${category.toLowerCase()} experiences.`)}</span>
                   </div>
                   <div className="game-hub__grid">
                     {games.map((game) => (
@@ -490,8 +492,8 @@ export function GameHubPage() {
           ) : (
             <div className="game-hub__section" data-reveal>
               <div className="game-hub__section-head">
-                <h2>{activeCategory}</h2>
-                <span>Focused picks for {activeCategory.toLowerCase()} fans.</span>
+                <h2>{t(activeCategory)}</h2>
+                <span>{td(`Focused picks for ${activeCategory.toLowerCase()} fans.`)}</span>
               </div>
               <div className="game-hub__grid">
                 {filteredGames.map((game) => (
@@ -513,8 +515,8 @@ export function GameHubPage() {
 
           <div className="game-hub__section" data-reveal>
             <div className="game-hub__section-head">
-              <h2>Recently played</h2>
-              <span>Jump back into your latest runs.</span>
+              <h2>{t("Recently played")}</h2>
+              <span>{t("Jump back into your latest runs.")}</span>
             </div>
             <div className="game-hub__recent">
               {meta.recent.length ? (
@@ -528,12 +530,12 @@ export function GameHubPage() {
                     }}
                     type="button"
                   >
-                    <strong>{miniGames.find((game) => game.id === run.gameId)?.title}</strong>
-                    <span>Score {run.score}</span>
+                    <strong>{td(miniGames.find((game) => game.id === run.gameId)?.title ?? "")}</strong>
+                    <span>{t("Score")} {run.score}</span>
                   </button>
                 ))
               ) : (
-                <div className="game-hub__empty">Play a round to build your history.</div>
+                <div className="game-hub__empty">{t("Play a round to build your history.")}</div>
               )}
             </div>
           </div>
@@ -562,27 +564,29 @@ function GameHubCard({
   onPlay: () => void;
   onToggleFavorite: () => void;
 }) {
+  const { t, td } = useI18n();
+
   return (
     <article className="game-hub__card">
       <div className="game-hub__card-visual">
-        <img src={game.previewImage} alt={`${game.title} preview`} loading="lazy" />
+        <img src={game.previewImage} alt={td(`${game.title} preview`)} loading="lazy" />
       </div>
       <div className="game-hub__card-body">
         <div>
-          <strong>{game.title}</strong>
-          <p>{game.description}</p>
+          <strong>{td(game.title)}</strong>
+          <p>{td(game.description)}</p>
         </div>
         <div className="game-hub__card-meta">
-          <span>{game.type}</span>
-          {game.difficulty ? <span>{game.difficulty}</span> : null}
-          <span>High {highScore}</span>
+          <span>{td(game.type)}</span>
+          {game.difficulty ? <span>{td(game.difficulty)}</span> : null}
+          <span>{t("High")} {highScore}</span>
         </div>
         <div className="game-hub__card-actions">
           <button className="button button--ghost" onClick={onPlay} type="button">
-            Play
+            {t("Play")}
           </button>
           <button className={`game-hub__favorite ${isFavorite ? "is-active" : ""}`} onClick={onToggleFavorite} type="button">
-            {isFavorite ? "Favorited" : "Favorite"}
+            {isFavorite ? t("Favorited") : t("Favorite")}
           </button>
         </div>
       </div>

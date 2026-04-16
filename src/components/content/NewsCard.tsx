@@ -40,7 +40,7 @@ export function NewsCard({ item, featured = false, onSelect }: NewsCardProps) {
         {kmsBrief ? (
           <>
             <p>{td(kmsBrief.summary)}</p>
-            <p className="news-card__impact">{t(kmsBrief.impact)}</p>
+            <p className="news-card__impact">{td(kmsBrief.impact)}</p>
           </>
         ) : (
           <p>{td(item.summary)}</p>

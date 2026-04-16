@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { ClassJob } from "../../data/classesJobs";
+import { useI18n } from "../../i18n/I18nProvider";
 
 type ClassCardProps = {
   item: ClassJob;
@@ -7,6 +8,7 @@ type ClassCardProps = {
 };
 
 export function ClassCard({ item, onSelect }: ClassCardProps) {
+  const { td } = useI18n();
   const cardRef = useRef<HTMLButtonElement | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [isVisibleOnScreen, setIsVisibleOnScreen] = useState(false);
@@ -89,16 +91,16 @@ export function ClassCard({ item, onSelect }: ClassCardProps) {
       </div>
       <div className="class-card__content">
         <div className="class-card__identity">
-          <h3>{item.name}</h3>
-          <p>{item.previewVideoFaction ?? item.category}</p>
+          <h3>{td(item.name)}</h3>
+          <p>{td(item.previewVideoFaction ?? item.category)}</p>
         </div>
         <div className="class-card__footer">
-          <span className="class-card__difficulty">{item.difficulty}</span>
-          <span className="class-card__playstyle">{item.playstyle}</span>
+          <span className="class-card__difficulty">{td(item.difficulty)}</span>
+          <span className="class-card__playstyle">{td(item.playstyle)}</span>
         </div>
         <div className="class-card__tags">
           {item.tags.slice(0, 2).map((tag) => (
-            <span key={tag}>{tag}</span>
+            <span key={tag}>{td(tag)}</span>
           ))}
         </div>
       </div>

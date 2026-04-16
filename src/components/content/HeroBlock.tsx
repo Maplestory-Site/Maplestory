@@ -25,7 +25,7 @@ export function HeroBlock({
   featuredTitle,
   featuredDescription
 }: HeroBlockProps) {
-  const { t } = useI18n();
+  const { t, td } = useI18n();
   const statusCopy = statusTone === "live" ? t("Live now on Twitch") : t("Live, clips, and alerts");
 
   return (
@@ -41,15 +41,15 @@ export function HeroBlock({
               <small>{t("MapleStory Creator")}</small>
             </div>
           </div>
-          <span className="hero__eyebrow">{t(eyebrow)}</span>
+          <span className="hero__eyebrow">{td(eyebrow)}</span>
           <div className="hero__status-row">
             <Badge label={t(statusLabel)} tone={statusTone} />
             <span>{statusCopy}</span>
           </div>
-          <h1>{t(title)}</h1>
-          {valueLine ? <strong className="hero__value-line">{t(valueLine)}</strong> : null}
-          <p>{t(description)}</p>
-          {urgencyText ? <strong className="hero__hook">{t(urgencyText)}</strong> : null}
+          <h1>{td(title)}</h1>
+          {valueLine ? <strong className="hero__value-line">{td(valueLine)}</strong> : null}
+          <p>{td(description)}</p>
+          {urgencyText ? <strong className="hero__hook">{td(urgencyText)}</strong> : null}
         </div>
 
         <div className="hero__feature card">
@@ -70,8 +70,8 @@ export function HeroBlock({
               />
             </div>
           </div>
-          <h2>{t(featuredTitle)}</h2>
-          <p>{t(featuredDescription)}</p>
+          <h2>{td(featuredTitle)}</h2>
+          <p>{td(featuredDescription)}</p>
         </div>
       </div>
     </section>

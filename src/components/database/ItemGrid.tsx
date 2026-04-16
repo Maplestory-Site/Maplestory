@@ -1,4 +1,5 @@
 import type { ItemEntry } from "../../data/items";
+import { useI18n } from "../../i18n/I18nProvider";
 
 type ItemGridProps = {
   items: ItemEntry[];
@@ -6,12 +7,14 @@ type ItemGridProps = {
 };
 
 export function ItemGrid({ items, onOpen }: ItemGridProps) {
+  const { t, td } = useI18n();
+
   if (!items.length) {
     return (
       <section className="item-grid item-grid--empty">
         <div className="database-empty">
-          <span>No items found</span>
-          <p>Try a different name, type, or sort.</p>
+          <span>{t("No items found")}</span>
+          <p>{t("Try a different name, type, or sort.")}</p>
         </div>
       </section>
     );
@@ -28,18 +31,18 @@ export function ItemGrid({ items, onOpen }: ItemGridProps) {
             onClick={() => onOpen(item)}
           >
             <span className={`item-tile__rarity item-tile__rarity--${item.rarity.toLowerCase()}`}>
-              {item.rarity}
+              {td(item.rarity)}
             </span>
             <span className="item-tile__media">
               {item.image ? (
-                <img alt={item.name} loading="lazy" src={item.image} />
+                <img alt={td(item.name)} loading="lazy" src={item.image} />
               ) : (
                 <span className="item-tile__fallback">{item.name.slice(0, 2).toUpperCase()}</span>
               )}
             </span>
-            <span className="item-tile__name">{item.name}</span>
+            <span className="item-tile__name">{td(item.name)}</span>
             <span className="item-tile__meta">
-              {item.level ? `Lv.${item.level}` : item.type}
+              {item.level ? td(`Lv.${item.level}`) : td(item.type)}
             </span>
           </button>
         ))}

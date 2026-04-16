@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useMiniGamesSound } from "./MiniGamesSound";
+import { useI18n } from "../../../../i18n/I18nProvider";
 
 type GameShellProps = {
   title: string;
@@ -22,6 +23,7 @@ export function GameShell({
   footer,
   aspectRatio = "16 / 9"
 }: GameShellProps) {
+  const { t, td } = useI18n();
   const shellRef = useRef<HTMLDivElement | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [canFullscreen, setCanFullscreen] = useState(false);
@@ -86,15 +88,15 @@ export function GameShell({
             {icon}
           </span>
           <div>
-            <strong>{title}</strong>
-            <span>{subtitle}</span>
+            <strong>{td(title)}</strong>
+            <span>{td(subtitle)}</span>
           </div>
         </div>
         <div className="game-shell__header-actions">
-          {badge ? <span className="game-shell__badge">{badge}</span> : null}
+          {badge ? <span className="game-shell__badge">{td(badge)}</span> : null}
           {canFullscreen ? (
             <button className="game-shell__fullscreen" type="button" onClick={toggleFullscreen}>
-              {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+              {isFullscreen ? t("Exit Fullscreen") : t("Fullscreen")}
             </button>
           ) : null}
         </div>

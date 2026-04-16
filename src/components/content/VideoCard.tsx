@@ -2,12 +2,14 @@ import type { VideoItem } from "../../data/siteContent";
 import { inferContentTags } from "../../lib/contentDiscovery";
 import { ShareActions } from "./ShareActions";
 import { Button } from "../ui/Button";
+import { useI18n } from "../../i18n/I18nProvider";
 
 type VideoCardProps = {
   item: VideoItem;
 };
 
 export function VideoCard({ item }: VideoCardProps) {
+  const { t, td } = useI18n();
   const tags = inferContentTags(item).slice(0, 2);
 
   return (
@@ -15,34 +17,34 @@ export function VideoCard({ item }: VideoCardProps) {
       <div className="video-card__thumb" aria-hidden="true">
         {item.thumbnail ? <img alt="" className="video-card__thumb-image" decoding="async" loading="lazy" src={item.thumbnail} /> : null}
         <div className="video-card__thumb-top">
-          <span className="video-card__thumb-tag">{item.category}</span>
-          {item.featured ? <span className="video-card__thumb-featured">Featured</span> : null}
+          <span className="video-card__thumb-tag">{td(item.category)}</span>
+          {item.featured ? <span className="video-card__thumb-featured">{t("Featured")}</span> : null}
         </div>
         <span className="video-card__thumb-duration">{item.duration}</span>
-        <span className="video-card__thumb-play">Play</span>
+        <span className="video-card__thumb-play">{t("Play")}</span>
       </div>
       <div className="video-card__body">
         <div className="video-card__eyebrow">
-          <span>{item.category}</span>
+          <span>{td(item.category)}</span>
           <span>{item.published}</span>
         </div>
-        <h3>{item.title}</h3>
-        <p>{item.description}</p>
+        <h3>{td(item.title)}</h3>
+        <p>{td(item.description)}</p>
         {tags.length ? (
-          <div className="content-tag-row" aria-label="Video tags">
+          <div className="content-tag-row" aria-label={t("Video tags")}>
             {tags.map((tag) => (
               <span className="content-tag-row__tag" key={`${item.id}-${tag}`}>
-                {tag}
+                {td(tag)}
               </span>
             ))}
           </div>
         ) : null}
         <div className="video-card__meta">
-          {item.viewCount ? <span>{item.viewCount} views</span> : null}
-          <span>Quick watch</span>
+          {item.viewCount ? <span>{td(`${item.viewCount} views`)}</span> : null}
+          <span>{t("Quick watch")}</span>
         </div>
         <ShareActions href={item.href} title={item.title} />
-        <Button href={item.href} variant="ghost">Watch Video</Button>
+        <Button href={item.href} variant="ghost">{t("Watch Video")}</Button>
       </div>
     </article>
   );

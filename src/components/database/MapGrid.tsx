@@ -1,4 +1,5 @@
 import type { MapEntry } from "../../data/maps";
+import { useI18n } from "../../i18n/I18nProvider";
 
 type MapGridProps = {
   items: MapEntry[];
@@ -6,12 +7,14 @@ type MapGridProps = {
 };
 
 export function MapGrid({ items, onOpen }: MapGridProps) {
+  const { t, td } = useI18n();
+
   if (!items.length) {
     return (
       <section className="map-grid map-grid--empty reveal-on-scroll">
         <div className="database-empty">
-          <span>No maps found</span>
-          <p>Try a different name, street, or region.</p>
+          <span>{t("No maps found")}</span>
+          <p>{t("Try a different name, street, or region.")}</p>
         </div>
       </section>
     );
@@ -22,9 +25,9 @@ export function MapGrid({ items, onOpen }: MapGridProps) {
       <div className="map-grid__tiles">
         {items.map((item) => (
           <button className="map-tile" key={item.id} type="button" onClick={() => onOpen(item)}>
-            <img alt={item.name} loading="lazy" src={item.image} />
-            <span className="map-tile__name">{item.name}</span>
-            <span className="map-tile__meta">{item.streetName}</span>
+            <img alt={td(item.name)} loading="lazy" src={item.image} />
+            <span className="map-tile__name">{td(item.name)}</span>
+            <span className="map-tile__meta">{td(item.streetName)}</span>
           </button>
         ))}
       </div>

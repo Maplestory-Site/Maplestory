@@ -10,7 +10,7 @@ type ClassDetailsPanelProps = {
 };
 
 export function ClassDetailsPanel({ item, onClose }: ClassDetailsPanelProps) {
-  const { t } = useI18n();
+  const { t, td } = useI18n();
   useEffect(() => {
     if (!item) {
       return;
@@ -31,14 +31,14 @@ export function ClassDetailsPanel({ item, onClose }: ClassDetailsPanelProps) {
   }
 
   return (
-    <div className="class-details" role="dialog" aria-modal="true" aria-label={`${item.name} ${t("details")}`}>
+    <div className="class-details" role="dialog" aria-modal="true" aria-label={`${td(item.name)} ${t("details")}`}>
       <button type="button" className="class-details__backdrop" aria-label={t("Close")} onClick={onClose} />
       <aside className="class-details__panel">
         <div className="class-details__top">
           <div>
-            <span className="class-details__eyebrow">{t(item.previewVideoFaction ?? item.category)}</span>
-            <h2>{item.name}</h2>
-            <p>{item.overview}</p>
+            <span className="class-details__eyebrow">{td(item.previewVideoFaction ?? item.category)}</span>
+            <h2>{td(item.name)}</h2>
+            <p>{td(item.overview)}</p>
           </div>
           <button type="button" className="class-details__close" aria-label={t("Close")} onClick={onClose}>
             {t("Close")}
@@ -76,11 +76,11 @@ export function ClassDetailsPanel({ item, onClose }: ClassDetailsPanelProps) {
             <div className="class-details__stats">
               <div className="class-details__badge">
                 <span>{t("Playstyle")}</span>
-                <strong>{t(item.playstyle)}</strong>
+                <strong>{td(item.playstyle)}</strong>
               </div>
               <div className="class-details__badge">
                 <span>{t("Difficulty")}</span>
-                <strong>{t(item.difficulty)}</strong>
+                <strong>{td(item.difficulty)}</strong>
               </div>
               <div className="class-details__badge">
                 <span>{t("Entry")}</span>
@@ -93,7 +93,7 @@ export function ClassDetailsPanel({ item, onClose }: ClassDetailsPanelProps) {
                 <h3>{t("Strengths")}</h3>
                 <ul>
                   {item.strengths.map((entry) => (
-                    <li key={entry}>{entry}</li>
+                    <li key={entry}>{td(entry)}</li>
                   ))}
                 </ul>
               </div>
@@ -101,7 +101,7 @@ export function ClassDetailsPanel({ item, onClose }: ClassDetailsPanelProps) {
                 <h3>{t("Weaknesses")}</h3>
                 <ul>
                   {item.weaknesses.map((entry) => (
-                    <li key={entry}>{entry}</li>
+                    <li key={entry}>{td(entry)}</li>
                   ))}
                 </ul>
               </div>
@@ -117,7 +117,7 @@ export function ClassDetailsPanel({ item, onClose }: ClassDetailsPanelProps) {
             <div className="class-details__footer">
               <div className="class-details__tags">
                 {item.tags.map((tag) => (
-                  <span key={tag}>{t(tag)}</span>
+                  <span key={tag}>{td(tag)}</span>
                 ))}
               </div>
               <div className="class-details__actions">

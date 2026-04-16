@@ -3,8 +3,10 @@ import type { MiniGameId } from "../../data/miniGames";
 import { miniGames } from "../../data/miniGames";
 import { MiniGamesModal } from "./MiniGamesModal";
 import { useGameFavorites } from "./minigames/shared/gameFavorites";
+import { useI18n } from "../../i18n/I18nProvider";
 
 export function MiniGamesLauncher() {
+  const { t, td } = useI18n();
   const [open, setOpen] = useState(false);
   const [activeGameId, setActiveGameId] = useState<MiniGameId>("reaction-test");
   const { favorites } = useGameFavorites();
@@ -20,20 +22,20 @@ export function MiniGamesLauncher() {
     <>
       <div className="mini-games-launcher card" data-reveal>
         <div className="mini-games-launcher__copy">
-          <span className="section-header__eyebrow">Mini Games Hub</span>
-          <h2>Fast rounds. Clear rules.</h2>
-          <p>Pick a game and play immediately.</p>
+          <span className="section-header__eyebrow">{t("Mini Games Hub")}</span>
+          <h2>{t("Fast rounds. Clear rules.")}</h2>
+          <p>{t("Pick a game and play immediately.")}</p>
         </div>
         <div className="mini-games-launcher__grid">
           <div className="mini-games-launcher__featured">
-            <span className="mini-games-launcher__eyebrow">Featured Game</span>
+            <span className="mini-games-launcher__eyebrow">{t("Featured Game")}</span>
             <div className="mini-games-launcher__featured-card">
               <div>
-                <strong>{featuredGame.title}</strong>
-                <span>{featuredGame.description}</span>
+                <strong>{td(featuredGame.title)}</strong>
+                <span>{td(featuredGame.description)}</span>
               </div>
               <button className="button button--primary" type="button" onClick={() => openGame(featuredGame.id)}>
-                Play Now
+                {t("Play Now")}
               </button>
             </div>
           </div>
@@ -42,12 +44,12 @@ export function MiniGamesLauncher() {
         <div className="mini-games-launcher__sections">
           {favoriteGames.length ? (
             <div className="mini-games-launcher__section">
-              <span>Favorites</span>
+              <span>{t("Favorites")}</span>
               <div className="mini-games-launcher__section-list">
                 {favoriteGames.slice(0, 4).map((game) => (
                   <button key={game!.id} type="button" onClick={() => openGame(game!.id)}>
-                    <strong>{game!.title}</strong>
-                    <span>Play</span>
+                    <strong>{td(game!.title)}</strong>
+                    <span>{t("Play")}</span>
                   </button>
                 ))}
               </div>
@@ -59,8 +61,8 @@ export function MiniGamesLauncher() {
           {miniGames.map((game) => (
             <button key={game.id} type="button" onClick={() => openGame(game.id)}>
               <span className="mini-games-launcher__card-icon">{game.icon}</span>
-              <strong>{game.title}</strong>
-              <span>Play</span>
+              <strong>{td(game.title)}</strong>
+              <span>{t("Play")}</span>
             </button>
           ))}
         </div>
@@ -71,7 +73,7 @@ export function MiniGamesLauncher() {
             onClick={() => setOpen(true)}
             type="button"
           >
-            Open Mini Games
+            {t("Open Mini Games")}
           </button>
         </div>
       </div>

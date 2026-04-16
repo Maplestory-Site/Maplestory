@@ -3,7 +3,8 @@ import type { NewsItem } from "../../data/newsHub";
 import { formatNewsMetaDate } from "../../lib/newsHub";
 import { Button } from "../ui/Button";
 import { useI18n } from "../../i18n/I18nProvider";
-import { translateArticleData } from "../../i18n/dynamicTranslate";
+import { getArticlePendingText } from "../../i18n/articlePendingText";
+import { useTranslatedArticleState } from "../../i18n/useTranslatedContent";
 
 type KmsSection = {
   title: string;
@@ -45,10 +46,18 @@ type KmsArticleModalProps = {
   onClose: () => void;
 };
 
+function splitArticleParagraphs(value = "") {
+  return value
+    .split(/\n{2,}/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean);
+}
+
 export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
   const { t, td, language } = useI18n();
   const [data, setData] = useState<KmsPayload | null>(null);
-  const [translatedData, setTranslatedData] = useState<KmsPayload | null>(null);
+  const translatedArticle = useTranslatedArticleState(data, { scope: "full" });
+  const translatedData = translatedArticle.data;
   const [loading, setLoading] = useState(false);
   const [openTopics, setOpenTopics] = useState<string[]>([]);
   const [showScrollTop, setShowScrollTop] = useState(false);
@@ -121,6 +130,13 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
 
   const published = useMemo(() => formatNewsMetaDate(item?.publishedAt ?? ""), [item]);
   const renderData = translatedData ?? data;
+  const isTranslatingArticle =
+    Boolean(data) && language !== "en" && translatedArticle.translating && !translatedArticle.ready;
+  const articleText = (value?: string, fallback = "") => value || fallback;
+  const dynamicText = (value?: string, fallback = "") => {
+    const resolved = articleText(value, fallback);
+    return td(resolved);
+  };
   const sectionList = useMemo(() => renderData?.sections ?? [], [renderData]);
   const categories = useMemo(() => renderData?.categories ?? [], [renderData]);
   const [activeCategory, setActiveCategory] = useState<string>("all");
@@ -158,22 +174,6 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
     const summary = (renderData?.summary || item?.summary || "").trim();
     return summary.replace(/\s+/g, " ").slice(0, 240);
   }, [renderData?.summary, item?.summary]);
-  useEffect(() => {
-    let active = true;
-    if (!data) {
-      setTranslatedData(null);
-      return;
-    }
-    translateArticleData(data, language, { scope: "full" }).then((next) => {
-      if (active) {
-        setTranslatedData(next);
-      }
-    });
-    return () => {
-      active = false;
-    };
-  }, [data, language]);
-
   if (!item) return null;
 
   return (
@@ -183,7 +183,9 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
         <div className="kms-modal__header">
           <div>
             <span className="kms-modal__eyebrow">{t("KMS Update")}</span>
-            <h2 id="kms-modal-title">{td(renderData?.title || item.title)}</h2>
+            <h2 id="kms-modal-title">
+              {isTranslatingArticle ? getArticlePendingText(language, "title") : dynamicText(renderData?.title, item.title)}
+            </h2>
             <p className="kms-modal__meta">
               <span>{renderData?.date || published}</span>
               <span>{t(item.category.replace("-", " "))}</span>
@@ -204,20 +206,34 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
         >
           <div className="kms-modal__block">
             <h3 className="kms-modal__section-title">{t("Summary")}</h3>
-            <div className={`kms-modal__summary card ${loading ? "is-loading" : ""}`}>
+            <div className={`kms-modal__summary card ${loading || isTranslatingArticle ? "is-loading" : ""}`}>
               {(renderData?.heroImage || item.image) && (
                 <div className="kms-modal__hero">
-                  <img src={renderData?.heroImage || item.image} alt={td(item.title)} loading="lazy" />
+                  <img src={renderData?.heroImage || item.image} alt={dynamicText(renderData?.title, item.title)} loading="lazy" />
                 </div>
               )}
               <h4>{t("Big picture")}</h4>
-              <p>{td(renderData?.summary || item.summary)}</p>
-              <p className="kms-modal__audience">{td(renderData?.audience || t("Affects upcoming progression planning."))}</p>
-              <div className="kms-modal__tags">
-                {(renderData?.tags?.length ? renderData.tags : ["Patch", "Events", "Systems"]).map((tag) => (
-                  <span key={tag}>{t(tag)}</span>
-                ))}
-              </div>
+              {isTranslatingArticle ? (
+                <>
+                  <p>{getArticlePendingText(language, "body")}</p>
+                  <div className="kms-loading">
+                    <span className="kms-loading__dot" />
+                    <span>{getArticlePendingText(language, "status")}</span>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <p>{dynamicText(renderData?.summary, item.summary)}</p>
+                  <p className="kms-modal__audience">{dynamicText(renderData?.audience, t("Affects upcoming progression planning."))}</p>
+                </>
+              )}
+              {!isTranslatingArticle && (
+                <div className="kms-modal__tags">
+                  {(renderData?.tags?.length ? renderData.tags : ["Patch", "Events", "Systems"]).map((tag) => (
+                    <span key={tag}>{dynamicText(tag)}</span>
+                  ))}
+                </div>
+              )}
               {loading && (
                 <div className="kms-loading">
                   <span className="kms-loading__dot" />
@@ -227,20 +243,21 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
             </div>
           </div>
 
-          {(renderData?.keyChanges?.length || renderData?.highlights?.length) && (
+          {!isTranslatingArticle && (renderData?.keyChanges?.length || renderData?.highlights?.length) && (
             <div className="kms-modal__block">
               <h3 className="kms-modal__section-title">{t("Key changes")}</h3>
               <div className="kms-modal__highlights">
                 {(renderData?.keyChanges?.length ? renderData.keyChanges : renderData?.highlights ?? []).map((note, index) => (
                   <div className="kms-modal__highlight card" key={`${note}-${index}`}>
                     <strong>{t("Key change")}</strong>
-                    <p>{td(note)}</p>
+                    <p>{dynamicText(note)}</p>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
+          {!isTranslatingArticle && (
           <div className="kms-modal__block">
             <h3 className="kms-modal__section-title">{t("Section shortcuts")}</h3>
             {categories.length > 0 && (
@@ -259,7 +276,7 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
                     type="button"
                     onClick={() => setActiveCategory(category.key)}
                   >
-                    {td(category.label)}
+                    {dynamicText(category.label)}
                   </button>
                 ))}
               </div>
@@ -282,29 +299,34 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
                     );
                   }}
                 >
-                  {td(section.title)}
+                  {dynamicText(section.title)}
                 </button>
               ))}
             </div>
           </div>
+          )}
 
           <div className="kms-modal__sections">
             <h3 className="kms-modal__section-title">{t("Full breakdown")}</h3>
-            {loading ? (
+            {loading || isTranslatingArticle ? (
               <div className="kms-skeleton">
+                {isTranslatingArticle ? (
+                  <p className="kms-modal__audience">{getArticlePendingText(language, "body")}</p>
+                ) : null}
                 <div className="kms-skeleton__row" />
                 <div className="kms-skeleton__row" />
                 <div className="kms-skeleton__row is-short" />
                 <div className="kms-skeleton__card" />
               </div>
             ) : null}
-          {!loading && !visibleSections.length && (
+          {!loading && !isTranslatingArticle && !visibleSections.length && (
             <div className="kms-section card">
               <h3>{t("Full Article")}</h3>
-              <p>{td(renderData?.fullText || item.summary || t("Full article content could not be loaded yet."))}</p>
+              <p>{dynamicText(renderData?.fullText, item.summary || t("Full article content could not be loaded yet."))}</p>
             </div>
           )}
             {!loading &&
+              !isTranslatingArticle &&
               visibleSections.map((section, index) => {
                 const key = `${section.title}-${index}`;
                 const isOpen = openTopics.includes(key);
@@ -327,7 +349,7 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
                         )
                       }
                     >
-                      <span>{td(section.title)}</span>
+                      <span>{dynamicText(section.title)}</span>
                       <small>
                         {section.details.length} {t("entries")}
                       </small>
@@ -335,8 +357,8 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
                     <div className={`kms-topic-group__sections ${isOpen ? "is-open" : ""}`} aria-hidden={!isOpen}>
                       <article className="kms-section card">
                         <header>
-                          <h3>{td(section.title)}</h3>
-                          <p>{td(section.summary || t("Overview for this section."))}</p>
+                          <h3>{dynamicText(section.title)}</h3>
+                          <p>{dynamicText(section.summary, t("Overview for this section."))}</p>
                         </header>
                         <div className="kms-section__details">
                           <div className="kms-section__content">
@@ -346,7 +368,7 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
                                   <div key={`${detail.src}-${detailIndex}`} className="kms-section__image">
                                     <img
                                       src={detail.src}
-                                      alt={td(detail.alt || section.title)}
+                                      alt={dynamicText(detail.alt, section.title)}
                                       loading="lazy"
                                       decoding="async"
                                     />
@@ -357,7 +379,7 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
                                 return (
                                   <ul key={`${detail.items.join("-")}-${detailIndex}`} className="kms-section__list">
                                     {detail.items.map((item, itemIndex) => (
-                                      <li key={`${item}-${itemIndex}`}>{td(item)}</li>
+                                      <li key={`${item}-${itemIndex}`}>{dynamicText(item)}</li>
                                     ))}
                                   </ul>
                                 );
@@ -365,7 +387,7 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
                               if (isSubheadingDetail(detail)) {
                                 return (
                                   <h4 key={`${detail.value}-${detailIndex}`} className="kms-section__subheading">
-                                    {td(detail.value)}
+                                    {dynamicText(detail.value)}
                                   </h4>
                                 );
                               }
@@ -378,14 +400,15 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
                               ) {
                                 return null;
                               }
-                              return (
-                                <p key={`${detail.value}-${detailIndex}`} className="kms-section__text">
-                                  {td(detail.value)}
+                              const paragraphs = splitArticleParagraphs(detail.value);
+                              return paragraphs.map((paragraph, paragraphIndex) => (
+                                <p key={`${detail.value}-${detailIndex}-${paragraphIndex}`} className="kms-section__text">
+                                  {dynamicText(paragraph)}
                                 </p>
-                              );
+                              ));
                             })}
                           </div>
-                          {section.impact ? <p className="kms-section__impact">{td(section.impact)}</p> : null}
+                          {section.impact ? <p className="kms-section__impact">{dynamicText(section.impact)}</p> : null}
                         </div>
                       </article>
                     </div>

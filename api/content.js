@@ -13,39 +13,113 @@ function decodeTranslatePayload(payload) {
     .join("");
 }
 
-async function translateTexts(texts, language) {
-  const translations = {};
+const translationMemory = new Map();
+const MAX_TRANSLATE_CONCURRENCY = 8;
 
-  for (const text of texts) {
-    if (!text || typeof text !== "string") continue;
+function normalizeTranslateLanguage(language = "en") {
+  const normalized = String(language).toLowerCase();
+  if (normalized === "zh") return "zh-CN";
+  return normalized;
+}
+
+function isLikelyUntranslatedIdentity(source = "", translated = "", language = "en") {
+  if (!source || !translated || normalizeTranslateLanguage(language) === "en") return false;
+  const normalize = (value) => String(value).replace(/\s+/g, " ").trim();
+  const original = normalize(source);
+  const candidate = normalize(translated);
+  if (original !== candidate) return false;
+  return original.length > 12 && /\s/.test(original) && /[A-Za-z]{3,}/.test(original);
+}
+
+function splitLongTranslateText(text) {
+  if (text.length <= 1400) return [text];
+  const paragraphs = text.split(/\n{2,}/).filter(Boolean);
+  if (paragraphs.length > 1 && paragraphs.every((paragraph) => paragraph.length <= 1400)) {
+    return paragraphs;
+  }
+
+  const chunks = [];
+  let buffer = "";
+  const sentences = text.split(/(?<=[.!?。！？])\s+/);
+  for (const sentence of sentences) {
+    if ((buffer + " " + sentence).trim().length > 1400 && buffer) {
+      chunks.push(buffer.trim());
+      buffer = sentence;
+    } else {
+      buffer = `${buffer} ${sentence}`.trim();
+    }
+  }
+  if (buffer) chunks.push(buffer.trim());
+  return chunks.length ? chunks : [text];
+}
+
+async function translateSingleText(text, language) {
+  const targetLanguage = normalizeTranslateLanguage(language);
+  const cacheKey = `${targetLanguage}\u0001${text}`;
+  if (translationMemory.has(cacheKey)) {
+    return translationMemory.get(cacheKey);
+  }
+
+  const chunks = splitLongTranslateText(text);
+  const translatedChunks = [];
+
+  for (const chunk of chunks) {
+    const endpoint = new URL("https://translate.googleapis.com/translate_a/single");
+    endpoint.searchParams.set("client", "gtx");
+    endpoint.searchParams.set("sl", "auto");
+    endpoint.searchParams.set("tl", targetLanguage);
+    endpoint.searchParams.set("dt", "t");
+    endpoint.searchParams.set("q", chunk);
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
 
     try {
-      const endpoint = new URL("https://translate.googleapis.com/translate_a/single");
-      endpoint.searchParams.set("client", "gtx");
-      endpoint.searchParams.set("sl", "auto");
-      endpoint.searchParams.set("tl", language);
-      endpoint.searchParams.set("dt", "t");
-      endpoint.searchParams.set("q", text);
-
       const response = await fetch(endpoint, {
         headers: {
           "User-Agent":
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36",
           Accept: "application/json,text/plain,*/*"
-        }
+        },
+        signal: controller.signal
       });
 
       if (!response.ok) {
-        translations[text] = text;
-        continue;
+        return text;
       }
 
       const payload = await response.json();
-      translations[text] = decodeTranslatePayload(payload) || text;
+      translatedChunks.push(decodeTranslatePayload(payload) || chunk);
     } catch {
-      translations[text] = text;
+      return text;
+    } finally {
+      clearTimeout(timeout);
     }
   }
+
+  const translated = translatedChunks.join(chunks.length > 1 && text.includes("\n\n") ? "\n\n" : " ");
+  if (!isLikelyUntranslatedIdentity(text, translated, targetLanguage)) {
+    translationMemory.set(cacheKey, translated || text);
+  }
+  return translated || text;
+}
+
+async function translateTexts(texts, language) {
+  const translations = {};
+  const queue = texts.filter((text) => text && typeof text === "string");
+  let index = 0;
+
+  async function worker() {
+    while (index < queue.length) {
+      const text = queue[index];
+      index += 1;
+      translations[text] = await translateSingleText(text, language);
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.min(MAX_TRANSLATE_CONCURRENCY, queue.length) }, () => worker())
+  );
 
   return translations;
 }

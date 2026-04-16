@@ -1,6 +1,10 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { LANGUAGES, SUPPORTED_LANGUAGE_CODES, type LanguageCode, type LanguageMeta } from "./languages";
-import { requestDynamicTranslations } from "./dynamicTranslate";
+import {
+  getDynamicTranslationCache,
+  requestDynamicTranslations,
+  subscribeDynamicTranslationCache
+} from "./dynamicTranslate";
 import { TRANSLATIONS } from "./translations";
 
 type I18nContextValue = {
@@ -14,7 +18,6 @@ type I18nContextValue = {
 };
 
 const STORAGE_KEY = "snailslayer-language";
-const DYNAMIC_CACHE_KEY = "snailslayer-i18n-dynamic";
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
@@ -45,6 +48,19 @@ function normalizeLanguage(input?: string | null): LanguageCode {
   return (SUPPORTED_LANGUAGE_CODES.find((code) => code === base) ?? "en") as LanguageCode;
 }
 
+function isLikelyUntranslatedIdentity(source = "", translated = "", language?: LanguageCode) {
+  if (!source || !translated || language === "en") return false;
+  const normalize = (value: string) => decodeHtmlEntities(value).replace(/\s+/g, " ").trim();
+  const original = normalize(source);
+  const candidate = normalize(translated);
+  if (original !== candidate) return false;
+  return original.length > 12 && /\s/.test(original) && /[A-Za-z]{3,}/.test(original);
+}
+
+function isUsableDynamicTranslation(source = "", translated?: string, language?: LanguageCode) {
+  return Boolean(translated) && !isLikelyUntranslatedIdentity(source, translated ?? "", language);
+}
+
 export function I18nProvider({ children }: { children: React.ReactNode }) {
   const supportedLanguages = useMemo(
     () => LANGUAGES.filter((lang) => SUPPORTED_LANGUAGE_CODES.includes(lang.code)),
@@ -52,18 +68,19 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   );
   const [dynamicCache, setDynamicCache] = useState<Record<string, Record<string, string>>>(() => {
     if (typeof window === "undefined") return {};
-    try {
-      const raw = window.localStorage.getItem(DYNAMIC_CACHE_KEY);
-      return raw ? (JSON.parse(raw) as Record<string, Record<string, string>>) : {};
-    } catch {
-      return {};
-    }
+    return getDynamicTranslationCache();
   });
   const [language, setLanguageState] = useState<LanguageCode>(() => {
     if (typeof window === "undefined") return "en";
     const stored = window.localStorage.getItem(STORAGE_KEY);
     return normalizeLanguage(stored ?? navigator.language);
   });
+
+  useEffect(() => {
+    return subscribeDynamicTranslationCache((cache) => {
+      setDynamicCache(cache);
+    });
+  }, []);
 
   const languageMeta = useMemo(
     () => supportedLanguages.find((lang) => lang.code === language) ?? supportedLanguages[0],
@@ -121,7 +138,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       const value = text?.trim();
       if (!value || language === "en") return;
       if (TRANSLATIONS[language]?.[value]) return;
-      if (dynamicCache?.[language]?.[value]) return;
+      if (isUsableDynamicTranslation(value, dynamicCache?.[language]?.[value], language)) return;
 
       const queue = pendingTranslationsRef.current.get(language) ?? new Set<string>();
       queue.add(value);
@@ -142,7 +159,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       const table = TRANSLATIONS[language];
       if (table && table[key]) return table[key];
       const cached = dynamicCache?.[language]?.[key];
-      if (cached) return cached;
+      if (isUsableDynamicTranslation(key, cached, language)) return cached;
       queueTranslation(key);
       const fallback = TRANSLATIONS.en[key];
       return fallback ?? key;
@@ -159,7 +176,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
         return decodeHtmlEntities(table[text]);
       }
       const translated = dynamicCache?.[language]?.[text];
-      if (translated) {
+      if (isUsableDynamicTranslation(text, translated, language)) {
         return decodeHtmlEntities(translated);
       }
       queueTranslation(text);

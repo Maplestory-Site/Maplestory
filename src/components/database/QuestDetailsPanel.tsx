@@ -1,21 +1,22 @@
 import { useEffect, useState } from "react";
 import type { QuestDetail, QuestEntry } from "../../data/quests";
+import { useI18n } from "../../i18n/I18nProvider";
 
 type QuestDetailsPanelProps = {
   item: QuestEntry | null;
   onClose: () => void;
 };
 
-function renderList(title: string, items: string[]) {
+function renderList(title: string, items: string[], t: (value: string) => string, td: (value: string) => string) {
   if (!items.length) return null;
 
   return (
     <section className="item-details__section">
-      <span>{title}</span>
+      <span>{t(title)}</span>
       <div className="item-details__chips">
         {items.map((entry) => (
           <span className="item-details__chip" key={`${title}-${entry}`}>
-            {entry}
+            {td(entry)}
           </span>
         ))}
       </div>
@@ -24,6 +25,7 @@ function renderList(title: string, items: string[]) {
 }
 
 export function QuestDetailsPanel({ item, onClose }: QuestDetailsPanelProps) {
+  const { t, td } = useI18n();
   const [detail, setDetail] = useState<QuestDetail | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -81,42 +83,42 @@ export function QuestDetailsPanel({ item, onClose }: QuestDetailsPanelProps) {
   const sectionNotes = detail?.notes?.length ? detail.notes : item.notes;
 
   return (
-    <div className="item-details" role="dialog" aria-modal="true" aria-label={`${item.name} quest details`}>
-      <button aria-label="Close quest details" className="item-details__backdrop" type="button" onClick={onClose} />
+    <div className="item-details" role="dialog" aria-modal="true" aria-label={td(`${item.name} quest details`)}>
+      <button aria-label={t("Close quest details")} className="item-details__backdrop" type="button" onClick={onClose} />
       <div className="item-details__panel">
         <button className="item-details__close" type="button" onClick={onClose}>
-          Close
+          {t("Close")}
         </button>
 
         <div className="item-details__header">
           <div className="item-details__visual">
             {current.image ? (
-              <img alt={current.name} src={current.image} />
+              <img alt={td(current.name)} src={current.image} />
             ) : (
               <span className="item-details__visual-fallback">{current.name.slice(0, 2).toUpperCase()}</span>
             )}
           </div>
 
           <div className="item-details__summary">
-            <span className="item-details__eyebrow">{current.category}</span>
-            <h2>{current.name}</h2>
-            <p>{current.summary}</p>
+            <span className="item-details__eyebrow">{td(current.category)}</span>
+            <h2>{td(current.name)}</h2>
+            <p>{td(current.summary)}</p>
 
             <div className="item-details__stats">
               <div>
-                <span>Category</span>
-                <strong>{current.category}</strong>
+                <span>{t("Category")}</span>
+                <strong>{td(current.category)}</strong>
               </div>
               <div>
-                <span>Level</span>
-                <strong>{current.levelBracket ? `Lv.${current.levelBracket}` : "Mixed"}</strong>
+                <span>{t("Level")}</span>
+                <strong>{current.levelBracket ? td(`Lv.${current.levelBracket}`) : t("Mixed")}</strong>
               </div>
               <div>
-                <span>Requirements</span>
+                <span>{t("Requirements")}</span>
                 <strong>{detail?.requirements.length ?? 0}</strong>
               </div>
               <div>
-                <span>Rewards</span>
+                <span>{t("Rewards")}</span>
                 <strong>{detail?.rewards.length ?? 0}</strong>
               </div>
             </div>
@@ -125,25 +127,25 @@ export function QuestDetailsPanel({ item, onClose }: QuestDetailsPanelProps) {
 
         {loading ? (
           <section className="item-details__section">
-            <span>Loading</span>
-            <p>Pulling quest requirements, rewards, NPCs, and map routes...</p>
+            <span>{t("Loading")}</span>
+            <p>{t("Pulling quest requirements, rewards, NPCs, and map routes...")}</p>
           </section>
         ) : null}
 
         {sectionNotes.length ? (
           <section className="item-details__section">
-            <span>Quest flow</span>
-            <p>{sectionNotes.join(" ")}</p>
+            <span>{t("Quest flow")}</span>
+            <p>{td(sectionNotes.join(" "))}</p>
           </section>
         ) : null}
 
-        {renderList("Requirements", detail?.requirements || [])}
-        {renderList("Rewards", detail?.rewards || [])}
-        {renderList("NPC / Contacts", detail?.npcs || [])}
-        {renderList("Maps / Locations", detail?.maps || [])}
-        {renderList("Steps", detail?.steps || [])}
-        {renderList("Unlocked Quests", detail?.nextQuests || [])}
-        {renderList("Quest tags", current.categories)}
+        {renderList("Requirements", detail?.requirements || [], t, td)}
+        {renderList("Rewards", detail?.rewards || [], t, td)}
+        {renderList("NPC / Contacts", detail?.npcs || [], t, td)}
+        {renderList("Maps / Locations", detail?.maps || [], t, td)}
+        {renderList("Steps", detail?.steps || [], t, td)}
+        {renderList("Unlocked Quests", detail?.nextQuests || [], t, td)}
+        {renderList("Quest tags", current.categories, t, td)}
 
       </div>
     </div>

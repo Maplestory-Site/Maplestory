@@ -1,23 +1,24 @@
 import { useEffect } from "react";
 import type { ItemEntry } from "../../data/items";
+import { useI18n } from "../../i18n/I18nProvider";
 
 type ItemDetailsPanelProps = {
   item: ItemEntry | null;
   onClose: () => void;
 };
 
-function renderList(title: string, items: string[]) {
+function renderList(title: string, items: string[], translate: (text: string) => string) {
   if (!items.length) {
     return null;
   }
 
   return (
     <section className="item-details__section">
-      <span>{title}</span>
+      <span>{translate(title)}</span>
       <div className="item-details__chips">
         {items.slice(0, 18).map((entry) => (
           <span className="item-details__chip" key={`${title}-${entry}`}>
-            {entry}
+            {translate(entry)}
           </span>
         ))}
       </div>
@@ -26,6 +27,8 @@ function renderList(title: string, items: string[]) {
 }
 
 export function ItemDetailsPanel({ item, onClose }: ItemDetailsPanelProps) {
+  const { t, td } = useI18n();
+
   useEffect(() => {
     if (!item) {
       return;
@@ -46,42 +49,42 @@ export function ItemDetailsPanel({ item, onClose }: ItemDetailsPanelProps) {
   }
 
   return (
-    <div className="item-details" role="dialog" aria-modal="true" aria-label={`${item.name} item details`}>
-      <button aria-label="Close item details" className="item-details__backdrop" type="button" onClick={onClose} />
+    <div className="item-details" role="dialog" aria-modal="true" aria-label={`${td(item.name)} ${t("item details")}`}>
+      <button aria-label={t("Close item details")} className="item-details__backdrop" type="button" onClick={onClose} />
       <div className="item-details__panel">
         <button className="item-details__close" type="button" onClick={onClose}>
-          Close
+          {t("Close")}
         </button>
 
         <div className="item-details__header">
           <div className="item-details__visual">
             {item.image ? (
-              <img alt={item.name} src={item.image} />
+              <img alt={td(item.name)} src={item.image} />
             ) : (
               <span className="item-details__visual-fallback">{item.name.slice(0, 2).toUpperCase()}</span>
             )}
           </div>
 
           <div className="item-details__summary">
-            <span className="item-details__eyebrow">{item.type}</span>
-            <h2>{item.name}</h2>
-            <p>{item.description}</p>
+            <span className="item-details__eyebrow">{td(item.type)}</span>
+            <h2>{td(item.name)}</h2>
+            <p>{td(item.description)}</p>
 
             <div className="item-details__stats">
               <div>
-                <span>Category</span>
-                <strong>{item.category}</strong>
+                <span>{t("Category")}</span>
+                <strong>{td(item.category)}</strong>
               </div>
               <div>
-                <span>Level</span>
-                <strong>{item.level ? `Lv.${item.level}` : "None"}</strong>
+                <span>{t("Level")}</span>
+                <strong>{item.level ? td(`Lv.${item.level}`) : t("None")}</strong>
               </div>
               <div>
-                <span>Rarity</span>
-                <strong>{item.rarity}</strong>
+                <span>{t("Rarity")}</span>
+                <strong>{td(item.rarity)}</strong>
               </div>
               <div>
-                <span>Collections</span>
+                <span>{t("Collections")}</span>
                 <strong>{item.sourceCount}</strong>
               </div>
             </div>
@@ -90,15 +93,15 @@ export function ItemDetailsPanel({ item, onClose }: ItemDetailsPanelProps) {
 
         {item.effect ? (
           <section className="item-details__section">
-            <span>Effect</span>
-            <p>{item.effect}</p>
+            <span>{t("Effect")}</span>
+            <p>{td(item.effect)}</p>
           </section>
         ) : null}
 
-        {renderList("Dropped by", item.sourceMonsters)}
-        {renderList("Quest / Rewards", item.rewardSources)}
-        {renderList("NPC", item.npcSources)}
-        {renderList("Crafting", item.craftSources)}
+        {renderList("Dropped by", item.sourceMonsters, td)}
+        {renderList("Quest / Rewards", item.rewardSources, td)}
+        {renderList("NPC", item.npcSources, td)}
+        {renderList("Crafting", item.craftSources, td)}
       </div>
     </div>
   );

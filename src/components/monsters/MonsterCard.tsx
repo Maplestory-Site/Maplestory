@@ -1,4 +1,5 @@
 import type { MonsterEntry } from "../../data/monsters";
+import { useI18n } from "../../i18n/I18nProvider";
 type MonsterCardProps = {
   item: MonsterEntry;
   compared: boolean;
@@ -7,23 +8,25 @@ type MonsterCardProps = {
 };
 
 export function MonsterCard({ item, compared, onOpen, onToggleCompare }: MonsterCardProps) {
+  const { t, td } = useI18n();
+
   return (
     <article className={`monster-mini-tile ${item.isBoss ? "is-boss" : ""}`}>
       <button className="monster-mini-tile__open" type="button" onClick={() => onOpen(item)}>
         <div className="monster-mini-tile__frame">
           <div className="monster-mini-tile__art">
-            {item.image ? <img alt={item.name} loading="lazy" src={item.image} /> : <span className="monster-mini-tile__glyph">{item.portrait}</span>}
+            {item.image ? <img alt={td(item.name)} loading="lazy" src={item.image} /> : <span className="monster-mini-tile__glyph">{item.portrait}</span>}
           </div>
         </div>
 
         <div className="monster-mini-tile__copy">
-          <strong>{item.name}</strong>
-          <span>Lv. {item.level}</span>
+          <strong>{td(item.name)}</strong>
+          <span>{td(`Lv. ${item.level}`)}</span>
         </div>
 
         <div className="monster-mini-tile__flags">
-          {item.isBoss ? <span>BOSS</span> : null}
-          {item.isElite ? <span>ELITE</span> : null}
+          {item.isBoss ? <span>{t("BOSS")}</span> : null}
+          {item.isElite ? <span>{t("ELITE")}</span> : null}
         </div>
       </button>
 
@@ -33,7 +36,7 @@ export function MonsterCard({ item, compared, onOpen, onToggleCompare }: Monster
           type="button"
           onClick={() => onToggleCompare(item)}
         >
-          {compared ? "Added" : "Compare"}
+          {compared ? t("Added") : t("Compare")}
         </button>
       </div>
     </article>
