@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { MapDetail, MapEntry } from "../../data/maps";
 import type { MonsterEntry } from "../../data/monsters";
+import { useI18n } from "../../i18n/I18nProvider";
 
 type MapDetailsPanelProps = {
   item: MapEntry | null;
@@ -18,6 +19,7 @@ function slugify(value = "") {
 }
 
 export function MapDetailsPanel({ item, monsterLookup, onClose, onOpenMonster }: MapDetailsPanelProps) {
+  const { t, td } = useI18n();
   const [detail, setDetail] = useState<MapDetail | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -70,37 +72,37 @@ export function MapDetailsPanel({ item, monsterLookup, onClose, onOpenMonster }:
 
   return (
     <div className="item-details map-details" role="dialog" aria-modal="true" aria-labelledby="map-details-title">
-      <button aria-label="Close map details" className="item-details__backdrop" type="button" onClick={onClose} />
+      <button aria-label={t("Close map details")} className="item-details__backdrop" type="button" onClick={onClose} />
       <div className="item-details__panel map-details__panel">
         <button className="item-details__close" type="button" onClick={onClose}>
-          Close
+          {t("Close")}
         </button>
 
         <div className="map-details__header">
           <div className="map-details__visual">
-            <img alt={item.name} src={detail?.map.imageLarge ?? item.imageLarge} />
+            <img alt={td(item.name)} src={detail?.map.imageLarge ?? item.imageLarge} />
           </div>
 
           <div className="item-details__summary">
-            <span className="item-details__eyebrow">{detail?.map.region ?? item.region}</span>
-            <h2 id="map-details-title">{detail?.map.name ?? item.name}</h2>
-            <p>{detail?.map.streetName ?? item.streetName}</p>
+            <span className="item-details__eyebrow">{td(detail?.map.region ?? item.region)}</span>
+            <h2 id="map-details-title">{td(detail?.map.name ?? item.name)}</h2>
+            <p>{td(detail?.map.streetName ?? item.streetName)}</p>
 
             <div className="item-details__stats map-details__stats">
               <div>
-                <span>Average Level</span>
-                <strong>{detail?.map.avgLevel ? `Lv. ${detail.map.avgLevel}` : "Mixed"}</strong>
+                <span>{t("Average Level")}</span>
+                <strong>{detail?.map.avgLevel ? td(`Lv. ${detail.map.avgLevel}`) : t("Mixed")}</strong>
               </div>
               <div>
-                <span>Spawn Points</span>
-                <strong>{detail?.map.spawnPoints || "Unknown"}</strong>
+                <span>{t("Spawn Points")}</span>
+                <strong>{detail?.map.spawnPoints ? td(String(detail.map.spawnPoints)) : t("Unknown")}</strong>
               </div>
               <div>
-                <span>Cap / Gen</span>
-                <strong>{detail?.map.capacityPerGen || "Unknown"}</strong>
+                <span>{t("Cap / Gen")}</span>
+                <strong>{detail?.map.capacityPerGen ? td(String(detail.map.capacityPerGen)) : t("Unknown")}</strong>
               </div>
               <div>
-                <span>Monsters</span>
+                <span>{t("Monsters")}</span>
                 <strong>{detail?.meta.monsterCount || 0}</strong>
               </div>
             </div>
@@ -109,9 +111,9 @@ export function MapDetailsPanel({ item, monsterLookup, onClose, onOpenMonster }:
         </div>
 
         <section className="item-details__section">
-          <span>Monsters in this map</span>
-          {loading ? <p>Loading map monsters...</p> : null}
-          {!loading && !resolvedMonsters.length ? <p>No monster entries were returned for this map.</p> : null}
+          <span>{t("Monsters in this map")}</span>
+          {loading ? <p>{t("Loading map monsters...")}</p> : null}
+          {!loading && !resolvedMonsters.length ? <p>{t("No monster entries were returned for this map.")}</p> : null}
 
           {resolvedMonsters.length ? (
             <div className="map-details__monster-grid">
@@ -123,14 +125,14 @@ export function MapDetailsPanel({ item, monsterLookup, onClose, onOpenMonster }:
                   onClick={() => monster.resolved && onOpenMonster(monster.resolved)}
                 >
                   {monster.image ? (
-                    <img alt={monster.name} loading="lazy" src={monster.image} />
+                    <img alt={td(monster.name)} loading="lazy" src={monster.image} />
                   ) : (
                     <span className="map-details__monster-fallback">{monster.portrait}</span>
                   )}
-                  <strong>{monster.name}</strong>
+                  <strong>{td(monster.name)}</strong>
                   <span>
-                    Lv. {monster.level}
-                    {monster.hp ? ` · HP ${monster.hp.toLocaleString("en-US")}` : ""}
+                    {td(`Lv. ${monster.level}`)}
+                    {monster.hp ? ` · ${td(`HP ${monster.hp.toLocaleString("en-US")}`)}` : ""}
                   </span>
                 </button>
               ))}

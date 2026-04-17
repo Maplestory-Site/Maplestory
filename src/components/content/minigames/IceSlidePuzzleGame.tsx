@@ -103,9 +103,11 @@ export function IceSlidePuzzleGame() {
   );
 
   useEffect(() => {
-    setPlayer(level.start);
-    setMoves(0);
-    setSolved(false);
+    window.setTimeout(() => {
+      setPlayer(level.start);
+      setMoves(0);
+      setSolved(false);
+    }, 0);
   }, [levelIndex, level.start]);
 
   function startRun() {

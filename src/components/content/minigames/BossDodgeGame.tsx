@@ -60,6 +60,56 @@ export function BossDodgeGame() {
   const spawnCountRef = useRef(0);
   const isTouch = useTouchDevice();
 
+  function finishRun(time: number) {
+    if (!runningRef.current) {
+      return;
+    }
+
+    runningRef.current = false;
+    setLastTime(time);
+    setPhase("over");
+    setStreak(0);
+    playFailure();
+    updateGameMeta({
+      gameId: "boss-dodge",
+      score: Number(time.toFixed(1)),
+      duration: time,
+      outcome: "loss"
+    });
+    if (shouldVibrate()) {
+      navigator.vibrate([40, 60, 40]);
+    }
+    setShake(true);
+    window.setTimeout(() => setShake(false), 320);
+    setBestTime((currentBest) => {
+      const nextBest = Math.max(currentBest, time);
+      window.localStorage.setItem(STORAGE_KEY, String(nextBest));
+      return nextBest;
+    });
+  }
+
+  function moveLeft() {
+    if (phase !== "running") {
+      startRun();
+    }
+    setPlayerLane((current) => Math.max(current - 1, 0));
+    if (lastLaneRef.current !== playerLane) {
+      setMovePulse(true);
+      window.setTimeout(() => setMovePulse(false), 120);
+    }
+  }
+
+  function moveRight() {
+    if (phase !== "running") {
+      startRun();
+    }
+    setPlayerLane((current) => Math.min(current + 1, LANE_COUNT - 1));
+    if (lastLaneRef.current !== playerLane) {
+      setMovePulse(true);
+      window.setTimeout(() => setMovePulse(false), 120);
+    }
+  }
+
   useEffect(() => {
     laneRef.current = playerLane;
     lastLaneRef.current = playerLane;
@@ -303,34 +353,6 @@ export function BossDodgeGame() {
     setPhase("running");
   }
 
-  function finishRun(time: number) {
-    if (!runningRef.current) {
-      return;
-    }
-
-    runningRef.current = false;
-    setLastTime(time);
-    setPhase("over");
-    setStreak(0);
-    playFailure();
-    updateGameMeta({
-      gameId: "boss-dodge",
-      score: Number(time.toFixed(1)),
-      duration: time,
-      outcome: "loss"
-    });
-    if (shouldVibrate()) {
-      navigator.vibrate([40, 60, 40]);
-    }
-    setShake(true);
-    window.setTimeout(() => setShake(false), 320);
-    setBestTime((currentBest) => {
-      const nextBest = Math.max(currentBest, time);
-      window.localStorage.setItem(STORAGE_KEY, String(nextBest));
-      return nextBest;
-    });
-  }
-
   function resetRun() {
     runningRef.current = false;
     if (animationRef.current) {
@@ -351,28 +373,6 @@ export function BossDodgeGame() {
     setDodgeFlash(false);
     setNearMissFlash(false);
     setScorePulse(false);
-  }
-
-  function moveLeft() {
-    if (phase !== "running") {
-      startRun();
-    }
-    setPlayerLane((current) => Math.max(current - 1, 0));
-    if (lastLaneRef.current !== playerLane) {
-      setMovePulse(true);
-      window.setTimeout(() => setMovePulse(false), 120);
-    }
-  }
-
-  function moveRight() {
-    if (phase !== "running") {
-      startRun();
-    }
-    setPlayerLane((current) => Math.min(current + 1, LANE_COUNT - 1));
-    if (lastLaneRef.current !== playerLane) {
-      setMovePulse(true);
-      window.setTimeout(() => setMovePulse(false), 120);
-    }
   }
 
   function handleLaneSelect(lane: number) {

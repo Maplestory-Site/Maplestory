@@ -21,9 +21,11 @@ import {
   rewardStreak,
   rewardSummary
 } from "../data/rewards";
+import { useI18n } from "../i18n/I18nProvider";
 
 export function ProfilePage() {
-  usePageMeta("Profile", "Saved clips, favorites, watch history, and profile stats for SNAILSLAYER viewers.");
+  const { t, td } = useI18n();
+  usePageMeta(t("Profile"), t("Saved clips, favorites, watch history, and profile stats for SNAILSLAYER viewers."));
   const { isAuthenticated, openAuth, logout, user } = useMockAuth();
   const recommendationSections = buildRecommendationSections(youtubeVideos, mockWatchHistory).slice(1, 3);
   const [rewardClaimed, setRewardClaimed] = useState(false);
@@ -34,14 +36,14 @@ export function ProfilePage() {
         <div className="container">
           <div className="profile-empty card">
             <span className="section-header__eyebrow">Profile</span>
-            <h1>Your viewer dashboard starts here</h1>
-            <p>Save clips, track favorites, and keep your MapleStory watch loop in one place.</p>
+            <h1>{t("Your viewer dashboard starts here")}</h1>
+            <p>{t("Save clips, track favorites, and keep your MapleStory watch loop in one place.")}</p>
             <div className="profile-empty__actions">
               <button className="button button--primary" onClick={openAuth} type="button">
-                Sign In
+                {t("Sign In")}
               </button>
               <Button href="/videos" variant="secondary">
-                Browse Videos
+                {t("Browse Videos")}
               </Button>
             </div>
           </div>
@@ -72,12 +74,12 @@ export function ProfilePage() {
                 <p>{user.email}</p>
               </div>
             </div>
-            <p className="profile-hero__copy">Saved clips, fresh watch history, and quick access to your favorite SNAILSLAYER content.</p>
+            <p className="profile-hero__copy">{t("Saved clips, fresh watch history, and quick access to your favorite SNAILSLAYER content.")}</p>
             <div className="profile-hero__actions">
-              <Button href="/live">Watch Live</Button>
-              <Button href="/community" variant="secondary">Join Discord</Button>
+              <Button href="/live">{t("Watch Live")}</Button>
+              <Button href="/community" variant="secondary">{t("Join Discord")}</Button>
               <button className="button button--ghost" onClick={logout} type="button">
-                Sign Out
+                {t("Sign Out")}
               </button>
             </div>
           </div>
@@ -86,7 +88,7 @@ export function ProfilePage() {
             {mockProfileStats.map((stat) => (
               <article className="card profile-stat" key={stat.label}>
                 <strong>{stat.value}</strong>
-                <span>{stat.label}</span>
+                <span>{td(stat.label)}</span>
               </article>
             ))}
           </div>
@@ -97,10 +99,10 @@ export function ProfilePage() {
         badges={rewardBadges}
         currentStreak={rewardStreak.current}
         dailyRewards={dailyRewards}
-        description="Claim the daily reward, keep your streak moving, and unlock the next badge."
+        description={t("Claim the daily reward, keep your streak moving, and unlock the next badge.")}
         onClaim={() => setRewardClaimed(true)}
         targetStreak={rewardStreak.target}
-        title="Reward track"
+        title={t("Reward track")}
       />
 
       <section className="section section--tight" data-reveal>
@@ -114,13 +116,13 @@ export function ProfilePage() {
                   <span>{clip.tag}</span>
                 </div>
                 <div className="profile-content-card__body">
-                  <h3>{clip.title}</h3>
-                  <p>{clip.note}</p>
+                  <h3>{td(clip.title)}</h3>
+                  <p>{td(clip.note)}</p>
                   <div className="profile-content-card__meta">
-                    <span>{clip.duration}</span>
-                    <span>Saved</span>
+                    <span>{td(clip.duration)}</span>
+                    <span>{t("Saved")}</span>
                   </div>
-                  <Button href={clip.href} variant="ghost">Open Clip</Button>
+                  <Button href={clip.href} variant="ghost">{t("Open Clip")}</Button>
                 </div>
               </article>
             ))}
@@ -136,12 +138,12 @@ export function ProfilePage() {
               {mockWatchHistory.map((item) => (
                 <article className="profile-history-item" key={item.id}>
                   <div className="profile-history-item__top">
-                    <strong>{item.title}</strong>
-                    <span>{item.type}</span>
+                    <strong>{td(item.title)}</strong>
+                    <span>{td(item.type)}</span>
                   </div>
                   <div className="profile-history-item__meta">
-                    <span>{item.watchedAt}</span>
-                    <span>{item.progress}% watched</span>
+                    <span>{td(item.watchedAt)}</span>
+                    <span>{item.progress}% {t("watched")}</span>
                   </div>
                   <div className="profile-progress">
                     <span style={{ width: `${item.progress}%` }} />
@@ -160,8 +162,8 @@ export function ProfilePage() {
                     {item.thumbnail ? <img alt="" loading="lazy" src={item.thumbnail} /> : null}
                   </span>
                   <span className="profile-favorite-item__copy">
-                    <strong>{item.title}</strong>
-                    <small>{item.category}</small>
+                    <strong>{td(item.title)}</strong>
+                    <small>{td(item.category)}</small>
                   </span>
                 </a>
               ))}
@@ -178,8 +180,8 @@ export function ProfilePage() {
               {mockNotificationItems.map((item) => (
                 <div className="profile-notification-item" key={item.id}>
                   <div>
-                    <strong>{item.label}</strong>
-                    <p>{item.description}</p>
+                    <strong>{td(item.label)}</strong>
+                    <p>{td(item.description)}</p>
                   </div>
                   <span className={`profile-toggle ${item.enabled ? "is-on" : ""}`}>
                     <span />

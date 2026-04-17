@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type PreferenceState = {
   live: boolean;
@@ -32,15 +32,16 @@ function readStoredPreferences(): PreferenceState {
 }
 
 export function useEngagementSystem(isLive: boolean) {
-  const [preferences, setPreferences] = useState<PreferenceState>(defaultPreferences);
+  const [preferences, setPreferences] = useState<PreferenceState>(readStoredPreferences);
   const [livePromptVisible, setLivePromptVisible] = useState(false);
   const [mockLiveStarted, setMockLiveStarted] = useState(false);
+  const isFirstRender = useRef(true);
 
   useEffect(() => {
-    setPreferences(readStoredPreferences());
-  }, []);
-
-  useEffect(() => {
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
     if (typeof window === "undefined") {
       return;
     }
@@ -57,14 +58,16 @@ export function useEngagementSystem(isLive: boolean) {
       return;
     }
 
-    setLivePromptVisible(true);
-
-    const timeout = window.setTimeout(() => {
+    const showTimer = window.setTimeout(() => setLivePromptVisible(true), 0);
+    const hideTimer = window.setTimeout(() => {
       setLivePromptVisible(false);
       setMockLiveStarted(false);
     }, 7000);
 
-    return () => window.clearTimeout(timeout);
+    return () => {
+      window.clearTimeout(showTimer);
+      window.clearTimeout(hideTimer);
+    };
   }, [isLive, mockLiveStarted, preferences.live]);
 
   const subscribedCount = useMemo(

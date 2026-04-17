@@ -85,12 +85,32 @@ async function translateSingleText(text, language) {
       });
 
       if (!response.ok) {
+        if (process.env.NODE_ENV !== "production") {
+          console.warn("[translate-batch] upstream non-ok response", {
+            language: targetLanguage,
+            status: response.status,
+            textPreview: text.slice(0, 120)
+          });
+        }
         return text;
       }
 
       const payload = await response.json();
-      translatedChunks.push(decodeTranslatePayload(payload) || chunk);
+      const translatedChunk = decodeTranslatePayload(payload) || chunk;
+      if (process.env.NODE_ENV !== "production" && isLikelyUntranslatedIdentity(chunk, translatedChunk, targetLanguage)) {
+        console.warn("[translate-batch] upstream returned identity translation", {
+          language: targetLanguage,
+          chunkPreview: chunk.slice(0, 120)
+        });
+      }
+      translatedChunks.push(translatedChunk);
     } catch {
+      if (process.env.NODE_ENV !== "production") {
+        console.warn("[translate-batch] upstream request failed", {
+          language: targetLanguage,
+          textPreview: text.slice(0, 120)
+        });
+      }
       return text;
     } finally {
       clearTimeout(timeout);
@@ -327,7 +347,19 @@ export default async function handler(req, res) {
   if (resource === "translate-batch" && req.method === "POST") {
     const language = String(req.query?.language ?? "en").toLowerCase();
     const texts = Array.isArray(req.body?.texts) ? req.body.texts.slice(0, 50) : [];
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[translate-batch] request", {
+        language,
+        count: texts.length
+      });
+    }
     const translations = await translateTexts(texts, language);
+    if (process.env.NODE_ENV !== "production") {
+      console.log("[translate-batch] response", {
+        language,
+        returned: Object.keys(translations).length
+      });
+    }
     res.setHeader("Cache-Control", "no-store, max-age=0");
     res.status(200).json({ translations });
     return;

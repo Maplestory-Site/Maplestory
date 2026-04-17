@@ -50,6 +50,49 @@ export function LaneSwitchRunnerGame() {
   const spawnCountRef = useRef(0);
   const isTouch = useTouchDevice();
 
+  function finishRun() {
+    if (!runRef.current) return;
+    runRef.current = false;
+    setPhase("over");
+    playFailure();
+    updateGameMeta({ gameId: "lane-switch-runner", score: Math.round(score), outcome: "loss" });
+    if (shouldVibrate()) {
+      navigator.vibrate([30, 60, 30]);
+    }
+    setShake(true);
+    window.setTimeout(() => setShake(false), 260);
+    setBestScore((current) => {
+      const next = Math.max(current, Math.round(score));
+      window.localStorage.setItem(STORAGE_KEY, String(next));
+      return next;
+    });
+  }
+
+  function moveLeft() {
+    if (phase !== "running") {
+      startRun();
+    }
+    setLane((current) => Math.max(0, current - 1));
+  }
+
+  function moveRight() {
+    if (phase !== "running") {
+      startRun();
+    }
+    setLane((current) => Math.min(LANE_COUNT - 1, current + 1));
+  }
+
+  function triggerJump() {
+    if (phase !== "running") {
+      startRun();
+    }
+    if (jumpTimeRef.current > 0 || jumpCooldownRef.current > 0) return;
+    jumpTimeRef.current = 0.6;
+    jumpCooldownRef.current = 0.35;
+    setJumpActive(true);
+    playSuccess();
+  }
+
   useEffect(() => {
     laneRef.current = lane;
   }, [lane]);
@@ -235,24 +278,6 @@ export function LaneSwitchRunnerGame() {
     setPhase("running");
   }
 
-  function finishRun() {
-    if (!runRef.current) return;
-    runRef.current = false;
-    setPhase("over");
-    playFailure();
-    updateGameMeta({ gameId: "lane-switch-runner", score: Math.round(score), outcome: "loss" });
-    if (shouldVibrate()) {
-      navigator.vibrate([30, 60, 30]);
-    }
-    setShake(true);
-    window.setTimeout(() => setShake(false), 260);
-    setBestScore((current) => {
-      const next = Math.max(current, Math.round(score));
-      window.localStorage.setItem(STORAGE_KEY, String(next));
-      return next;
-    });
-  }
-
   function resetRun() {
     distanceRef.current = 0;
     setPhase("ready");
@@ -263,31 +288,6 @@ export function LaneSwitchRunnerGame() {
     setStreak(0);
     setJumpActive(false);
     setShake(false);
-  }
-
-  function moveLeft() {
-    if (phase !== "running") {
-      startRun();
-    }
-    setLane((current) => Math.max(0, current - 1));
-  }
-
-  function moveRight() {
-    if (phase !== "running") {
-      startRun();
-    }
-    setLane((current) => Math.min(LANE_COUNT - 1, current + 1));
-  }
-
-  function triggerJump() {
-    if (phase !== "running") {
-      startRun();
-    }
-    if (jumpTimeRef.current > 0 || jumpCooldownRef.current > 0) return;
-    jumpTimeRef.current = 0.6;
-    jumpCooldownRef.current = 0.35;
-    setJumpActive(true);
-    playSuccess();
   }
 
   return (

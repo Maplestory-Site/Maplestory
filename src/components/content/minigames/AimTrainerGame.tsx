@@ -46,6 +46,44 @@ export function AimTrainerGame() {
   const debugTickRef = useRef(0);
   const spawnCountRef = useRef(0);
 
+  function spawnTarget(timestamp: number, lifespan: number): Target {
+    const size = 42 - speedTier * 4;
+    return {
+      id: nextId.current++,
+      x: 10 + Math.random() * 80,
+      y: 16 + Math.random() * 68,
+      size,
+      spawnedAt: timestamp,
+      lifespan,
+      vx: (Math.random() * 2 - 1) * (1 + speedTier * 0.4),
+      vy: (Math.random() * 2 - 1) * (1 + speedTier * 0.4)
+    };
+  }
+
+  function finishRun() {
+    if (!runningRef.current) return;
+    runningRef.current = false;
+    setPhase("over");
+    updateGameMeta({ gameId: "aim-trainer", score, outcome: "loss" });
+    setBestScore((current) => {
+      const next = Math.max(current, score);
+      window.localStorage.setItem(STORAGE_KEY, String(next));
+      return next;
+    });
+  }
+
+  function registerMiss() {
+    setShots((current) => current + 1);
+    setScore((current) => Math.max(0, current - 25));
+    setCombo(0);
+    setShake(true);
+    window.setTimeout(() => setShake(false), 200);
+    playFailure();
+    if (shouldVibrate()) {
+      navigator.vibrate([20, 30, 20]);
+    }
+  }
+
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
     if (saved) {
@@ -153,20 +191,6 @@ export function AimTrainerGame() {
     return "Warmup";
   }, [speedTier]);
 
-  function spawnTarget(timestamp: number, lifespan: number): Target {
-    const size = 42 - speedTier * 4;
-    return {
-      id: nextId.current++,
-      x: 10 + Math.random() * 80,
-      y: 16 + Math.random() * 68,
-      size,
-      spawnedAt: timestamp,
-      lifespan,
-      vx: (Math.random() * 2 - 1) * (1 + speedTier * 0.4),
-      vy: (Math.random() * 2 - 1) * (1 + speedTier * 0.4)
-    };
-  }
-
   function startRun() {
     nextId.current = 1;
     lastSpawnRef.current = 0;
@@ -194,18 +218,6 @@ export function AimTrainerGame() {
     setPhase("running");
   }
 
-  function finishRun() {
-    if (!runningRef.current) return;
-    runningRef.current = false;
-    setPhase("over");
-    updateGameMeta({ gameId: "aim-trainer", score, outcome: "loss" });
-    setBestScore((current) => {
-      const next = Math.max(current, score);
-      window.localStorage.setItem(STORAGE_KEY, String(next));
-      return next;
-    });
-  }
-
   function registerHit(isHeadshot: boolean) {
     const base = 40 + speedTier * 8;
     const headshotBonus = isHeadshot ? 30 + speedTier * 6 : 0;
@@ -219,18 +231,6 @@ export function AimTrainerGame() {
     playSuccess();
     if (shouldVibrate()) {
       navigator.vibrate(14);
-    }
-  }
-
-  function registerMiss() {
-    setShots((current) => current + 1);
-    setScore((current) => Math.max(0, current - 25));
-    setCombo(0);
-    setShake(true);
-    window.setTimeout(() => setShake(false), 200);
-    playFailure();
-    if (shouldVibrate()) {
-      navigator.vibrate([20, 30, 20]);
     }
   }
 

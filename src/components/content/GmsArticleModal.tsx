@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { NewsItem } from "../../data/newsHub";
 import { formatNewsMetaDate } from "../../lib/newsHub";
-import { Button } from "../ui/Button";
 import { useI18n } from "../../i18n/I18nProvider";
 import { getArticlePendingText } from "../../i18n/articlePendingText";
 import { useTranslatedArticleState } from "../../i18n/useTranslatedContent";
@@ -216,20 +215,6 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
             </div>
           </div>
 
-          {!isTranslatingArticle && renderData?.keyPoints?.length ? (
-            <div className="kms-modal__block">
-              <h3 className="kms-modal__section-title">{t("Key points")}</h3>
-              <div className="kms-modal__highlights">
-                {renderData.keyPoints.map((note, index) => (
-                  <div className="kms-modal__highlight card" key={`${note}-${index}`}>
-                    <strong>{t("Key point")}</strong>
-                    <p>{dynamicText(note)}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : null}
-
           {!isTranslatingArticle && (
           <div className="kms-modal__block">
             <h3 className="kms-modal__section-title">{t("Section shortcuts")}</h3>
@@ -381,11 +366,6 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
           </div>
         </div>
 
-        <div className="kms-modal__footer">
-          <Button href={item.sourceUrl} variant="secondary">
-            {t("Read Original")}
-          </Button>
-        </div>
         {showScrollTop ? (
           <button
             className="kms-modal__scroll-top"

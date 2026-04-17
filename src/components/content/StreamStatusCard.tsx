@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
 import { twitchChannelLogin } from "../../data/twitchFeed";
@@ -33,13 +33,7 @@ export function StreamStatusCard({
   secondaryCta
 }: StreamStatusCardProps) {
   const isLive = status === "live";
-  const [parentHost, setParentHost] = useState("localhost");
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      setParentHost(window.location.hostname || "localhost");
-    }
-  }, []);
+  const parentHost = typeof window !== "undefined" ? window.location.hostname || "localhost" : "localhost";
 
   return (
     <article className="card stream-card" data-reveal>

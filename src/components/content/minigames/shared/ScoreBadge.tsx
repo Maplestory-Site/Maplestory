@@ -11,9 +11,12 @@ export function ScoreBadge({ label, value, tone = "default" }: ScoreBadgeProps) 
 
   useEffect(() => {
     if (value === null || value === undefined) return;
-    setIsPop(true);
-    const timer = window.setTimeout(() => setIsPop(false), 240);
-    return () => window.clearTimeout(timer);
+    const popTimer = window.setTimeout(() => setIsPop(true), 0);
+    const clearTimer = window.setTimeout(() => setIsPop(false), 240);
+    return () => {
+      window.clearTimeout(popTimer);
+      window.clearTimeout(clearTimer);
+    };
   }, [value]);
 
   return (

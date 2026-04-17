@@ -18,9 +18,12 @@ export function GameMetaPanel() {
     if (!meta.lastXpAt || meta.lastXpGain <= 0) return;
     const timeAgo = Date.now() - new Date(meta.lastXpAt).getTime();
     if (timeAgo > 8000) return;
-    setShowXpGain(true);
-    const timer = window.setTimeout(() => setShowXpGain(false), 2600);
-    return () => window.clearTimeout(timer);
+    const showTimer = window.setTimeout(() => setShowXpGain(true), 0);
+    const hideTimer = window.setTimeout(() => setShowXpGain(false), 2600);
+    return () => {
+      window.clearTimeout(showTimer);
+      window.clearTimeout(hideTimer);
+    };
   }, [meta.lastXpAt, meta.lastXpGain]);
 
   return (

@@ -1,6 +1,7 @@
 export type LanguageCode =
   | "en"
   | "he"
+  | "hr"
   | "ru"
   | "de"
   | "fr"
@@ -35,6 +36,7 @@ export type LanguageMeta = {
 export const LANGUAGES: LanguageMeta[] = [
   { code: "en", label: "English", nativeLabel: "English", dir: "ltr" },
   { code: "he", label: "Hebrew", nativeLabel: "עברית", dir: "rtl" },
+  { code: "hr", label: "Croatian", nativeLabel: "Hrvatski", dir: "ltr" },
   { code: "ru", label: "Russian", nativeLabel: "Русский", dir: "ltr" },
   { code: "de", label: "German", nativeLabel: "Deutsch", dir: "ltr" },
   { code: "fr", label: "French", nativeLabel: "Français", dir: "ltr" },
@@ -63,6 +65,7 @@ export const LANGUAGES: LanguageMeta[] = [
 export const SUPPORTED_LANGUAGE_CODES: LanguageCode[] = [
   "en",
   "he",
+  "hr",
   "ru",
   "de",
   "fr",

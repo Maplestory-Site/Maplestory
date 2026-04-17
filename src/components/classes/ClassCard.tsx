@@ -16,7 +16,6 @@ export function ClassCard({ item, onSelect }: ClassCardProps) {
 
   useEffect(() => {
     if (!item.previewVideo || typeof window === "undefined" || !cardRef.current) {
-      setIsVisibleOnScreen(false);
       return;
     }
 

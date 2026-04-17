@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
 import { usePageMeta } from "../app/usePageMeta";
 import { ItemDetailsPanel } from "../components/database/ItemDetailsPanel";
@@ -9,6 +9,7 @@ import { PetDetailsPanel } from "../components/database/PetDetailsPanel";
 import { PetGrid } from "../components/database/PetGrid";
 import { QuestDetailsPanel } from "../components/database/QuestDetailsPanel";
 import { QuestGrid } from "../components/database/QuestGrid";
+import { SimulatorStudio } from "../components/database/SimulatorStudio";
 import { BossSpotlightSection } from "../components/monsters/BossSpotlightSection";
 import { MonsterCompareModal } from "../components/monsters/MonsterCompareModal";
 import { MonsterDropsDatabase } from "../components/monsters/MonsterDropsDatabase";
@@ -46,7 +47,8 @@ const databaseSections = [
   { id: "items", label: "Items" },
   { id: "maps", label: "Maps" },
   { id: "pets", label: "Pets" },
-  { id: "quests", label: "Quests" }
+  { id: "quests", label: "Quests" },
+  { id: "simulator", label: "Simulator" }
 ] as const;
 
 type DatabaseSection = (typeof databaseSections)[number]["id"];
@@ -93,6 +95,13 @@ export function MonstersPage() {
   const petsFeed = usePetsFeed();
   const questsFeed = useQuestsFeed();
 
+  // Refs for tracking previous filter keys (during-render pagination reset pattern)
+  const prevMonsterKeyRef = useRef("");
+  const prevItemKeyRef = useRef("");
+  const prevMapKeyRef = useRef("");
+  const prevPetKeyRef = useRef("");
+  const prevQuestKeyRef = useRef("");
+
   const regions = useMemo(() => getMonsterRegions(feed.items), [feed.items]);
   const weaknesses = useMemo(() => getMonsterWeaknesses(feed.items), [feed.items]);
   const featuredBosses = useMemo(() => getFeaturedBosses(feed.items), [feed.items]);
@@ -113,20 +122,19 @@ export function MonstersPage() {
   );
 
   const totalPages = Math.max(1, Math.ceil(filteredMonsters.length / monstersPerPage));
+
+  // Reset monster page during render when filters/section change
+  const monsterKey = `${activeSection}-${feed.items.length}-${JSON.stringify(filters)}`;
+  if (prevMonsterKeyRef.current !== monsterKey) {
+    prevMonsterKeyRef.current = monsterKey;
+    if (currentPage !== 1) setCurrentPage(1);
+  }
+  const safePage = Math.min(currentPage, totalPages);
+
   const paginatedMonsters = useMemo(() => {
-    const start = (currentPage - 1) * monstersPerPage;
+    const start = (safePage - 1) * monstersPerPage;
     return filteredMonsters.slice(start, start + monstersPerPage);
-  }, [currentPage, filteredMonsters]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [filters, feed.items.length, activeSection]);
-
-  useEffect(() => {
-    if (currentPage > totalPages) {
-      setCurrentPage(totalPages);
-    }
-  }, [currentPage, totalPages]);
+  }, [safePage, filteredMonsters]);
 
   const itemTypes = useMemo(
     () => ["All", ...new Set(itemsFeed.items.map((item) => item.type))] as Array<"All" | ItemEntry["type"]>,
@@ -159,20 +167,19 @@ export function MonstersPage() {
   }, [itemQuery, itemSort, itemTypeFilter, itemsFeed.items]);
 
   const itemTotalPages = Math.max(1, Math.ceil(filteredItems.length / itemsPerPage));
+
+  // Reset item page during render when filters change
+  const itemKey = `${activeSection}-${itemsFeed.items.length}-${itemQuery}-${itemSort}-${itemTypeFilter}`;
+  if (prevItemKeyRef.current !== itemKey) {
+    prevItemKeyRef.current = itemKey;
+    if (itemCurrentPage !== 1) setItemCurrentPage(1);
+  }
+  const safeItemPage = Math.min(itemCurrentPage, itemTotalPages);
+
   const paginatedItems = useMemo(() => {
-    const start = (itemCurrentPage - 1) * itemsPerPage;
+    const start = (safeItemPage - 1) * itemsPerPage;
     return filteredItems.slice(start, start + itemsPerPage);
-  }, [filteredItems, itemCurrentPage]);
-
-  useEffect(() => {
-    setItemCurrentPage(1);
-  }, [itemQuery, itemSort, itemTypeFilter, activeSection, itemsFeed.items.length]);
-
-  useEffect(() => {
-    if (itemCurrentPage > itemTotalPages) {
-      setItemCurrentPage(itemTotalPages);
-    }
-  }, [itemCurrentPage, itemTotalPages]);
+  }, [filteredItems, safeItemPage]);
 
   const comparedMonsters = useMemo(
     () => feed.items.filter((item) => comparedIds.includes(item.id)),
@@ -199,20 +206,19 @@ export function MonstersPage() {
   }, [mapQuery, mapRegionFilter, mapsFeed.items]);
 
   const mapTotalPages = Math.max(1, Math.ceil(filteredMaps.length / itemsPerPage));
+
+  // Reset map page during render when filters change
+  const mapKey = `${activeSection}-${mapsFeed.items.length}-${mapQuery}-${mapRegionFilter}`;
+  if (prevMapKeyRef.current !== mapKey) {
+    prevMapKeyRef.current = mapKey;
+    if (mapCurrentPage !== 1) setMapCurrentPage(1);
+  }
+  const safeMapPage = Math.min(mapCurrentPage, mapTotalPages);
+
   const paginatedMaps = useMemo(() => {
-    const start = (mapCurrentPage - 1) * itemsPerPage;
+    const start = (safeMapPage - 1) * itemsPerPage;
     return filteredMaps.slice(start, start + itemsPerPage);
-  }, [filteredMaps, mapCurrentPage]);
-
-  useEffect(() => {
-    setMapCurrentPage(1);
-  }, [mapQuery, mapRegionFilter, activeSection, mapsFeed.items.length]);
-
-  useEffect(() => {
-    if (mapCurrentPage > mapTotalPages) {
-      setMapCurrentPage(mapTotalPages);
-    }
-  }, [mapCurrentPage, mapTotalPages]);
+  }, [filteredMaps, safeMapPage]);
 
   const questCategories = useMemo(
     () => ["All", ...new Set(questsFeed.items.map((item) => item.category).filter(Boolean).sort((left, right) => left.localeCompare(right)))],
@@ -235,20 +241,19 @@ export function MonstersPage() {
   }, [questCategoryFilter, questQuery, questsFeed.items]);
 
   const questTotalPages = Math.max(1, Math.ceil(filteredQuests.length / itemsPerPage));
+
+  // Reset quest page during render when filters change
+  const questKey = `${activeSection}-${questsFeed.items.length}-${questQuery}-${questCategoryFilter}`;
+  if (prevQuestKeyRef.current !== questKey) {
+    prevQuestKeyRef.current = questKey;
+    if (questCurrentPage !== 1) setQuestCurrentPage(1);
+  }
+  const safeQuestPage = Math.min(questCurrentPage, questTotalPages);
+
   const paginatedQuests = useMemo(() => {
-    const start = (questCurrentPage - 1) * itemsPerPage;
+    const start = (safeQuestPage - 1) * itemsPerPage;
     return filteredQuests.slice(start, start + itemsPerPage);
-  }, [filteredQuests, questCurrentPage]);
-
-  useEffect(() => {
-    setQuestCurrentPage(1);
-  }, [questQuery, questCategoryFilter, activeSection, questsFeed.items.length]);
-
-  useEffect(() => {
-    if (questCurrentPage > questTotalPages) {
-      setQuestCurrentPage(questTotalPages);
-    }
-  }, [questCurrentPage, questTotalPages]);
+  }, [filteredQuests, safeQuestPage]);
 
   const monsterLookup = useMemo(() => {
     const lookup = new Map<string, MonsterEntry>();
@@ -288,20 +293,19 @@ export function MonstersPage() {
   }, [petCategoryFilter, petQuery, petsFeed.items]);
 
   const petTotalPages = Math.max(1, Math.ceil(filteredPets.length / petsPerPage));
+
+  // Reset pet page during render when filters change
+  const petKey = `${activeSection}-${petsFeed.items.length}-${petQuery}-${petCategoryFilter}`;
+  if (prevPetKeyRef.current !== petKey) {
+    prevPetKeyRef.current = petKey;
+    if (petCurrentPage !== 1) setPetCurrentPage(1);
+  }
+  const safePetPage = Math.min(petCurrentPage, petTotalPages);
+
   const paginatedPets = useMemo(() => {
-    const start = (petCurrentPage - 1) * petsPerPage;
+    const start = (safePetPage - 1) * petsPerPage;
     return filteredPets.slice(start, start + petsPerPage);
-  }, [filteredPets, petCurrentPage]);
-
-  useEffect(() => {
-    setPetCurrentPage(1);
-  }, [petQuery, petCategoryFilter, activeSection, petsFeed.items.length]);
-
-  useEffect(() => {
-    if (petCurrentPage > petTotalPages) {
-      setPetCurrentPage(petTotalPages);
-    }
-  }, [petCurrentPage, petTotalPages]);
+  }, [filteredPets, safePetPage]);
 
 
   usePageMeta(
@@ -320,6 +324,8 @@ export function MonstersPage() {
           ? petsFeed.items.length
           : activeSection === "quests"
             ? questsFeed.items.length
+            : activeSection === "simulator"
+              ? 24
             : feed.items.length;
 
   function handleFilterChange<K extends keyof MonsterFilters>(key: K, value: MonsterFilters[K]) {
@@ -358,7 +364,9 @@ export function MonstersPage() {
           ? "Browse maps, regions, and the monsters found there."
           : activeSection === "pets"
             ? "Track pet-related routes, tags, and preview entries."
-            : "Track quest monsters, quest drops, and useful routes."
+            : activeSection === "quests"
+              ? "Track quest monsters, quest drops, and useful routes."
+              : "Preview a Maple-style simulator with layered looks, poses, and backgrounds."
           }
           title={databaseSections.find((section) => section.id === activeSection)?.label ?? "Monster"}
           total={heroTotal}
@@ -424,18 +432,18 @@ export function MonstersPage() {
               <div className="monster-pagination reveal-on-scroll">
                 <div className="monster-pagination__status">
                   <strong>
-                    {Math.min(filteredMonsters.length, (currentPage - 1) * monstersPerPage + 1)}-
-                    {Math.min(filteredMonsters.length, currentPage * monstersPerPage)}
+                    {Math.min(filteredMonsters.length, (safePage - 1) * monstersPerPage + 1)}-
+                    {Math.min(filteredMonsters.length, safePage * monstersPerPage)}
                   </strong>
                   <span>
-                    of {filteredMonsters.length} monsters · page {currentPage} / {totalPages}
+                    of {filteredMonsters.length} monsters · page {safePage} / {totalPages}
                   </span>
                 </div>
 
                 <div className="monster-pagination__actions">
                   <button
                     className="monster-pagination__button"
-                    disabled={currentPage === 1}
+                    disabled={safePage === 1}
                     type="button"
                     onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
                   >
@@ -443,7 +451,7 @@ export function MonstersPage() {
                   </button>
                   <button
                     className="monster-pagination__button"
-                    disabled={currentPage === totalPages}
+                    disabled={safePage === totalPages}
                     type="button"
                     onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
                   >
@@ -493,8 +501,8 @@ export function MonstersPage() {
               <div className="item-browser__summary">
                 <strong>{filteredItems.length}</strong>
                 <span>
-                  items · {Math.min(filteredItems.length, (itemCurrentPage - 1) * itemsPerPage + 1)}-
-                  {Math.min(filteredItems.length, itemCurrentPage * itemsPerPage)} visible
+                  items · {Math.min(filteredItems.length, (safeItemPage - 1) * itemsPerPage + 1)}-
+                  {Math.min(filteredItems.length, safeItemPage * itemsPerPage)} visible
                 </span>
               </div>
             </section>
@@ -505,18 +513,18 @@ export function MonstersPage() {
               <div className="monster-pagination reveal-on-scroll">
                 <div className="monster-pagination__status">
                   <strong>
-                    {Math.min(filteredItems.length, (itemCurrentPage - 1) * itemsPerPage + 1)}-
-                    {Math.min(filteredItems.length, itemCurrentPage * itemsPerPage)}
+                    {Math.min(filteredItems.length, (safeItemPage - 1) * itemsPerPage + 1)}-
+                    {Math.min(filteredItems.length, safeItemPage * itemsPerPage)}
                   </strong>
                   <span>
-                    of {filteredItems.length} items · page {itemCurrentPage} / {itemTotalPages}
+                    of {filteredItems.length} items · page {safeItemPage} / {itemTotalPages}
                   </span>
                 </div>
 
                 <div className="monster-pagination__actions">
                   <button
                     className="monster-pagination__button"
-                    disabled={itemCurrentPage === 1}
+                    disabled={safeItemPage === 1}
                     type="button"
                     onClick={() => setItemCurrentPage((page) => Math.max(1, page - 1))}
                   >
@@ -524,7 +532,7 @@ export function MonstersPage() {
                   </button>
                   <button
                     className="monster-pagination__button"
-                    disabled={itemCurrentPage === itemTotalPages}
+                    disabled={safeItemPage === itemTotalPages}
                     type="button"
                     onClick={() => setItemCurrentPage((page) => Math.min(itemTotalPages, page + 1))}
                   >
@@ -565,8 +573,8 @@ export function MonstersPage() {
               <div className="item-browser__summary">
                 <strong>{filteredMaps.length}</strong>
                 <span>
-                  maps · {Math.min(filteredMaps.length, (mapCurrentPage - 1) * itemsPerPage + 1)}-
-                  {Math.min(filteredMaps.length, mapCurrentPage * itemsPerPage)} visible
+                  maps · {Math.min(filteredMaps.length, (safeMapPage - 1) * itemsPerPage + 1)}-
+                  {Math.min(filteredMaps.length, safeMapPage * itemsPerPage)} visible
                 </span>
               </div>
             </section>
@@ -577,18 +585,18 @@ export function MonstersPage() {
               <div className="monster-pagination reveal-on-scroll">
                 <div className="monster-pagination__status">
                   <strong>
-                    {Math.min(filteredMaps.length, (mapCurrentPage - 1) * itemsPerPage + 1)}-
-                    {Math.min(filteredMaps.length, mapCurrentPage * itemsPerPage)}
+                    {Math.min(filteredMaps.length, (safeMapPage - 1) * itemsPerPage + 1)}-
+                    {Math.min(filteredMaps.length, safeMapPage * itemsPerPage)}
                   </strong>
                   <span>
-                    of {filteredMaps.length} maps · page {mapCurrentPage} / {mapTotalPages}
+                    of {filteredMaps.length} maps · page {safeMapPage} / {mapTotalPages}
                   </span>
                 </div>
 
                 <div className="monster-pagination__actions">
                   <button
                     className="monster-pagination__button"
-                    disabled={mapCurrentPage === 1}
+                    disabled={safeMapPage === 1}
                     type="button"
                     onClick={() => setMapCurrentPage((page) => Math.max(1, page - 1))}
                   >
@@ -596,7 +604,7 @@ export function MonstersPage() {
                   </button>
                   <button
                     className="monster-pagination__button"
-                    disabled={mapCurrentPage === mapTotalPages}
+                    disabled={safeMapPage === mapTotalPages}
                     type="button"
                     onClick={() => setMapCurrentPage((page) => Math.min(mapTotalPages, page + 1))}
                   >
@@ -637,8 +645,8 @@ export function MonstersPage() {
               <div className="item-browser__summary">
                 <strong>{filteredPets.length}</strong>
                 <span>
-                  pets · {Math.min(filteredPets.length, (petCurrentPage - 1) * petsPerPage + 1)}-
-                  {Math.min(filteredPets.length, petCurrentPage * petsPerPage)} visible
+                  pets · {Math.min(filteredPets.length, (safePetPage - 1) * petsPerPage + 1)}-
+                  {Math.min(filteredPets.length, safePetPage * petsPerPage)} visible
                 </span>
               </div>
             </section>
@@ -649,18 +657,18 @@ export function MonstersPage() {
               <div className="monster-pagination reveal-on-scroll">
                 <div className="monster-pagination__status">
                   <strong>
-                    {Math.min(filteredPets.length, (petCurrentPage - 1) * petsPerPage + 1)}-
-                    {Math.min(filteredPets.length, petCurrentPage * petsPerPage)}
+                    {Math.min(filteredPets.length, (safePetPage - 1) * petsPerPage + 1)}-
+                    {Math.min(filteredPets.length, safePetPage * petsPerPage)}
                   </strong>
                   <span>
-                    of {filteredPets.length} pets · page {petCurrentPage} / {petTotalPages}
+                    of {filteredPets.length} pets · page {safePetPage} / {petTotalPages}
                   </span>
                 </div>
 
                 <div className="monster-pagination__actions">
                   <button
                     className="monster-pagination__button"
-                    disabled={petCurrentPage === 1}
+                    disabled={safePetPage === 1}
                     type="button"
                     onClick={() => setPetCurrentPage((page) => Math.max(1, page - 1))}
                   >
@@ -668,7 +676,7 @@ export function MonstersPage() {
                   </button>
                   <button
                     className="monster-pagination__button"
-                    disabled={petCurrentPage === petTotalPages}
+                    disabled={safePetPage === petTotalPages}
                     type="button"
                     onClick={() => setPetCurrentPage((page) => Math.min(petTotalPages, page + 1))}
                   >
@@ -709,8 +717,8 @@ export function MonstersPage() {
               <div className="item-browser__summary">
                 <strong>{filteredQuests.length}</strong>
                 <span>
-                  quests · {Math.min(filteredQuests.length, (questCurrentPage - 1) * itemsPerPage + 1)}-
-                  {Math.min(filteredQuests.length, questCurrentPage * itemsPerPage)} visible
+                  quests · {Math.min(filteredQuests.length, (safeQuestPage - 1) * itemsPerPage + 1)}-
+                  {Math.min(filteredQuests.length, safeQuestPage * itemsPerPage)} visible
                 </span>
               </div>
             </section>
@@ -721,18 +729,18 @@ export function MonstersPage() {
               <div className="monster-pagination reveal-on-scroll">
                 <div className="monster-pagination__status">
                   <strong>
-                    {Math.min(filteredQuests.length, (questCurrentPage - 1) * itemsPerPage + 1)}-
-                    {Math.min(filteredQuests.length, questCurrentPage * itemsPerPage)}
+                    {Math.min(filteredQuests.length, (safeQuestPage - 1) * itemsPerPage + 1)}-
+                    {Math.min(filteredQuests.length, safeQuestPage * itemsPerPage)}
                   </strong>
                   <span>
-                    of {filteredQuests.length} quests · page {questCurrentPage} / {questTotalPages}
+                    of {filteredQuests.length} quests · page {safeQuestPage} / {questTotalPages}
                   </span>
                 </div>
 
                 <div className="monster-pagination__actions">
                   <button
                     className="monster-pagination__button"
-                    disabled={questCurrentPage === 1}
+                    disabled={safeQuestPage === 1}
                     type="button"
                     onClick={() => setQuestCurrentPage((page) => Math.max(1, page - 1))}
                   >
@@ -740,7 +748,7 @@ export function MonstersPage() {
                   </button>
                   <button
                     className="monster-pagination__button"
-                    disabled={questCurrentPage === questTotalPages}
+                    disabled={safeQuestPage === questTotalPages}
                     type="button"
                     onClick={() => setQuestCurrentPage((page) => Math.min(questTotalPages, page + 1))}
                   >
@@ -751,6 +759,8 @@ export function MonstersPage() {
             ) : null}
           </>
         ) : null}
+
+        {activeSection === "simulator" ? <SimulatorStudio /> : null}
       </div>
 
       <MonsterDetailsPanel

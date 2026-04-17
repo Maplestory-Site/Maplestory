@@ -40,31 +40,32 @@ const SESSION_KEY = "snailslayer-session";
 
 const MockAuthContext = createContext<MockAuthContextValue | null>(null);
 
-export function MockAuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<MockUser | null>(null);
-  const [authOpen, setAuthOpen] = useState(false);
-
-  useEffect(() => {
-    if (typeof window === "undefined") {
-      return;
-    }
-
+function readInitialUser(): MockUser | null {
+  if (typeof window === "undefined") return null;
+  try {
     const session = window.localStorage.getItem(SESSION_KEY);
     const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (!saved || !session) return;
+    if (!saved || !session) return null;
+    const parsed = JSON.parse(saved) as MockUser[];
+    const sessionId = JSON.parse(session) as { userId: string };
+    return parsed.find((entry) => entry.id === sessionId.userId) || null;
+  } catch {
+    window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem(SESSION_KEY);
+    return null;
+  }
+}
 
-    try {
-      const parsed = JSON.parse(saved) as MockUser[];
-      const sessionId = JSON.parse(session) as { userId: string };
-      const currentUser = parsed.find((entry) => entry.id === sessionId.userId) || null;
-      if (currentUser) {
-        setUser(currentUser);
-        applyUserProgress(extractUserProgress(currentUser));
-      }
-    } catch {
-      window.localStorage.removeItem(STORAGE_KEY);
-      window.localStorage.removeItem(SESSION_KEY);
+export function MockAuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<MockUser | null>(readInitialUser);
+  const [authOpen, setAuthOpen] = useState(false);
+
+  // Apply persisted progress on initial mount
+  useEffect(() => {
+    if (user) {
+      applyUserProgress(extractUserProgress(user));
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   function persistUser(nextUser: MockUser) {

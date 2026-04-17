@@ -33,6 +33,23 @@ export function BombDefuseGame() {
   const [shake, setShake] = useState(false);
 
   const timerRef = useRef<number | null>(null);
+  const timeLeftRef = useRef(7);
+
+  function finishRun() {
+    setPhase("over");
+    updateGameMeta({ gameId: "bomb-defuse", score, outcome: "loss" });
+    playFailure();
+    if (shouldVibrate()) {
+      navigator.vibrate([30, 50, 30]);
+    }
+    setShake(true);
+    window.setTimeout(() => setShake(false), 260);
+    setBestScore((current) => {
+      const next = Math.max(current, score);
+      window.localStorage.setItem(STORAGE_KEY, String(next));
+      return next;
+    });
+  }
 
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
@@ -51,13 +68,12 @@ export function BombDefuseGame() {
     }
 
     timerRef.current = window.setInterval(() => {
-      setTimeLeft((current) => {
-        const next = Math.max(0, current - 0.1);
-        if (next <= 0.05) {
-          finishRun();
-        }
-        return next;
-      });
+      const next = Math.max(0, timeLeftRef.current - 0.1);
+      timeLeftRef.current = next;
+      setTimeLeft(next);
+      if (next <= 0.05) {
+        finishRun();
+      }
     }, 100);
 
     return () => {
@@ -105,6 +121,7 @@ export function BombDefuseGame() {
     }));
     setWires(nextWires);
     const baseTime = Math.max(2.6, 7 - nextRound * 0.45);
+    timeLeftRef.current = baseTime;
     setTimeLeft(baseTime);
     const baitChance = Math.min(0.4, 0.12 + nextRound * 0.04);
     if (Math.random() < baitChance) {
@@ -137,22 +154,6 @@ export function BombDefuseGame() {
     setPhase("running");
   }
 
-  function finishRun() {
-    setPhase("over");
-    updateGameMeta({ gameId: "bomb-defuse", score, outcome: "loss" });
-    playFailure();
-    if (shouldVibrate()) {
-      navigator.vibrate([30, 50, 30]);
-    }
-    setShake(true);
-    window.setTimeout(() => setShake(false), 260);
-    setBestScore((current) => {
-      const next = Math.max(current, score);
-      window.localStorage.setItem(STORAGE_KEY, String(next));
-      return next;
-    });
-  }
-
   function handleChoice(selectedWire: Wire) {
     if (phase !== "running") return;
     if (!selectedWire.isCorrect) {
@@ -177,6 +178,7 @@ export function BombDefuseGame() {
     setScore(0);
     setStreak(0);
     setWires([]);
+    timeLeftRef.current = 7;
     setTimeLeft(7);
     setShake(false);
     setBaitId(null);

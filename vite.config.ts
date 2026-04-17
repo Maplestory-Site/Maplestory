@@ -98,13 +98,14 @@ export default defineConfig({
             if (req.url.startsWith('/api/gms?')) {
               const url = new URL(req.url, 'http://localhost')
               const target = url.searchParams.get('url')
+              const force = url.searchParams.get('force') === '1'
               if (!target) {
                 res.statusCode = 400
                 res.setHeader('Content-Type', 'application/json')
                 res.end(JSON.stringify({ error: 'Missing url parameter.' }))
                 return
               }
-              const payload = await fetchGmsArticle(target)
+              const payload = await fetchGmsArticle(target, { forceRefresh: force })
               res.statusCode = 200
               res.setHeader('Content-Type', 'application/json')
               res.end(JSON.stringify(payload))

@@ -52,7 +52,8 @@ export const navigationItems: NavItem[] = [
       { label: "Items", href: "/database/items" },
       { label: "Maps", href: "/database/maps" },
       { label: "Pets", href: "/database/pets" },
-      { label: "Quests", href: "/database/quests" }
+      { label: "Quests", href: "/database/quests" },
+      { label: "Simulator", href: "/database/simulator" }
     ]
   }
 ];

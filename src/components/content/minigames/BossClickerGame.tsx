@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { GameButton } from "./shared/GameButton";
 import { GameCard } from "./shared/GameCard";
 import { GameOverlay } from "./shared/GameOverlay";
@@ -26,9 +26,18 @@ export function BossClickerGame() {
   const [warning, setWarning] = useState(false);
   const [shake, setShake] = useState(false);
   const [pattern, setPattern] = useState<"strike" | "double" | "slam">("strike");
-  const [phaseLabel, setPhaseLabel] = useState("Phase I");
   const [attackNote, setAttackNote] = useState("Strike");
   const [queuedHits, setQueuedHits] = useState(0);
+  const playerHpRef = useRef(BASE_PLAYER_HP);
+
+  function applyBossHit(damage = 1) {
+    const next = Math.max(0, playerHpRef.current - damage);
+    playerHpRef.current = next;
+    setPlayerHp(next);
+    if (next <= 0) {
+      finishRun();
+    }
+  }
 
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
@@ -81,19 +90,12 @@ export function BossClickerGame() {
     return "Pressure I";
   }, [round]);
 
-  useEffect(() => {
-    if (round >= 7) {
-      setPhaseLabel("Phase III");
-    } else if (round >= 4) {
-      setPhaseLabel("Phase II");
-    } else {
-      setPhaseLabel("Phase I");
-    }
-  }, [round]);
+  const phaseLabel = round >= 7 ? "Phase III" : round >= 4 ? "Phase II" : "Phase I";
 
   function startRun() {
     setRound(1);
     setBossHp(BASE_BOSS_HP);
+    playerHpRef.current = BASE_PLAYER_HP;
     setPlayerHp(BASE_PLAYER_HP);
     setScore(0);
     setCombo(0);
@@ -131,6 +133,7 @@ export function BossClickerGame() {
     setPhase("ready");
     setRound(1);
     setBossHp(BASE_BOSS_HP);
+    playerHpRef.current = BASE_PLAYER_HP;
     setPlayerHp(BASE_PLAYER_HP);
     setScore(0);
     setCombo(0);
@@ -138,16 +141,6 @@ export function BossClickerGame() {
     setQueuedHits(0);
     setPattern("strike");
     setAttackNote("Strike");
-  }
-
-  function applyBossHit(damage = 1) {
-    setPlayerHp((current) => {
-      const next = Math.max(0, current - damage);
-      if (next <= 0) {
-        finishRun();
-      }
-      return next;
-    });
   }
 
   function handleAttack() {

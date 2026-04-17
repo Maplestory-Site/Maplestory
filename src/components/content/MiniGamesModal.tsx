@@ -97,9 +97,12 @@ function MiniGamesModalContent({
   );
 
   useEffect(() => {
-    setIsLoading(true);
-    const timer = window.setTimeout(() => setIsLoading(false), 260);
-    return () => window.clearTimeout(timer);
+    const loadingTimer = window.setTimeout(() => setIsLoading(true), 0);
+    const doneTimer = window.setTimeout(() => setIsLoading(false), 260);
+    return () => {
+      window.clearTimeout(loadingTimer);
+      window.clearTimeout(doneTimer);
+    };
   }, [activeGame.id]);
 
   return (

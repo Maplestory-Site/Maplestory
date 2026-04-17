@@ -27,12 +27,16 @@ export function GameLeaderboardModal({
 
   useEffect(() => {
     if (!open) return;
-    setLoading(true);
+    const loadingTimer = window.setTimeout(() => setLoading(true), 0);
     fetch(`/api/leaderboard?gameId=${encodeURIComponent(gameId)}&userId=${encodeURIComponent(user?.id ?? "")}`)
       .then((res) => res.json())
       .then((data) => setPayload(data))
       .catch(() => setPayload({ entries: [], userRank: undefined }))
-      .finally(() => setLoading(false));
+      .finally(() => {
+        window.clearTimeout(loadingTimer);
+        setLoading(false);
+      });
+    return () => window.clearTimeout(loadingTimer);
   }, [gameId, open, user?.id]);
 
   if (!open) return null;

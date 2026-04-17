@@ -14,8 +14,8 @@ export function decodeHtmlEntities(value = "") {
     "&#39;": "'",
     "&lt;": "<",
     "&gt;": ">",
-    "&ndash;": "–",
-    "&mdash;": "—"
+    "&ndash;": "\u2013",
+    "&mdash;": "\u2014"
   };
 
   const withNamed = Object.keys(named).reduce((acc, entity) => acc.replaceAll(entity, named[entity]), input);
@@ -27,7 +27,7 @@ export function decodeHtmlEntities(value = "") {
 
 export function sanitizeText(value = "") {
   const raw = typeof value === "string" ? value : "";
-  const decoded = raw.includes("ÃƒÂ¢") || raw.includes("ÃƒÆ’") ? Buffer.from(raw, "latin1").toString("utf8") : raw;
+  const decoded = raw.includes("ÃƒÆ’Ã‚Â¢") || raw.includes("ÃƒÆ’Ã†â€™") ? Buffer.from(raw, "latin1").toString("utf8") : raw;
 
   return decodeHtmlEntities(decoded)
     .replace(/\u00a0/g, " ")

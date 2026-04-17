@@ -93,9 +93,11 @@ export function MapleSurvivalGame() {
         return Math.hypot(dx, dy) < 7;
       });
       if (hitEnemy) {
-        setPhase("over");
-        setShake(true);
-        window.setTimeout(() => setShake(false), 240);
+        window.setTimeout(() => {
+          setPhase("over");
+          setShake(true);
+          window.setTimeout(() => setShake(false), 240);
+        }, 0);
         return;
       }
 

@@ -201,6 +201,15 @@ export async function requestDynamicTranslations(
     return mergedTranslations;
   }
 
+  if (import.meta.env.DEV) {
+    console.log("[i18n] requestDynamicTranslations", {
+      language,
+      total: texts.length,
+      unique: uniqueTexts.length,
+      missing: missingTexts.length
+    });
+  }
+
   for (const batch of chunk(missingTexts, MAX_TRANSLATION_BATCH)) {
     const requestKey = `${language}:${batch.slice().sort().join("\u0001")}`;
     const pending =
@@ -218,6 +227,13 @@ export async function requestDynamicTranslations(
           }
 
           const payload = (await response.json()) as { translations?: Record<string, string> };
+          if (import.meta.env.DEV) {
+            console.log("[i18n] translate-batch response", {
+              language,
+              requested: batch.length,
+              returned: Object.keys(payload.translations ?? {}).length
+            });
+          }
           return payload.translations ?? {};
         })
         .finally(() => {
@@ -229,6 +245,12 @@ export async function requestDynamicTranslations(
     Object.entries(resolved).forEach(([source, translated]) => {
       if (isUsableTranslation(source, translated, language)) {
         mergedTranslations[source] = normalizeReaderText(translated);
+      } else if (import.meta.env.DEV) {
+        console.warn("[i18n] unusable translation result", {
+          language,
+          source,
+          translated
+        });
       }
     });
   }

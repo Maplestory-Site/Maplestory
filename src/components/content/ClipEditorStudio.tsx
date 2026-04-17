@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import { Button } from "../ui/Button";
 
 type ClipMoment = {
@@ -26,15 +26,14 @@ export function ClipEditorStudio({
   const activeMoment = moments.find((moment) => moment.id === activeMomentId) ?? moments[0];
   const [start, setStart] = useState(activeMoment?.start ?? 18);
   const [end, setEnd] = useState(activeMoment?.end ?? 42);
+  const prevMomentIdRef = useRef(activeMomentId);
 
-  useEffect(() => {
-    if (!activeMoment) {
-      return;
-    }
-
+  // Sync start/end when active moment changes (during-render update pattern)
+  if (prevMomentIdRef.current !== activeMomentId && activeMoment) {
+    prevMomentIdRef.current = activeMomentId;
     setStart(activeMoment.start);
     setEnd(activeMoment.end);
-  }, [activeMoment]);
+  }
 
   const clipLength = Math.max(end - start, 1);
   const startPercent = (start / durationSeconds) * 100;

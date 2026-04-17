@@ -26,13 +26,12 @@ export function GameShell({
   const { t, td } = useI18n();
   const shellRef = useRef<HTMLDivElement | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [canFullscreen, setCanFullscreen] = useState(false);
+  const [canFullscreen] = useState(() => typeof document !== "undefined" && !!document.documentElement.requestFullscreen);
   const [feedback, setFeedback] = useState<"idle" | "success" | "fail">("idle");
   const feedbackTimer = useRef<number | null>(null);
   const { playFailure, playSuccess } = useMiniGamesSound();
 
   useEffect(() => {
-    setCanFullscreen(typeof document !== "undefined" && !!document.documentElement.requestFullscreen);
     const handleChange = () => {
       setIsFullscreen(!!document.fullscreenElement);
     };
