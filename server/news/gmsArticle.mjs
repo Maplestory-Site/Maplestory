@@ -4,7 +4,7 @@ import { sanitizeText } from "./normalize.mjs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-const PARSER_VERSION = 4;
+const PARSER_VERSION = 6;
 
 function extractIdFromUrl(url = "") {
   const match = /\/news\/[^/]+\/(\d+)/.exec(url);
@@ -205,9 +205,9 @@ function isFresh(entry) {
   return Date.now() - new Date(entry.cachedAt).getTime() < GMS_ARTICLE_TTL_MINUTES * 60 * 1000;
 }
 
-export async function fetchGmsArticle(url) {
+export async function fetchGmsArticle(url, { forceRefresh = false } = {}) {
   const cache = (await readJson(GMS_ARTICLE_CACHE_FILE)) ?? {};
-  if (cache[url] && isFresh(cache[url]) && cache[url].payload?.parserVersion === PARSER_VERSION) {
+  if (!forceRefresh && cache[url] && isFresh(cache[url]) && cache[url].payload?.parserVersion === PARSER_VERSION) {
     return cache[url].payload;
   }
 

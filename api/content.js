@@ -304,7 +304,7 @@ async function fetchGms(url, force, res) {
       return;
     }
 
-    const payload = await fetchGmsArticle(url);
+    const payload = await fetchGmsArticle(url, { forceRefresh: force === "1" || force === "true" });
     const cacheHeader =
       force === "1" || force === "true"
         ? "no-store, max-age=0"
