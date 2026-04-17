@@ -9440,14 +9440,14 @@ body.reduce-motion *::after {
   border-radius: 16px;
   overflow: hidden;
   border: 1px solid rgba(255, 255, 255, 0.12);
-  height: auto;
+  height: clamp(180px, 24vw, 320px);
   background: rgba(10, 12, 18, 0.35);
 }
 
 .kms-modal__hero img {
   display: block;
   width: 100%;
-  height: auto;
+  height: 100%;
   object-fit: contain;
   object-position: center;
 }
