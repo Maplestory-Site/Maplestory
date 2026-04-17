@@ -73,7 +73,11 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
 
       setLoading(true);
       try {
-        const response = await fetch(`/api/gms?url=${encodeURIComponent(item.sourceUrl)}`);
+        const cacheBust = `${Date.now()}`;
+        const response = await fetch(
+          `/api/gms?url=${encodeURIComponent(item.sourceUrl)}&force=1&ts=${cacheBust}`,
+          { cache: "no-store" }
+        );
         if (!response.ok) {
           throw new Error("Failed to load GMS article.");
         }
@@ -100,8 +104,12 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
     };
   }, [item]);
 
-  const published = useMemo(() => formatNewsMetaDate(item?.publishedAt ?? ""), [item]);
   const renderData = translatedData ?? data;
+  const published = useMemo(() => formatNewsMetaDate(item?.publishedAt ?? ""), [item]);
+  const renderDate = useMemo(
+    () => formatNewsMetaDate(renderData?.date || item?.publishedAt || ""),
+    [renderData?.date, item?.publishedAt]
+  );
   const isTranslatingArticle =
     Boolean(data) && language !== "en" && translatedArticle.translating && !translatedArticle.ready;
   const articleText = (value?: string, fallback = "") => value || fallback;
@@ -128,6 +136,10 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
     const match = categories.find((category) => category.key === activeCategory);
     return match?.sections ?? (sectionList.length ? sectionList : fallbackSections);
   }, [activeCategory, categories, sectionList, fallbackSections]);
+  const normalizedSummary = useMemo(() => {
+    const summary = (renderData?.summary || item?.summary || "").trim();
+    return summary.replace(/\s+/g, " ").slice(0, 240);
+  }, [renderData?.summary, item?.summary]);
 
   useEffect(() => {
     setActiveCategory("all");
@@ -153,7 +165,7 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
               {isTranslatingArticle ? getArticlePendingText(language, "title") : dynamicText(renderData?.title, item.title)}
             </h2>
             <p className="kms-modal__meta">
-              <span>{renderData?.date || published}</span>
+              <span>{renderDate || published}</span>
               <span>{t(item.category.replace("-", " "))}</span>
             </p>
           </div>
@@ -331,6 +343,15 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
                                     {dynamicText(detail.value)}
                                   </h4>
                                 );
+                              }
+                              const normalized = (detail.value || "").replace(/\s+/g, " ").slice(0, 240);
+                              if (
+                                detailIndex === 0 &&
+                                section === visibleSections[0] &&
+                                normalizedSummary &&
+                                normalized === normalizedSummary
+                              ) {
+                                return null;
                               }
                               const paragraphs = splitArticleParagraphs(detail.value);
                               return paragraphs.map((paragraph, paragraphIndex) => (
