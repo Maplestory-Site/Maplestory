@@ -247,7 +247,14 @@ export async function fetchGmsArticle(url, { forceRefresh = false } = {}) {
     heroImage: parsed.heroImage || (data?.imageThumbnail ? `https://g.nexonstatic.com${data.imageThumbnail}` : "")
   };
 
-  cache[url] = { cachedAt: new Date().toISOString(), payload };
-  await writeJson(GMS_ARTICLE_CACHE_FILE, cache);
+  try {
+    cache[url] = { cachedAt: new Date().toISOString(), payload };
+    await writeJson(GMS_ARTICLE_CACHE_FILE, cache);
+  } catch (error) {
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("[GMS] Failed to persist article cache.", error);
+    }
+  }
+
   return payload;
 }
