@@ -140,6 +140,17 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
     const summary = (renderData?.summary || item?.summary || "").trim();
     return summary.replace(/\s+/g, " ").slice(0, 240);
   }, [renderData?.summary, item?.summary]);
+  const breakdownSections = useMemo(() => {
+    if (!normalizedSummary) return visibleSections;
+    return visibleSections.filter((section, index) => {
+      if (index !== 0 || section.title !== "Overview") return true;
+      const summary = (section.summary || "").replace(/\s+/g, " ").slice(0, 240);
+      const firstDetail = section.details[0];
+      const firstText =
+        firstDetail?.type === "text" ? (firstDetail.value || "").replace(/\s+/g, " ").slice(0, 240) : "";
+      return summary !== normalizedSummary && firstText !== normalizedSummary;
+    });
+  }, [normalizedSummary, visibleSections]);
 
   useEffect(() => {
     setActiveCategory("all");
@@ -284,7 +295,7 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
             {!loading && !isTranslatingArticle && !visibleSections.length && <p>{t("No sections available yet. Try again in a moment.")}</p>}
             {!loading &&
               !isTranslatingArticle &&
-              visibleSections.map((section, index) => {
+              breakdownSections.map((section, index) => {
                 const key = `${section.title}-${index}`;
                 const isOpen = openTopics.includes(key);
                 return (
@@ -347,7 +358,7 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
                               const normalized = (detail.value || "").replace(/\s+/g, " ").slice(0, 240);
                               if (
                                 detailIndex === 0 &&
-                                section === visibleSections[0] &&
+                                section === breakdownSections[0] &&
                                 normalizedSummary &&
                                 normalized === normalizedSummary
                               ) {
