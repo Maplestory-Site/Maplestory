@@ -47,6 +47,15 @@ const ROOT_SELECTORS = [
   ".content"
 ];
 
+function scoreRootCandidate($, node) {
+  const textLength = cleanText($(node).text() || "").length;
+  const paragraphCount = $(node).find("p").length;
+  const headingCount = $(node).find("h1, h2, h3, h4").length;
+  const imageCount = $(node).find("img").length;
+  const listCount = $(node).find("ul, ol").length;
+  return textLength + paragraphCount * 220 + headingCount * 160 + imageCount * 120 + listCount * 140;
+}
+
 function resolveUrl(src, baseUrl) {
   if (!src) return "";
   if (src.startsWith("http://") || src.startsWith("https://")) return src;
@@ -397,18 +406,20 @@ export function parseArticleHtml(html = "", baseUrl = "") {
   let root = null;
   let rootSelector = "";
 
-  const postContent = $(".post-content").first();
-  if (postContent.length) {
-    root = postContent;
-    rootSelector = ".post-content";
-  } else {
-    for (const selector of ROOT_SELECTORS) {
-      const candidate = $(selector).first();
-      if (candidate.length) {
-        root = candidate;
-        rootSelector = selector;
-        break;
-      }
+  for (const selector of ROOT_SELECTORS) {
+    const candidates = $(selector).toArray();
+    if (!candidates.length) {
+      continue;
+    }
+
+    const bestCandidate = candidates
+      .map((node) => ({ node, score: scoreRootCandidate($, node) }))
+      .sort((left, right) => right.score - left.score)[0];
+
+    if (bestCandidate?.node && bestCandidate.score > 0) {
+      root = $(bestCandidate.node);
+      rootSelector = selector;
+      break;
     }
   }
 

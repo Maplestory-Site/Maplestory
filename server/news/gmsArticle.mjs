@@ -1,5 +1,5 @@
 import { GMS_ARTICLE_CACHE_FILE, GMS_ARTICLE_TTL_MINUTES, OFFICIAL_SOURCE } from "./config.mjs";
-import { parseArticleHtml, detectCategory } from "./articleParser.mjs";
+import { parseArticleHtml, detectCategory, groupSectionsByCategory } from "./articleParser.mjs";
 import { sanitizeText } from "./normalize.mjs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
@@ -243,7 +243,7 @@ export async function fetchGmsArticle(url) {
     summary: sanitizeText(data?.summary || "") || parsed.summary || "",
     keyPoints: buildKeyPoints(enrichedSections),
     sections: enrichedSections,
-    categories: parsed.categories,
+    categories: groupSectionsByCategory(enrichedSections),
     heroImage: parsed.heroImage || (data?.imageThumbnail ? `https://g.nexonstatic.com${data.imageThumbnail}` : "")
   };
 
