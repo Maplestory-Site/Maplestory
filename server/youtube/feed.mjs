@@ -3,7 +3,7 @@ import staticFeed from "../../src/data/youtubeVideos.json" with { type: "json" }
 const CHANNEL_HANDLE_URL = "https://www.youtube.com/@snailslayermain";
 const MAX_VIDEOS = 24;
 const CACHE_MS = 5 * 60 * 1000;
-const SEED_VIDEO_IDS = ["d_A90T991Qg", "-i-iViq2jjU", "5mIrGj4dR1A", "FUF1NI8vm1o"];
+const SEED_VIDEO_IDS = ["0Xjqa0LXQlg", "d_A90T991Qg", "-i-iViq2jjU", "5mIrGj4dR1A", "FUF1NI8vm1o"];
 
 let memoryCache = null;
 
