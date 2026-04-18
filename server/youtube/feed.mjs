@@ -1,10 +1,9 @@
-import { readFile } from "node:fs/promises";
+import staticFeed from "../../src/data/youtubeVideos.json" with { type: "json" };
 
 const CHANNEL_HANDLE_URL = "https://www.youtube.com/@snailslayermain";
 const MAX_VIDEOS = 24;
 const CACHE_MS = 5 * 60 * 1000;
 const SEED_VIDEO_IDS = ["d_A90T991Qg", "-i-iViq2jjU", "5mIrGj4dR1A", "FUF1NI8vm1o"];
-const STATIC_FEED_FILE = "src/data/youtubeVideos.json";
 
 let memoryCache = null;
 
@@ -94,13 +93,8 @@ function publishedTime(video) {
   return Number.isNaN(time) ? 0 : time;
 }
 
-async function readStaticVideos() {
-  try {
-    const payload = JSON.parse(await readFile(STATIC_FEED_FILE, "utf8"));
-    return Array.isArray(payload.videos) ? payload.videos : [];
-  } catch {
-    return [];
-  }
+function readStaticVideos() {
+  return Array.isArray(staticFeed.videos) ? staticFeed.videos : [];
 }
 
 async function fetchWatchHtml(videoId) {
@@ -170,7 +164,7 @@ export async function getYoutubeFeed({ forceRefresh = false } = {}) {
     .filter((id, index, allIds) => allIds.indexOf(id) === index)
     .slice(0, MAX_VIDEOS);
   const liveVideos = (await Promise.all(ids.map((id) => buildVideo(id)))).filter(Boolean);
-  const staticVideos = await readStaticVideos();
+  const staticVideos = readStaticVideos();
   const mergedVideos = [...liveVideos, ...staticVideos].filter(
     (video, index, videos) => video?.id && videos.findIndex((item) => item?.id === video.id) === index
   );
