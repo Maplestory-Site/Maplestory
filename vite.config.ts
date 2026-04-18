@@ -72,6 +72,20 @@ export default defineConfig({
               await contentHandler(localReq, createLocalApiResponse(res))
               return
             }
+            if (req.url.startsWith('/api/youtube')) {
+              const url = new URL(req.url, 'http://localhost')
+              const localReq = req as typeof req & {
+                query: Record<string, string>
+                body?: unknown
+              }
+              localReq.query = {
+                resource: 'youtube-feed',
+                ...Object.fromEntries(url.searchParams.entries())
+              }
+              localReq.body = {}
+              await contentHandler(localReq, createLocalApiResponse(res))
+              return
+            }
             if (req.url.startsWith('/api/kms?')) {
               const url = new URL(req.url, 'http://localhost')
               const target = url.searchParams.get('url')

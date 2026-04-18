@@ -39,6 +39,10 @@
       "destination": "/api/content?resource=news-feed"
     },
     {
+      "source": "/api/youtube",
+      "destination": "/api/content?resource=youtube-feed"
+    },
+    {
       "source": "/api/items",
       "destination": "/api/database?resource=items"
     },

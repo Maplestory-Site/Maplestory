@@ -1,8 +1,19 @@
 {
   "channelTitle": "snailslayer",
   "channelUrl": "https://www.youtube.com/@snailslayermain",
-  "lastSynced": "2026-04-16T18:24:00.012Z",
+  "lastSynced": "2026-04-18T04:39:31.133Z",
   "videos": [
+    {
+      "id": "0Xjqa0LXQlg",
+      "title": "v 268 Maple University 21st Anniversary Update Preview",
+      "description": "Maple University’s 21st Anniversary is here, and the v.268 Update Preview gives us an early look at what’s coming. In this video,…",
+      "category": "Guides",
+      "duration": "16:48",
+      "published": "Apr 17, 2026",
+      "href": "https://www.youtube.com/watch?v=0Xjqa0LXQlg",
+      "thumbnail": "https://i.ytimg.com/vi/0Xjqa0LXQlg/maxresdefault.jpg",
+      "viewCount": "60"
+    },
     {
       "id": "d_A90T991Qg",
       "title": "MapleStory NOW NEW SIX JOB SKILLS 🎮",
@@ -12,7 +23,7 @@
       "published": "Apr 9, 2026",
       "href": "https://www.youtube.com/watch?v=d_A90T991Qg",
       "thumbnail": "https://i.ytimg.com/vi/d_A90T991Qg/maxresdefault.jpg",
-      "viewCount": "90"
+      "viewCount": "95"
     },
     {
       "id": "-i-iViq2jjU",
@@ -23,7 +34,7 @@
       "published": "Apr 7, 2026",
       "href": "https://www.youtube.com/watch?v=-i-iViq2jjU",
       "thumbnail": "https://i.ytimg.com/vi/-i-iViq2jjU/maxresdefault.jpg",
-      "viewCount": "140"
+      "viewCount": "142"
     },
     {
       "id": "5mIrGj4dR1A",
@@ -45,7 +56,7 @@
       "published": "Mar 29, 2026",
       "href": "https://www.youtube.com/watch?v=FUF1NI8vm1o",
       "thumbnail": "https://i.ytimg.com/vi/FUF1NI8vm1o/maxresdefault.jpg",
-      "viewCount": "305"
+      "viewCount": "306"
     },
     {
       "id": "uj8ks6V8S_U",
@@ -56,7 +67,7 @@
       "published": "Mar 18, 2026",
       "href": "https://www.youtube.com/watch?v=uj8ks6V8S_U",
       "thumbnail": "https://i.ytimg.com/vi/uj8ks6V8S_U/maxresdefault.jpg",
-      "viewCount": "58"
+      "viewCount": "59"
     },
     {
       "id": "73gcKdoI5PI",
@@ -67,7 +78,7 @@
       "published": "Mar 13, 2026",
       "href": "https://www.youtube.com/watch?v=73gcKdoI5PI",
       "thumbnail": "https://i.ytimg.com/vi/73gcKdoI5PI/maxresdefault.jpg",
-      "viewCount": "53"
+      "viewCount": "55"
     },
     {
       "id": "isjFjmpAOkI",
@@ -78,7 +89,7 @@
       "published": "Mar 10, 2026",
       "href": "https://www.youtube.com/watch?v=isjFjmpAOkI",
       "thumbnail": "https://i.ytimg.com/vi/isjFjmpAOkI/sddefault.jpg",
-      "viewCount": "18"
+      "viewCount": "19"
     },
     {
       "id": "vmTjiO0AQ5w",
@@ -100,7 +111,7 @@
       "published": "Mar 5, 2026",
       "href": "https://www.youtube.com/watch?v=aYCJ1tx5l7U",
       "thumbnail": "https://i.ytimg.com/vi/aYCJ1tx5l7U/maxresdefault.jpg",
-      "viewCount": "130"
+      "viewCount": "131"
     },
     {
       "id": "ZfDi1SUYNGQ",
@@ -255,17 +266,6 @@
       "href": "https://www.youtube.com/watch?v=-S9rD3bFCLM",
       "thumbnail": "https://i.ytimg.com/vi/-S9rD3bFCLM/maxresdefault.jpg",
       "viewCount": "526"
-    },
-    {
-      "id": "vDeM-4d9Vnc",
-      "title": "MapleSchool EP1 🎒  Which Server Which Class Start Smart",
-      "description": "Welcome to MapleSchool 🍁📚 In this video, I break down the different MapleStory servers, explain what makes each one unique, and…",
-      "category": "Bossing",
-      "duration": "13:22",
-      "published": "Dec 31, 2025",
-      "href": "https://www.youtube.com/watch?v=vDeM-4d9Vnc",
-      "thumbnail": "https://i.ytimg.com/vi/vDeM-4d9Vnc/maxresdefault.jpg",
-      "viewCount": "57"
     }
   ]
 }

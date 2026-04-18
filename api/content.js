@@ -4,6 +4,7 @@ import { buildKmsPayloadFromHtml, fetchKmsArticle } from "../server/news/kmsArti
 import { getKmsFeed } from "../server/news/kmsFeed.mjs";
 import { sanitizeText } from "../server/news/normalize.mjs";
 import { getLatestNews, getNewsFeed, getNewsItemById } from "../server/news/service.mjs";
+import { getYoutubeFeed } from "../server/youtube/feed.mjs";
 
 function decodeTranslatePayload(payload) {
   if (!Array.isArray(payload) || !Array.isArray(payload[0])) return "";
@@ -445,6 +446,18 @@ export default async function handler(req, res) {
         isNew: item.isNew ?? false
       }))
     });
+    return;
+  }
+
+  if (resource === "youtube-feed") {
+    try {
+      const forceRefresh = req.query?.force === "1" || req.query?.force === "true";
+      const feed = await getYoutubeFeed({ forceRefresh });
+      res.setHeader("Cache-Control", forceRefresh ? "no-store, max-age=0" : "s-maxage=300, stale-while-revalidate=1800");
+      res.status(200).json(feed);
+    } catch {
+      res.status(502).json({ error: "Failed to load YouTube feed." });
+    }
     return;
   }
 

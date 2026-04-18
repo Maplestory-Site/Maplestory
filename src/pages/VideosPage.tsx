@@ -7,7 +7,7 @@ import { RecommendationPanel } from "../components/content/RecommendationPanel";
 import { VideoCard } from "../components/content/VideoCard";
 import { SectionHeader } from "../components/ui/SectionHeader";
 import { mockWatchHistory } from "../features/profile/mockProfileData";
-import { youtubeChannelUrl, youtubeLastSynced, youtubeVideos } from "../data/youtubeFeed";
+import { useYoutubeFeed } from "../hooks/useYoutubeFeed";
 import { buildRecommendationSections } from "../lib/aiExperience";
 import { contentFilters, filterVideos, type ContentFilterKey, inferPrimaryCategory } from "../lib/contentDiscovery";
 
@@ -17,9 +17,11 @@ export function VideosPage() {
   const page = Math.max(1, Number(searchParams.get("page") || "1"));
   const currentFilter = (searchParams.get("filter") || "all") as ContentFilterKey;
   const pageSize = 8;
+  const youtubeFeed = useYoutubeFeed();
+  const youtubeVideos = youtubeFeed.videos;
 
   const safeFilter = contentFilters.some((filter) => filter.key === currentFilter) ? currentFilter : "all";
-  const filteredVideos = useMemo(() => filterVideos(youtubeVideos, safeFilter), [safeFilter]);
+  const filteredVideos = useMemo(() => filterVideos(youtubeVideos, safeFilter), [safeFilter, youtubeVideos]);
   const totalPages = Math.max(1, Math.ceil(filteredVideos.length / pageSize));
   const currentPage = Math.min(page, totalPages);
   const filterCounts = useMemo(
@@ -32,7 +34,7 @@ export function VideosPage() {
         },
         { all: 0, boss: 0, guide: 0, funny: 0, progression: 0 }
       ),
-    []
+    [youtubeVideos]
   );
 
   const visibleVideos = useMemo(() => {
@@ -43,7 +45,7 @@ export function VideosPage() {
     }));
   }, [currentPage, filteredVideos]);
 
-  const recommendationSections = useMemo(() => buildRecommendationSections(youtubeVideos, mockWatchHistory), []);
+  const recommendationSections = useMemo(() => buildRecommendationSections(youtubeVideos, mockWatchHistory), [youtubeVideos]);
 
   function updateSearch(nextPage: number, nextFilter: ContentFilterKey) {
     setSearchParams(
@@ -68,8 +70,8 @@ export function VideosPage() {
         <div className="container">
           <SectionHeader
             description={
-              youtubeLastSynced
-                ? `${filterCounts[safeFilter]} picks ready. Last refresh: ${new Date(youtubeLastSynced).toLocaleString("en-US")}`
+              youtubeFeed.lastSynced
+                ? `${filterCounts[safeFilter]} picks ready. Last refresh: ${new Date(youtubeFeed.lastSynced).toLocaleString("en-US")}`
                 : "Start with the newest drop."
             }
             title={safeFilter === "all" ? "Latest uploads" : `${contentFilters.find((filter) => filter.key === safeFilter)?.label} picks`}
@@ -119,7 +121,7 @@ export function VideosPage() {
 
       <CtaBanner
         description="Want every upload? Subscribe and stay close to the next drop."
-        primaryCta={{ label: "See the Channel", href: youtubeChannelUrl }}
+        primaryCta={{ label: "See the Channel", href: youtubeFeed.channelUrl }}
         secondaryCta={{ label: "Watch Live Now", href: "/live" }}
         title="Keep up"
       />
