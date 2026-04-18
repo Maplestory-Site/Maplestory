@@ -90,7 +90,31 @@ function formatDuration(value = "") {
 function publishedTime(video) {
   const value = video?.published || "";
   const time = Date.parse(value);
-  return Number.isNaN(time) ? 0 : time;
+  if (!Number.isNaN(time)) {
+    return time;
+  }
+
+  const match = value.match(/^([A-Za-z]{3}) (\d{1,2}), (\d{4})$/);
+  const monthIndex = {
+    Jan: 0,
+    Feb: 1,
+    Mar: 2,
+    Apr: 3,
+    May: 4,
+    Jun: 5,
+    Jul: 6,
+    Aug: 7,
+    Sep: 8,
+    Oct: 9,
+    Nov: 10,
+    Dec: 11
+  }[match?.[1] || ""];
+
+  if (monthIndex === undefined) {
+    return 0;
+  }
+
+  return Date.UTC(Number(match[3]), monthIndex, Number(match[2]));
 }
 
 function readStaticVideos() {
