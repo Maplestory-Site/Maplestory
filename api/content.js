@@ -16,6 +16,55 @@ function decodeTranslatePayload(payload) {
 
 const translationMemory = new Map();
 const MAX_TRANSLATE_CONCURRENCY = 8;
+const REQUIRED_LATEST_YOUTUBE_VIDEO = {
+  id: "0Xjqa0LXQlg",
+  title: "v 268 Maple University 21st Anniversary Update Preview",
+  description:
+    "Maple University's 21st Anniversary is here, and the v.268 Update Preview gives us an early look at what's coming.",
+  category: "Guides",
+  duration: "16:48",
+  published: "Apr 17, 2026",
+  href: "https://www.youtube.com/watch?v=0Xjqa0LXQlg",
+  thumbnail: "https://i.ytimg.com/vi/0Xjqa0LXQlg/maxresdefault.jpg",
+  viewCount: ""
+};
+
+function getYoutubePublishedTime(video) {
+  const value = video?.published || "";
+  const parsed = Date.parse(value);
+  if (!Number.isNaN(parsed)) return parsed;
+
+  const match = value.match(/^([A-Za-z]{3}) (\d{1,2}), (\d{4})$/);
+  const monthIndex = {
+    Jan: 0,
+    Feb: 1,
+    Mar: 2,
+    Apr: 3,
+    May: 4,
+    Jun: 5,
+    Jul: 6,
+    Aug: 7,
+    Sep: 8,
+    Oct: 9,
+    Nov: 10,
+    Dec: 11
+  }[match?.[1] || ""];
+
+  return monthIndex === undefined ? 0 : Date.UTC(Number(match[3]), monthIndex, Number(match[2]));
+}
+
+function normalizeYoutubeFeed(feed) {
+  const videos = Array.isArray(feed?.videos) ? feed.videos : [];
+  const mergedVideos = [REQUIRED_LATEST_YOUTUBE_VIDEO, ...videos]
+    .filter((video, index, allVideos) => video?.id && allVideos.findIndex((item) => item?.id === video.id) === index)
+    .toSorted((a, b) => getYoutubePublishedTime(b) - getYoutubePublishedTime(a))
+    .slice(0, 24);
+
+  return {
+    ...feed,
+    videos: mergedVideos
+  };
+}
 
 function normalizeTranslateLanguage(language = "en") {
   const normalized = String(language).toLowerCase();
@@ -452,7 +501,7 @@ export default async function handler(req, res) {
   if (resource === "youtube-feed") {
     try {
       const forceRefresh = req.query?.force === "1" || req.query?.force === "true";
-      const feed = await getYoutubeFeed({ forceRefresh });
+      const feed = normalizeYoutubeFeed(await getYoutubeFeed({ forceRefresh }));
       res.setHeader("Cache-Control", forceRefresh ? "no-store, max-age=0" : "s-maxage=300, stale-while-revalidate=1800");
       res.status(200).json(feed);
     } catch {
