@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   ClassSkillId,
   GearId,
   GlobalMultId,
@@ -19,6 +19,7 @@ import {
   SKILLS,
   UPGRADES,
 } from "./progressionSystem";
+import { CLASSES } from "./classSystem";
 import { SKILL_DEFINITIONS, SKILLS_BY_CLASS } from "./skillSystem";
 
 export type PlayerActionType =
@@ -27,6 +28,7 @@ export type PlayerActionType =
   | "upgrade"
   | "skill"
   | "class"
+  | "gear"
   | "prestige"
   | "rebirth";
 
@@ -87,22 +89,23 @@ export const DEFAULT_PLAYER_BEHAVIOR: PlayerBehaviorState = {
 };
 
 export function getSmartSkillRecommendation(state: IdleGameState): ClassSkillId | null {
-  if (!state.selectedClass) return null;
+  if (!state.classId) return null;
 
-  const skillIds = SKILLS_BY_CLASS[state.selectedClass] ?? [];
-  const enemyMaxHp = Math.max(1, state.currentEnemyMaxHp || state.currentEnemyHp || 1);
-  const enemyHpPercent = state.currentEnemyHp / enemyMaxHp;
+  const skillIds: ClassSkillId[] = SKILLS_BY_CLASS[state.classId] ?? [];
+  const enemyMaxHp = Math.max(1, state.enemyMaxHp || state.enemyHp || 1);
+  const enemyHpPercent = state.enemyHp / enemyMaxHp;
   const bossStage = isBossStage(state.stage);
+  const maxResource = CLASSES[state.classId]?.maxResource ?? 100;
 
-  const usable = skillIds.filter((skillId) => {
+  const usable = skillIds.filter((skillId: ClassSkillId) => {
     const definition = SKILL_DEFINITIONS[skillId];
     if (!definition || state.level < definition.unlockLevel) return false;
     if ((state.skillCooldowns[skillId] ?? 0) > 0) return false;
-    return state.resource.current >= definition.resourceCost;
+    return state.resource >= definition.resourceCost;
   });
 
   const scored = usable
-    .map((skillId) => {
+    .map((skillId: ClassSkillId) => {
       const definition = SKILL_DEFINITIONS[skillId];
       let priority = definition.unlockLevel;
 
@@ -119,7 +122,7 @@ export function getSmartSkillRecommendation(state: IdleGameState): ClassSkillId 
       }
 
       if (definition.effect.type === "buff_regen") {
-        priority += state.resource.current < state.resource.max * 0.45 ? 50 : 10;
+        priority += state.resource < maxResource * 0.45 ? 50 : 10;
       }
 
       return { skillId, priority };

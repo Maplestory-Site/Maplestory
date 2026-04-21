@@ -1,4 +1,4 @@
-/**
+﻿/**
  * IdleStory World monster ecosystem.
  *
  * Map identity lives in monsters.json. This module enriches that content with
@@ -550,7 +550,7 @@ function getThemeTrait(theme: string, slotIndex: number): MonsterTraitId {
   return themeTraits[slotIndex % themeTraits.length] ?? "fast";
 }
 
-function buildNormalVariants(seed: RawMonsterSeed, map: RawMapMonsterContent, slotIndex: number): MonsterVariantProfile[] {
+function buildNormalVariants(_seed: RawMonsterSeed, map: RawMapMonsterContent, slotIndex: number): MonsterVariantProfile[] {
   const themeTrait = getThemeTrait(map.theme, slotIndex);
   return [
     BASE_VARIANT,
@@ -575,7 +575,7 @@ function getEliteTraitIds(map: RawMapMonsterContent, seed: RawMonsterSeed): Mons
   return [themeTraits[0] ?? "berserk", themeTraits[1] ?? "burst"];
 }
 
-function getBossTraitIds(map: RawMapMonsterContent, seed: RawMonsterSeed): MonsterTraitId[] {
+function getBossTraitIds(_map: RawMapMonsterContent, seed: RawMonsterSeed): MonsterTraitId[] {
   const text = `${seed.name} ${seed.specialTrait} ${seed.description ?? ""}`.toLowerCase();
   const traits: MonsterTraitId[] = ["berserk"];
   if (/shield|guard|stone|armor|shell|scale/.test(text)) traits.push("shielded");

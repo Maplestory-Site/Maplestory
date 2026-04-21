@@ -1,4 +1,4 @@
-/**
+﻿/**
  * IdleStory World — Progression System
  *
  * Hero and upgrade data, XP/leveling formulas, resource rates, prestige gate.
@@ -20,7 +20,6 @@ import { calculateTotalEquipmentStats } from "./inventorySystem";
 import { calculateHeroTeamDps } from "./heroSystem";
 import {
   getMonstersByMap,
-  getStageMonsterByMap,
   toDatabaseMonster,
   type MapMonster
 } from "./monsterSystem";
@@ -128,8 +127,9 @@ export const BOSS_STAGE_IN_MAP = 10;
 
 export function getXpTarget(level: number): number {
   const safeLevel = Math.max(1, level);
-  const postTenRamp = safeLevel > 10 ? 1 + (safeLevel - 10) * 0.035 : 1;
-  return Math.floor(75 * Math.pow(safeLevel, 1.8) * postTenRamp);
+  // Steeper curve: ~3x harder at early levels, ~6x harder at level 50+
+  const postTenRamp = safeLevel > 10 ? 1 + (safeLevel - 10) * 0.09 : 1;
+  return Math.floor(220 * Math.pow(safeLevel, 1.95) * postTenRamp);
 }
 
 export function getStageInMap(stage: number): number {
@@ -151,13 +151,14 @@ export function getMonsterHpForStage(stage: number, mapLevel: number, monster?: 
   }
 
   const stageInMap = getStageInMap(stage);
-  const normalHp = Math.floor(40 * Math.pow(stageInMap, 1.5));
-  const mapMultiplier = 1 + Math.max(0, mapLevel - 1) * 0.18;
+  // Increased base HP so monsters last 4-12 seconds at typical DPS values
+  const normalHp = Math.floor(350 * Math.pow(stageInMap, 1.7));
+  const mapMultiplier = 1 + Math.max(0, mapLevel - 1) * 0.22;
   const scaledNormalHp = Math.floor(normalHp * mapMultiplier);
   const encounterType = getEncounterTypeForStage(stage);
 
-  if (encounterType === "boss") return Math.floor(scaledNormalHp * 8);
-  if (encounterType === "elite") return Math.floor(scaledNormalHp * 3);
+  if (encounterType === "boss") return Math.floor(scaledNormalHp * 10);
+  if (encounterType === "elite") return Math.floor(scaledNormalHp * 4);
   return scaledNormalHp;
 }
 
@@ -169,7 +170,13 @@ export function getMonsterXpReward(
   monster?: Pick<MapMonster, "xpReward">
 ): number {
   const cycle = Math.floor((Math.max(1, stage) - 1) / MAP_STAGE_COUNT);
-  const antiFarmMultiplier = playerLevel > mapLevel + 5 ? 0.5 : 1;
+  // Graduated anti-farm: full XP when on-level, drops fast when overleveled
+  const levelGap = playerLevel - mapLevel;
+  const antiFarmMultiplier =
+    levelGap > 20 ? 0.05 :
+    levelGap > 12 ? 0.15 :
+    levelGap > 6  ? 0.40 :
+    levelGap > 2  ? 0.70 : 1.0;
   if (monster) {
     return Math.max(1, Math.floor(monster.xpReward * antiFarmMultiplier * Math.pow(1.03, cycle)));
   }
@@ -220,8 +227,9 @@ export function applyXpGain(currentLevel: number, currentXp: number, xpGain: num
  */
 export function calculateDPS(state: IdleGameState): number {
   // ── Base damage from heroes and gear ─────────────────────────────────────
-  const forgeBoost = 1 + state.upgrades.forge * UPGRADES.forge.boost;
-  const prestigeBonus = 1 + state.prestigeCount * 0.05;
+  // Softened multipliers to prevent snowballing too fast
+  const forgeBoost = 1 + state.upgrades.forge * UPGRADES.forge.boost * 0.6;
+  const prestigeBonus = 1 + state.prestigeCount * 0.03;
 
   const heroDps = calculateHeroTeamDps(state.heroLevels);
   const gearDps = (Object.entries(state.gearLevels) as [GearId, number][]).reduce(

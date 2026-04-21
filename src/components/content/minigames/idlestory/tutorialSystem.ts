@@ -139,10 +139,9 @@ export function isTutorialActive(t: TutorialState): boolean {
  * 120+         →  1×  (normal speed)
  */
 export function getNewPlayerDpsMult(totalPlayTimeSeconds: number): number {
-  if (totalPlayTimeSeconds <= 10)  return 5.0;
-  if (totalPlayTimeSeconds <= 30)  return 3.0;
-  if (totalPlayTimeSeconds <= 60)  return 2.0;
-  if (totalPlayTimeSeconds <= 120) return 1.5;
+  if (totalPlayTimeSeconds <= 30)  return 1.8;
+  if (totalPlayTimeSeconds <= 90)  return 1.4;
+  if (totalPlayTimeSeconds <= 180) return 1.1;
   return 1.0;
 }
 
@@ -158,11 +157,9 @@ export function getNewPlayerDpsMult(totalPlayTimeSeconds: number): number {
  * 180+         →  1×
  */
 export function getNewPlayerXpMult(totalPlayTimeSeconds: number): number {
-  if (totalPlayTimeSeconds <= 10)  return 6.0;
-  if (totalPlayTimeSeconds <= 30)  return 5.0;
-  if (totalPlayTimeSeconds <= 60)  return 3.0;
-  if (totalPlayTimeSeconds <= 120) return 2.0;
-  if (totalPlayTimeSeconds <= 180) return 1.5;
+  if (totalPlayTimeSeconds <= 30)  return 2.0;
+  if (totalPlayTimeSeconds <= 90)  return 1.5;
+  if (totalPlayTimeSeconds <= 180) return 1.2;
   return 1.0;
 }
 
