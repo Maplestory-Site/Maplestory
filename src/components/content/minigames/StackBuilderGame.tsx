@@ -38,7 +38,10 @@ export function StackBuilderGame() {
   const [direction, setDirection] = useState(1);
   const [movingWidth, setMovingWidth] = useState(BASE_WIDTH);
   const [score, setScore] = useState(0);
-  const [bestScore, setBestScore] = useState(0);
+  const [bestScore, setBestScore] = useState(() => {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    return saved ? (Number(saved) || 0) : 0;
+  });
   const [combo, setCombo] = useState(0);
   const [level, setLevel] = useState(1);
   const [shake, setShake] = useState(false);
@@ -69,13 +72,6 @@ export function StackBuilderGame() {
   useEffect(() => {
     levelRef.current = level;
   }, [level]);
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      setBestScore(Number(saved) || 0);
-    }
-  }, []);
 
   useEffect(() => {
     if (phase !== "running") {

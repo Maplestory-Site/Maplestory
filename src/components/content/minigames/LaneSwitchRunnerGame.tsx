@@ -31,7 +31,10 @@ export function LaneSwitchRunnerGame() {
   const [lane, setLane] = useState(1);
   const [obstacles, setObstacles] = useState<Obstacle[]>([]);
   const [score, setScore] = useState(0);
-  const [bestScore, setBestScore] = useState(0);
+  const [bestScore, setBestScore] = useState(() => {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    return saved ? (Number(saved) || 0) : 0;
+  });
   const [distance, setDistance] = useState(0);
   const [streak, setStreak] = useState(0);
   const [shake, setShake] = useState(false);
@@ -49,6 +52,23 @@ export function LaneSwitchRunnerGame() {
   const debugTickRef = useRef(0);
   const spawnCountRef = useRef(0);
   const isTouch = useTouchDevice();
+
+  function startRun() {
+    nextId.current = 1;
+    spawnTimerRef.current = 0;
+    jumpTimeRef.current = 0;
+    jumpCooldownRef.current = 0;
+    distanceRef.current = 0;
+    spawnCountRef.current = 0;
+    setLane(1);
+    setObstacles([]);
+    setScore(0);
+    setDistance(0);
+    setStreak(0);
+    setJumpActive(false);
+    setPhase("running");
+    playSuccess();
+  }
 
   function finishRun() {
     if (!runRef.current) return;
@@ -96,13 +116,6 @@ export function LaneSwitchRunnerGame() {
   useEffect(() => {
     laneRef.current = lane;
   }, [lane]);
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      setBestScore(Number(saved) || 0);
-    }
-  }, []);
 
   useEffect(() => {
     if (phase !== "running") {
@@ -249,23 +262,6 @@ export function LaneSwitchRunnerGame() {
     if (distance >= 80) return "Fast";
     return "Flow";
   }, [distance]);
-
-  function startRun() {
-    nextId.current = 1;
-    spawnTimerRef.current = 0;
-    jumpTimeRef.current = 0;
-    jumpCooldownRef.current = 0;
-    distanceRef.current = 0;
-    spawnCountRef.current = 0;
-    setLane(1);
-    setObstacles([]);
-    setScore(0);
-    setDistance(0);
-    setStreak(0);
-    setJumpActive(false);
-    setPhase("running");
-    playSuccess();
-  }
 
   function pauseRun() {
     if (phase !== "running") return;

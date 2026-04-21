@@ -185,7 +185,7 @@ export async function requestDynamicTranslations(
 
   if (!uniqueTexts.length) return {};
 
-  let mergedTranslations: Record<string, string> = {};
+  const mergedTranslations: Record<string, string> = {};
   const missingTexts: string[] = [];
 
   uniqueTexts.forEach((text) => {

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from "react";
+import { useMemo, useState } from "react";
 import { NavLink, useParams } from "react-router-dom";
 import { usePageMeta } from "../app/usePageMeta";
 import { ItemDetailsPanel } from "../components/database/ItemDetailsPanel";
@@ -9,7 +9,6 @@ import { PetDetailsPanel } from "../components/database/PetDetailsPanel";
 import { PetGrid } from "../components/database/PetGrid";
 import { QuestDetailsPanel } from "../components/database/QuestDetailsPanel";
 import { QuestGrid } from "../components/database/QuestGrid";
-import { SimulatorStudio } from "../components/database/SimulatorStudio";
 import { BossSpotlightSection } from "../components/monsters/BossSpotlightSection";
 import { MonsterCompareModal } from "../components/monsters/MonsterCompareModal";
 import { MonsterDropsDatabase } from "../components/monsters/MonsterDropsDatabase";
@@ -47,8 +46,7 @@ const databaseSections = [
   { id: "items", label: "Items" },
   { id: "maps", label: "Maps" },
   { id: "pets", label: "Pets" },
-  { id: "quests", label: "Quests" },
-  { id: "simulator", label: "Simulator" }
+  { id: "quests", label: "Quests" }
 ] as const;
 
 type DatabaseSection = (typeof databaseSections)[number]["id"];
@@ -95,12 +93,12 @@ export function MonstersPage() {
   const petsFeed = usePetsFeed();
   const questsFeed = useQuestsFeed();
 
-  // Refs for tracking previous filter keys (during-render pagination reset pattern)
-  const prevMonsterKeyRef = useRef("");
-  const prevItemKeyRef = useRef("");
-  const prevMapKeyRef = useRef("");
-  const prevPetKeyRef = useRef("");
-  const prevQuestKeyRef = useRef("");
+  // State for tracking previous filter keys — enables during-render pagination reset
+  const [prevMonsterKey, setPrevMonsterKey] = useState("");
+  const [prevItemKey, setPrevItemKey] = useState("");
+  const [prevMapKey, setPrevMapKey] = useState("");
+  const [prevPetKey, setPrevPetKey] = useState("");
+  const [prevQuestKey, setPrevQuestKey] = useState("");
 
   const regions = useMemo(() => getMonsterRegions(feed.items), [feed.items]);
   const weaknesses = useMemo(() => getMonsterWeaknesses(feed.items), [feed.items]);
@@ -125,8 +123,8 @@ export function MonstersPage() {
 
   // Reset monster page during render when filters/section change
   const monsterKey = `${activeSection}-${feed.items.length}-${JSON.stringify(filters)}`;
-  if (prevMonsterKeyRef.current !== monsterKey) {
-    prevMonsterKeyRef.current = monsterKey;
+  if (prevMonsterKey !== monsterKey) {
+    setPrevMonsterKey(monsterKey);
     if (currentPage !== 1) setCurrentPage(1);
   }
   const safePage = Math.min(currentPage, totalPages);
@@ -170,8 +168,8 @@ export function MonstersPage() {
 
   // Reset item page during render when filters change
   const itemKey = `${activeSection}-${itemsFeed.items.length}-${itemQuery}-${itemSort}-${itemTypeFilter}`;
-  if (prevItemKeyRef.current !== itemKey) {
-    prevItemKeyRef.current = itemKey;
+  if (prevItemKey !== itemKey) {
+    setPrevItemKey(itemKey);
     if (itemCurrentPage !== 1) setItemCurrentPage(1);
   }
   const safeItemPage = Math.min(itemCurrentPage, itemTotalPages);
@@ -209,8 +207,8 @@ export function MonstersPage() {
 
   // Reset map page during render when filters change
   const mapKey = `${activeSection}-${mapsFeed.items.length}-${mapQuery}-${mapRegionFilter}`;
-  if (prevMapKeyRef.current !== mapKey) {
-    prevMapKeyRef.current = mapKey;
+  if (prevMapKey !== mapKey) {
+    setPrevMapKey(mapKey);
     if (mapCurrentPage !== 1) setMapCurrentPage(1);
   }
   const safeMapPage = Math.min(mapCurrentPage, mapTotalPages);
@@ -244,8 +242,8 @@ export function MonstersPage() {
 
   // Reset quest page during render when filters change
   const questKey = `${activeSection}-${questsFeed.items.length}-${questQuery}-${questCategoryFilter}`;
-  if (prevQuestKeyRef.current !== questKey) {
-    prevQuestKeyRef.current = questKey;
+  if (prevQuestKey !== questKey) {
+    setPrevQuestKey(questKey);
     if (questCurrentPage !== 1) setQuestCurrentPage(1);
   }
   const safeQuestPage = Math.min(questCurrentPage, questTotalPages);
@@ -296,8 +294,8 @@ export function MonstersPage() {
 
   // Reset pet page during render when filters change
   const petKey = `${activeSection}-${petsFeed.items.length}-${petQuery}-${petCategoryFilter}`;
-  if (prevPetKeyRef.current !== petKey) {
-    prevPetKeyRef.current = petKey;
+  if (prevPetKey !== petKey) {
+    setPrevPetKey(petKey);
     if (petCurrentPage !== 1) setPetCurrentPage(1);
   }
   const safePetPage = Math.min(petCurrentPage, petTotalPages);
@@ -324,8 +322,6 @@ export function MonstersPage() {
           ? petsFeed.items.length
           : activeSection === "quests"
             ? questsFeed.items.length
-            : activeSection === "simulator"
-              ? 24
             : feed.items.length;
 
   function handleFilterChange<K extends keyof MonsterFilters>(key: K, value: MonsterFilters[K]) {
@@ -366,7 +362,7 @@ export function MonstersPage() {
             ? "Track pet-related routes, tags, and preview entries."
             : activeSection === "quests"
               ? "Track quest monsters, quest drops, and useful routes."
-              : "Preview a Maple-style simulator with layered looks, poses, and backgrounds."
+              : "Browse monsters, bosses, drops, and maps fast."
           }
           title={databaseSections.find((section) => section.id === activeSection)?.label ?? "Monster"}
           total={heroTotal}
@@ -760,7 +756,6 @@ export function MonstersPage() {
           </>
         ) : null}
 
-        {activeSection === "simulator" ? <SimulatorStudio /> : null}
       </div>
 
       <MonsterDetailsPanel

@@ -104,6 +104,7 @@ export function BombDefuseGame() {
     return "steady";
   }, [timeLeft]);
 
+  /* eslint-disable react-hooks/purity */
   function buildRound(nextRound = round) {
     const count = Math.min(6, 3 + Math.floor(nextRound / 2));
     const options = shuffle(LABELS).slice(0, count);
@@ -133,6 +134,7 @@ export function BombDefuseGame() {
       setBaitId(null);
     }
   }
+  /* eslint-enable react-hooks/purity */
 
   function startRun() {
     setRound(1);

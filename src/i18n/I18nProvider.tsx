@@ -99,14 +99,24 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     document.documentElement.lang = language;
     document.documentElement.dir = languageMeta.dir;
     document.body.classList.toggle("is-rtl", isRtl);
-  }, [isRtl, language, languageMeta.dir]);
 
-  const setLanguage = useCallback((next: LanguageCode) => {
-    setLanguageState(next);
-  }, []);
+    // Don't dim the page on initial load — only animate actual language switches
+    if (isFirstLangEffect.current) {
+      isFirstLangEffect.current = false;
+      return;
+    }
+
+    document.body.classList.add("is-lang-switching");
+    const timer = window.setTimeout(() => {
+      document.body.classList.remove("is-lang-switching");
+    }, 180);
+    return () => window.clearTimeout(timer);
+  }, [isRtl, language, languageMeta.dir]);
 
   const pendingTranslationsRef = useRef(new Map<LanguageCode, Set<string>>());
   const flushTimerRef = useRef<number | null>(null);
+  const flushFrameRef = useRef<number | null>(null);
+  const isFirstLangEffect = useRef(true);
 
   const flushPendingTranslations = useCallback(
     async (targetLanguage: LanguageCode) => {
@@ -133,6 +143,35 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
+  const setLanguage = useCallback((next: LanguageCode) => {
+    // Cancel any pending debounce timer
+    if (flushTimerRef.current !== null) {
+      window.clearTimeout(flushTimerRef.current);
+      flushTimerRef.current = null;
+    }
+    if (flushFrameRef.current !== null) {
+      window.cancelAnimationFrame(flushFrameRef.current);
+      flushFrameRef.current = null;
+    }
+    setLanguageState(next);
+  }, []);
+
+  // Flush translations immediately after language changes (after render queues strings)
+  useEffect(() => {
+    if (language === "en") return;
+    // Use rAF so the render has completed and t()/td() have queued their strings
+    flushFrameRef.current = window.requestAnimationFrame(() => {
+      flushFrameRef.current = null;
+      void flushPendingTranslations(language);
+    });
+    return () => {
+      if (flushFrameRef.current !== null) {
+        window.cancelAnimationFrame(flushFrameRef.current);
+        flushFrameRef.current = null;
+      }
+    };
+  }, [language, flushPendingTranslations]);
+
   const queueTranslation = useCallback(
     (text: string) => {
       const value = text?.trim();
@@ -144,11 +183,12 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
       queue.add(value);
       pendingTranslationsRef.current.set(language, queue);
 
-      if (typeof window !== "undefined" && flushTimerRef.current == null) {
+      // Only set debounce timer if no rAF flush is pending
+      if (typeof window !== "undefined" && flushTimerRef.current == null && flushFrameRef.current == null) {
         flushTimerRef.current = window.setTimeout(() => {
           flushTimerRef.current = null;
           void flushPendingTranslations(language);
-        }, 120);
+        }, 50);
       }
     },
     [dynamicCache, flushPendingTranslations, language]
@@ -176,7 +216,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
         return decodeHtmlEntities(table[text]);
       }
       const translated = dynamicCache?.[language]?.[text];
-      if (isUsableDynamicTranslation(text, translated, language)) {
+      if (translated && isUsableDynamicTranslation(text, translated, language)) {
         return decodeHtmlEntities(translated);
       }
       queueTranslation(text);
@@ -201,6 +241,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useI18n() {
   const context = useContext(I18nContext);
   if (!context) {

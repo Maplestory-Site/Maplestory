@@ -62,7 +62,10 @@ export function NeoSnakeGame() {
   const [direction, setDirection] = useState<Direction>("right");
   const [queuedDirection, setQueuedDirection] = useState<Direction>("right");
   const [score, setScore] = useState(0);
-  const [bestScore, setBestScore] = useState(0);
+  const [bestScore, setBestScore] = useState(() => {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    return saved ? (Number(saved) || 0) : 0;
+  });
   const [speedTier, setSpeedTier] = useState(1);
   const [shake, setShake] = useState(false);
   const [boostTicks, setBoostTicks] = useState(0);
@@ -75,12 +78,65 @@ export function NeoSnakeGame() {
     directionRef.current = direction;
   }, [direction]);
 
-  useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      setBestScore(Number(saved) || 0);
+  function queueDirection(next: Direction) {
+    if (next === OPPOSITE[directionRef.current]) return;
+    setQueuedDirection(next);
+  }
+
+  function finishRun() {
+    setPhase("over");
+    updateGameMeta({ gameId: "neo-snake", score, outcome: "loss" });
+    setBestScore((current) => {
+      const next = Math.max(current, score);
+      window.localStorage.setItem(STORAGE_KEY, String(next));
+      return next;
+    });
+    playFailure();
+    if (shouldVibrate()) {
+      navigator.vibrate([30, 60, 30]);
     }
-  }, []);
+    setShake(true);
+    window.setTimeout(() => setShake(false), 260);
+  }
+
+  function step() {
+    if (phase !== "running") return;
+    setDirection(queuedDirection);
+    setBoostTicks((current) => Math.max(0, current - 1));
+
+    setSnake((current) => {
+      const head = current[0];
+      const nextHead = nextPosition(head, queuedDirection);
+
+      if (
+        nextHead.x < 0 ||
+        nextHead.y < 0 ||
+        nextHead.x >= GRID_SIZE ||
+        nextHead.y >= GRID_SIZE ||
+        current.some((segment) => segment.x === nextHead.x && segment.y === nextHead.y)
+      ) {
+        finishRun();
+        return current;
+      }
+
+      const nextSnake = [nextHead, ...current];
+      const ateFood = food && nextHead.x === food.x && nextHead.y === food.y;
+      if (!ateFood) {
+        nextSnake.pop();
+      } else {
+        playSuccess();
+        if (shouldVibrate()) {
+          navigator.vibrate(12);
+        }
+        setScore((value) => value + 40 + speedTier * 6);
+        setSpeedTier((value) => Math.min(6, value + 0.2));
+        setBoostTicks(6);
+        setFood(randomFood(nextSnake));
+      }
+
+      return nextSnake;
+    });
+  }
 
   useEffect(() => {
     if (phase !== "running") {
@@ -150,22 +206,6 @@ export function NeoSnakeGame() {
     setPhase("running");
   }
 
-  function finishRun() {
-    setPhase("over");
-    updateGameMeta({ gameId: "neo-snake", score, outcome: "loss" });
-    setBestScore((current) => {
-      const next = Math.max(current, score);
-      window.localStorage.setItem(STORAGE_KEY, String(next));
-      return next;
-    });
-    playFailure();
-    if (shouldVibrate()) {
-      navigator.vibrate([30, 60, 30]);
-    }
-    setShake(true);
-    window.setTimeout(() => setShake(false), 260);
-  }
-
   function resetRun() {
     setPhase("ready");
     setSnake([]);
@@ -173,11 +213,6 @@ export function NeoSnakeGame() {
     setScore(0);
     setSpeedTier(1);
     setBoostTicks(0);
-  }
-
-  function queueDirection(next: Direction) {
-    if (next === OPPOSITE[directionRef.current]) return;
-    setQueuedDirection(next);
   }
 
   function turnLeft() {
@@ -190,45 +225,6 @@ export function NeoSnakeGame() {
     const order: Direction[] = ["up", "right", "down", "left"];
     const idx = order.indexOf(directionRef.current);
     queueDirection(order[(idx + 1) % order.length]);
-  }
-
-  function step() {
-    if (phase !== "running") return;
-    setDirection(queuedDirection);
-    setBoostTicks((current) => Math.max(0, current - 1));
-
-    setSnake((current) => {
-      const head = current[0];
-      const nextHead = nextPosition(head, queuedDirection);
-
-      if (
-        nextHead.x < 0 ||
-        nextHead.y < 0 ||
-        nextHead.x >= GRID_SIZE ||
-        nextHead.y >= GRID_SIZE ||
-        current.some((segment) => segment.x === nextHead.x && segment.y === nextHead.y)
-      ) {
-        finishRun();
-        return current;
-      }
-
-      const nextSnake = [nextHead, ...current];
-      const ateFood = food && nextHead.x === food.x && nextHead.y === food.y;
-      if (!ateFood) {
-        nextSnake.pop();
-      } else {
-        playSuccess();
-        if (shouldVibrate()) {
-          navigator.vibrate(12);
-        }
-        setScore((value) => value + 40 + speedTier * 6);
-        setSpeedTier((value) => Math.min(6, value + 0.2));
-        setBoostTicks(6);
-        setFood(randomFood(nextSnake));
-      }
-
-      return nextSnake;
-    });
   }
 
   return (

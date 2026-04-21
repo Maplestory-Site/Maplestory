@@ -78,8 +78,10 @@ export function MapleTrainingGame() {
 
   useEffect(() => {
     if (trainingScore > bestScore) {
-      setBestScore(trainingScore);
-      window.localStorage.setItem(STORAGE_KEY, String(trainingScore));
+      window.setTimeout(() => {
+        setBestScore(trainingScore);
+        window.localStorage.setItem(STORAGE_KEY, String(trainingScore));
+      }, 0);
     }
   }, [trainingScore, bestScore]);
 

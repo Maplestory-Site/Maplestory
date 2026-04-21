@@ -29,7 +29,10 @@ export function ReactionTestGame() {
   const [zoneCenter, setZoneCenter] = useState(() => randomZoneCenter());
   const [score, setScore] = useState(0);
   const [combo, setCombo] = useState(0);
-  const [bestScore, setBestScore] = useState(0);
+  const [bestScore, setBestScore] = useState(() => {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    return saved ? (Number(saved) || 0) : 0;
+  });
   const [round, setRound] = useState(1);
   const [result, setResult] = useState<ReactionResult | null>(null);
   const [shake, setShake] = useState(false);
@@ -60,13 +63,6 @@ export function ReactionTestGame() {
   useEffect(() => {
     roundRef.current = round;
   }, [round]);
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      setBestScore(Number(saved) || 0);
-    }
-  }, []);
 
   useEffect(() => {
     if (phase !== "running") {
@@ -112,31 +108,6 @@ export function ReactionTestGame() {
       }
     };
   }, [phase, speed]);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.code !== "Space" && event.code !== "Enter") {
-        return;
-      }
-
-      event.preventDefault();
-
-      if (phase === "running") {
-        stopRun();
-        return;
-      }
-
-      if (phase === "paused") {
-        resumeRun();
-        return;
-      }
-
-      startRound();
-    };
-
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [phase, combo, score, perfectHalf, goodHalf]);
 
   function startRound() {
     setZoneCenter(randomZoneCenter());
@@ -204,6 +175,31 @@ export function ReactionTestGame() {
       window.localStorage.setItem(STORAGE_KEY, String(nextScore));
     }
   }
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.code !== "Space" && event.code !== "Enter") {
+        return;
+      }
+
+      event.preventDefault();
+
+      if (phase === "running") {
+        stopRun();
+        return;
+      }
+
+      if (phase === "paused") {
+        resumeRun();
+        return;
+      }
+
+      startRound();
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [phase, combo, score, perfectHalf, goodHalf]);
 
   function resetSession() {
     setPhase("ready");

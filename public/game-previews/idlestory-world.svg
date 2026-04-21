@@ -1,0 +1,28 @@
+<svg width="960" height="540" viewBox="0 0 960 540" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="960" height="540" rx="44" fill="#071318"/>
+  <rect x="46" y="44" width="868" height="452" rx="38" fill="url(#sky)"/>
+  <circle cx="760" cy="116" r="58" fill="#FFE29A" opacity=".8"/>
+  <path d="M46 374C148 330 244 350 346 314C470 270 560 318 650 284C746 248 824 292 914 250V496H46V374Z" fill="#0D3A35"/>
+  <path d="M84 400C202 352 286 396 410 354C548 308 634 378 756 334C828 308 876 324 914 302V496H84V400Z" fill="#135144"/>
+  <rect x="118" y="252" width="168" height="156" rx="18" fill="#17242F" stroke="#72F2C8" stroke-opacity=".45" stroke-width="4"/>
+  <path d="M100 258L202 172L304 258H100Z" fill="#FFB35F"/>
+  <rect x="164" y="312" width="72" height="96" rx="12" fill="#0A1117"/>
+  <rect x="374" y="224" width="210" height="184" rx="22" fill="#1E2335" stroke="#A7C7FF" stroke-opacity=".5" stroke-width="4"/>
+  <path d="M352 230L480 118L606 230H352Z" fill="#A47CFF"/>
+  <rect x="432" y="292" width="96" height="116" rx="14" fill="#0A1117"/>
+  <rect x="672" y="278" width="166" height="130" rx="20" fill="#1A2C2E" stroke="#FFD28A" stroke-opacity=".45" stroke-width="4"/>
+  <path d="M652 284L756 200L860 284H652Z" fill="#6DE0BD"/>
+  <circle cx="220" cy="438" r="34" fill="#FF7557"/>
+  <circle cx="300" cy="440" r="26" fill="#8FF7D5"/>
+  <circle cx="620" cy="438" r="31" fill="#BFA7FF"/>
+  <path d="M105 96H600" stroke="#EAF9F8" stroke-width="16" stroke-linecap="round"/>
+  <path d="M105 136H490" stroke="#EAF9F8" stroke-opacity=".62" stroke-width="12" stroke-linecap="round"/>
+  <text x="104" y="102" fill="#071318" font-size="20" font-family="Arial, sans-serif" font-weight="800">IDLESTORY WORLD</text>
+  <defs>
+    <linearGradient id="sky" x1="116" y1="70" x2="870" y2="470" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#69D7FF"/>
+      <stop offset=".48" stop-color="#8FF0D0"/>
+      <stop offset="1" stop-color="#1B5A52"/>
+    </linearGradient>
+  </defs>
+</svg>

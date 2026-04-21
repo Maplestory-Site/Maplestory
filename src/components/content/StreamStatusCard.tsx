@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { Badge } from "../ui/Badge";
 import { Button } from "../ui/Button";
 import { twitchChannelLogin } from "../../data/twitchFeed";

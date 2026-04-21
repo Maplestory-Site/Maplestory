@@ -15,7 +15,8 @@ export type GameId =
   | "memory-flash"
   | "lane-switch-runner"
   | "ice-slide-puzzle"
-  | "boss-clicker";
+  | "boss-clicker"
+  | "idlestory-world";
 
 export type GameResult = {
   gameId: GameId;
@@ -119,7 +120,8 @@ const DEFAULT_STATE: GameMetaState = {
     "memory-flash": 0,
     "lane-switch-runner": 0,
     "ice-slide-puzzle": 0,
-    "boss-clicker": 0
+    "boss-clicker": 0,
+    "idlestory-world": 0
   },
   gamePlays: {
     "reaction-test": 0,
@@ -135,7 +137,8 @@ const DEFAULT_STATE: GameMetaState = {
     "memory-flash": 0,
     "lane-switch-runner": 0,
     "ice-slide-puzzle": 0,
-    "boss-clicker": 0
+    "boss-clicker": 0,
+    "idlestory-world": 0
   },
   recent: [],
   runs: [],
@@ -200,7 +203,8 @@ function buildDailyMissions(dateKey: string): DailyMissionsState {
     "neo-snake",
     "lane-switch-runner",
     "memory-flash",
-    "bomb-defuse"
+    "bomb-defuse",
+    "idlestory-world"
   ];
   const gameId = gamePool[Math.floor(rand() * gamePool.length)];
   const missions: DailyMission[] = [
@@ -266,7 +270,7 @@ function applyDailyMissionProgress(state: GameMetaState, result: GameResult) {
   let bonusCoins = 0;
   let bonusBoxes = 0;
   const missions = daily.missions.map((mission) => {
-    let next = { ...mission };
+    const next = { ...mission };
     if (mission.type === "plays") {
       next.current = Math.min(mission.target, mission.current + 1);
     }

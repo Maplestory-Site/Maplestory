@@ -29,7 +29,10 @@ export function TapDodgeGame() {
   const { playFailure, playSuccess } = useMiniGamesSound();
   const [phase, setPhase] = useState<"ready" | "running" | "paused" | "over">("ready");
   const [score, setScore] = useState(0);
-  const [best, setBest] = useState(0);
+  const [best, setBest] = useState(() => {
+    const stored = window.localStorage.getItem(STORAGE_KEY);
+    return stored ? (Number(stored) || 0) : 0;
+  });
   const [combo, setCombo] = useState(0);
   const [speedTier, setSpeedTier] = useState(1);
   const [shake, setShake] = useState(false);
@@ -52,12 +55,24 @@ export function TapDodgeGame() {
     playerRef.current = playerX;
   }, [playerX]);
 
-  useEffect(() => {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      setBest(Number(stored) || 0);
+  function finishRun() {
+    if (!runRef.current) return;
+    runRef.current = false;
+    const finalScore = Math.round(scoreRef.current);
+    setPhase("over");
+    playFailure();
+    updateGameMeta({ gameId: "tap-dodge", score: finalScore, duration: scoreRef.current / 10, outcome: "loss" });
+    if (shouldVibrate()) {
+      navigator.vibrate([30, 50, 30]);
     }
-  }, []);
+    setShake(true);
+    window.setTimeout(() => setShake(false), 320);
+    setBest((currentBest) => {
+      const nextBest = Math.max(currentBest, finalScore);
+      window.localStorage.setItem(STORAGE_KEY, String(nextBest));
+      return nextBest;
+    });
+  }
 
   useEffect(() => {
     if (phase !== "running") {
@@ -184,6 +199,34 @@ export function TapDodgeGame() {
     };
   }, [phase]);
 
+  function startRun() {
+    nextId.current = 1;
+    spawnTimerRef.current = 0;
+    spawnCountRef.current = 0;
+    scoreRef.current = 0;
+    comboRef.current = 0;
+    setObstacles([]);
+    setScore(0);
+    setCombo(0);
+    setPlayerX(0);
+    setPhase("running");
+    playSuccess();
+  }
+
+  function moveLeft() {
+    if (phase !== "running") {
+      startRun();
+    }
+    setPlayerX((current) => Math.max(current - 0.4, -1));
+  }
+
+  function moveRight() {
+    if (phase !== "running") {
+      startRun();
+    }
+    setPlayerX((current) => Math.min(current + 0.4, 1));
+  }
+
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
       if (phase !== "running") return;
@@ -209,20 +252,6 @@ export function TapDodgeGame() {
     return "Warmup";
   }, [speedTier]);
 
-  function startRun() {
-    nextId.current = 1;
-    spawnTimerRef.current = 0;
-    spawnCountRef.current = 0;
-    scoreRef.current = 0;
-    comboRef.current = 0;
-    setObstacles([]);
-    setScore(0);
-    setCombo(0);
-    setPlayerX(0);
-    setPhase("running");
-    playSuccess();
-  }
-
   function pauseRun() {
     if (phase !== "running") return;
     setPhase("paused");
@@ -232,25 +261,6 @@ export function TapDodgeGame() {
     if (phase !== "paused") return;
     lastFrameRef.current = null;
     setPhase("running");
-  }
-
-  function finishRun() {
-    if (!runRef.current) return;
-    runRef.current = false;
-    const finalScore = Math.round(scoreRef.current);
-    setPhase("over");
-    playFailure();
-    updateGameMeta({ gameId: "tap-dodge", score: finalScore, duration: scoreRef.current / 10, outcome: "loss" });
-    if (shouldVibrate()) {
-      navigator.vibrate([30, 50, 30]);
-    }
-    setShake(true);
-    window.setTimeout(() => setShake(false), 320);
-    setBest((currentBest) => {
-      const nextBest = Math.max(currentBest, finalScore);
-      window.localStorage.setItem(STORAGE_KEY, String(nextBest));
-      return nextBest;
-    });
   }
 
   function resetRun() {
@@ -268,20 +278,6 @@ export function TapDodgeGame() {
     setCombo(0);
     setPlayerX(0);
     setPhase("ready");
-  }
-
-  function moveLeft() {
-    if (phase !== "running") {
-      startRun();
-    }
-    setPlayerX((current) => Math.max(current - 0.4, -1));
-  }
-
-  function moveRight() {
-    if (phase !== "running") {
-      startRun();
-    }
-    setPlayerX((current) => Math.min(current + 0.4, 1));
   }
 
   return (

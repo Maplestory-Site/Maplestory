@@ -14,6 +14,7 @@ import { LaneSwitchRunnerGame } from "./LaneSwitchRunnerGame";
 import { IceSlidePuzzleGame } from "./IceSlidePuzzleGame";
 import { BossClickerGame } from "./BossClickerGame";
 import { MapleSurvivalGame } from "./MapleSurvivalGame";
+import { IdleStoryWorldGame } from "./IdleStoryWorldGame";
 
 export const miniGamesRegistry: Record<MiniGameId, ComponentType> = {
   "reaction-test": ReactionTestGame,
@@ -29,5 +30,6 @@ export const miniGamesRegistry: Record<MiniGameId, ComponentType> = {
   "memory-flash": MemoryFlashGame,
   "lane-switch-runner": LaneSwitchRunnerGame,
   "ice-slide-puzzle": IceSlidePuzzleGame,
-  "boss-clicker": BossClickerGame
+  "boss-clicker": BossClickerGame,
+  "idlestory-world": IdleStoryWorldGame
 };

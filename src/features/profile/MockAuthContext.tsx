@@ -3,6 +3,7 @@ import { applyUserProgress, extractUserProgress, loadGameMeta, type UserProgress
 import { flushOutbox, loadCloudProgress, saveCloudProgress, submitLeaderboardScore } from "../../components/content/minigames/shared/cloudProgress";
 import { getActiveRoomId } from "../../components/content/minigames/shared/multiplayerSession";
 import { updateRoom } from "../../components/content/minigames/shared/multiplayerApi";
+import { loginCloudAccount, signupCloudAccount } from "../../components/content/minigames/shared/onlineAccounts";
 
 type MockUser = {
   id: string;
@@ -30,8 +31,8 @@ type MockAuthContextValue = {
   authOpen: boolean;
   openAuth: () => void;
   closeAuth: () => void;
-  login: (payload: LoginPayload) => boolean;
-  signup: (payload: { username: string; email: string; password: string }) => boolean;
+  login: (payload: LoginPayload) => Promise<boolean>;
+  signup: (payload: { username: string; email: string; password: string }) => Promise<boolean>;
   logout: () => void;
 };
 
@@ -76,13 +77,35 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     window.localStorage.setItem(SESSION_KEY, JSON.stringify({ userId: nextUser.id }));
   }
 
-  function login({ email, password }: LoginPayload) {
+  async function login({ email, password }: LoginPayload) {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (!stored) return false;
     try {
-      const parsed = JSON.parse(stored) as MockUser[];
+      const parsed = stored ? (JSON.parse(stored) as MockUser[]) : [];
       const match = parsed.find((entry) => entry.email === email.trim().toLowerCase() && entry.password === password);
-      if (!match) return false;
+      if (!match) {
+        const cloudUser = await loginCloudAccount({ email, password });
+        if (!cloudUser) return false;
+        const progress = extractUserProgress({ xp: 0, level: 1, highScores: {} as UserProgress["highScores"] } as MockUser);
+        const nextUser: MockUser = {
+          id: cloudUser.id,
+          username: cloudUser.username,
+          name: cloudUser.username,
+          email: cloudUser.email,
+          avatarLabel: cloudUser.username.slice(0, 1).toUpperCase(),
+          createdAt: cloudUser.createdAt,
+          xp: progress.xp,
+          level: progress.level,
+          coins: progress.coins,
+          ownedItems: progress.ownedItems ?? [],
+          highScores: progress.highScores,
+          password
+        };
+        setUser(nextUser);
+        setAuthOpen(false);
+        persistUser(nextUser);
+        applyUserProgress(progress);
+        return true;
+      }
       const withProgress = {
         ...match,
         ...extractUserProgress(match)
@@ -106,7 +129,7 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
-  function signup({ username, email, password }: { username: string; email: string; password: string }) {
+  async function signup({ username, email, password }: { username: string; email: string; password: string }) {
     const safeName = username.trim() || "Maple Player";
     const safeEmail = email.trim().toLowerCase() || "player@maple.world";
     const stored = window.localStorage.getItem(STORAGE_KEY);
@@ -120,7 +143,8 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
         return false;
       }
     }
-    const id = `${safeEmail}-${Date.now()}`;
+    const cloudUser = await signupCloudAccount({ username: safeName, email: safeEmail, password });
+    const id = cloudUser?.id ?? `${safeEmail}-${Date.now()}`;
     const progress = extractUserProgress({ xp: 0, level: 1, highScores: {} as UserProgress["highScores"] } as MockUser);
     const nextUser: MockUser = {
       id,
@@ -128,7 +152,7 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
       name: safeName,
       email: safeEmail,
       avatarLabel: safeName.slice(0, 1).toUpperCase(),
-      createdAt: new Date().toISOString(),
+      createdAt: cloudUser?.createdAt ?? new Date().toISOString(),
       xp: progress.xp,
       level: progress.level,
       coins: progress.coins,
@@ -204,6 +228,7 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
   return <MockAuthContext.Provider value={value}>{children}</MockAuthContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useMockAuth() {
   const context = useContext(MockAuthContext);
 

@@ -21,7 +21,10 @@ export function BossClickerGame() {
   const [playerHp, setPlayerHp] = useState(BASE_PLAYER_HP);
   const [round, setRound] = useState(1);
   const [score, setScore] = useState(0);
-  const [bestScore, setBestScore] = useState(0);
+  const [bestScore, setBestScore] = useState(() => {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    return saved ? (Number(saved) || 0) : 0;
+  });
   const [combo, setCombo] = useState(0);
   const [warning, setWarning] = useState(false);
   const [shake, setShake] = useState(false);
@@ -29,6 +32,22 @@ export function BossClickerGame() {
   const [attackNote, setAttackNote] = useState("Strike");
   const [queuedHits, setQueuedHits] = useState(0);
   const playerHpRef = useRef(BASE_PLAYER_HP);
+
+  function finishRun() {
+    setPhase("over");
+    updateGameMeta({ gameId: "boss-clicker", score, outcome: "loss" });
+    playFailure();
+    if (shouldVibrate()) {
+      navigator.vibrate([30, 60, 30]);
+    }
+    setShake(true);
+    window.setTimeout(() => setShake(false), 260);
+    setBestScore((current) => {
+      const next = Math.max(current, score);
+      window.localStorage.setItem(STORAGE_KEY, String(next));
+      return next;
+    });
+  }
 
   function applyBossHit(damage = 1) {
     const next = Math.max(0, playerHpRef.current - damage);
@@ -38,13 +57,6 @@ export function BossClickerGame() {
       finishRun();
     }
   }
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      setBestScore(Number(saved) || 0);
-    }
-  }, []);
 
   useEffect(() => {
     if (phase !== "running") return;
@@ -111,22 +123,6 @@ export function BossClickerGame() {
   function resumeRun() {
     if (phase !== "paused") return;
     setPhase("running");
-  }
-
-  function finishRun() {
-    setPhase("over");
-    updateGameMeta({ gameId: "boss-clicker", score, outcome: "loss" });
-    playFailure();
-    if (shouldVibrate()) {
-      navigator.vibrate([30, 60, 30]);
-    }
-    setShake(true);
-    window.setTimeout(() => setShake(false), 260);
-    setBestScore((current) => {
-      const next = Math.max(current, score);
-      window.localStorage.setItem(STORAGE_KEY, String(next));
-      return next;
-    });
   }
 
   function resetRun() {

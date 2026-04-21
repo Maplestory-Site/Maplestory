@@ -22,9 +22,23 @@ export function ReactionTimerProGame() {
   const { playFailure, playSuccess } = useMiniGamesSound();
   const [phase, setPhase] = useState<"ready" | "waiting" | "active" | "result" | "paused" | "over">("ready");
   const [reactionMs, setReactionMs] = useState<number | null>(null);
-  const [bestReaction, setBestReaction] = useState<number | null>(null);
+  const [bestReaction, setBestReaction] = useState<number | null>(() => {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    if (saved) {
+      const parsed = Number(saved);
+      if (!Number.isNaN(parsed) && parsed > 0) return parsed;
+    }
+    return null;
+  });
   const [score, setScore] = useState(0);
-  const [bestScore, setBestScore] = useState(0);
+  const [bestScore, setBestScore] = useState(() => {
+    const stored = window.localStorage.getItem(BEST_SCORE_KEY);
+    if (stored) {
+      const parsed = Number(stored);
+      if (!Number.isNaN(parsed)) return parsed;
+    }
+    return 0;
+  });
   const [combo, setCombo] = useState(0);
   const [round, setRound] = useState(1);
   const [rating, setRating] = useState<Rating | null>(null);
@@ -34,24 +48,6 @@ export function ReactionTimerProGame() {
   const delayRef = useRef<number | null>(null);
   const replayRef = useRef<number | null>(null);
   const runningRef = useRef(false);
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      const parsed = Number(saved);
-      if (!Number.isNaN(parsed) && parsed > 0) {
-        setBestReaction(parsed);
-      }
-    }
-
-    const storedScore = window.localStorage.getItem(BEST_SCORE_KEY);
-    if (storedScore) {
-      const parsedScore = Number(storedScore);
-      if (!Number.isNaN(parsedScore)) {
-        setBestScore(parsedScore);
-      }
-    }
-  }, []);
 
   useEffect(() => {
     return () => {

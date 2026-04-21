@@ -140,16 +140,24 @@ async function main() {
     console.log(`Synced ${videos.length} YouTube videos.`);
   } catch (error) {
     if (existing) {
-      console.warn("YouTube sync failed. Keeping existing cached data.");
+      console.warn("[sync-youtube] Remote fetch failed — keeping existing cached data.");
       return;
     }
 
-    throw error;
+    // No cache and no data — write a minimal placeholder so the app can still start
+    console.warn("[sync-youtube] No cache and fetch failed — writing empty placeholder.");
+    await mkdir(path.dirname(OUTPUT_FILE), { recursive: true });
+    await writeFile(OUTPUT_FILE, JSON.stringify({
+      channelTitle: "snailslayer",
+      channelUrl: "https://www.youtube.com/@snailslayermain",
+      lastSynced: new Date().toISOString(),
+      videos: []
+    }, null, 2) + "\n", "utf8");
   }
 }
 
 main().catch((error) => {
-  console.error("Failed to sync YouTube videos.");
-  console.error(error);
-  process.exit(1);
+  console.error("[sync-youtube] Unexpected error:", error?.message ?? error);
+  // Non-fatal: the app can run without fresh YouTube data
+  process.exitCode = 1;
 });

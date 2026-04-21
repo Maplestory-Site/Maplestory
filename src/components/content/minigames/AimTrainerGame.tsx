@@ -29,7 +29,10 @@ export function AimTrainerGame() {
   const [phase, setPhase] = useState<"ready" | "running" | "paused" | "over">("ready");
   const [timeLeft, setTimeLeft] = useState(ROUND_SECONDS);
   const [score, setScore] = useState(0);
-  const [bestScore, setBestScore] = useState(0);
+  const [bestScore, setBestScore] = useState(() => {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    return saved ? (Number(saved) || 0) : 0;
+  });
   const [hits, setHits] = useState(0);
   const [shots, setShots] = useState(0);
   const [combo, setCombo] = useState(0);
@@ -83,13 +86,6 @@ export function AimTrainerGame() {
       navigator.vibrate([20, 30, 20]);
     }
   }
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      setBestScore(Number(saved) || 0);
-    }
-  }, []);
 
   useEffect(() => {
     if (phase !== "running") {

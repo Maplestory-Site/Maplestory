@@ -1,0 +1,420 @@
+[
+  {
+    "mapId": "henesys",
+    "name": "Henesys Field",
+    "theme": "meadow",
+    "region": "Victoria Island",
+    "levelRequirement": 1,
+    "recommendedPower": 120,
+    "difficultyTier": "starter",
+    "flavorText": "Soft grasslands full of cute mushroom trouble.",
+    "normalMonsters": [
+      { "id": "henesys_blue_snail", "name": "Blue Snail", "rarity": "common", "elementalType": "neutral", "specialTrait": "Soft Shell", "description": "A tiny field crawler that teaches new heroes the basics.", "spriteKey": "snail_blue", "spawnWeight": 28 },
+      { "id": "henesys_red_snail", "name": "Red Snail", "rarity": "common", "elementalType": "neutral", "specialTrait": "Hard Shell", "description": "A stubborn snail with a tougher shell.", "spriteKey": "snail_red", "spawnWeight": 24 },
+      { "id": "henesys_orange_mushroom", "name": "Orange Mushroom", "rarity": "common", "elementalType": "nature", "specialTrait": "Bouncy Cap", "description": "A cheerful mushroom that hops between flower patches.", "spriteKey": "orange_mushroom", "spawnWeight": 22 },
+      { "id": "henesys_ribbon_piglet", "name": "Ribbon Piglet", "rarity": "common", "elementalType": "nature", "specialTrait": "Quick Trot", "description": "A small piglet darting through the meadow.", "spriteKey": "ribbon_piglet", "spawnWeight": 18 },
+      { "id": "henesys_green_spore", "name": "Green Spore", "rarity": "rare", "elementalType": "nature", "specialTrait": "Spore Puff", "description": "A young mushroom spirit with itchy spores.", "spriteKey": "green_spore", "spawnWeight": 8 }
+    ],
+    "eliteMonster": { "id": "henesys_elite_angry_mushroom", "name": "Angry Mushroom Guard", "rarity": "rare", "elementalType": "nature", "specialTrait": "Guard Stomp", "description": "A defensive mushroom guarding the path to Mushmom.", "spriteKey": "angry_mushroom_guard", "spawnWeight": 1, "abilities": [{ "id": "guard_stomp", "name": "Guard Stomp", "effect": "stagger", "cooldown": 8, "description": "A heavy hop that slows progress briefly." }] },
+    "bossMonster": { "id": "henesys_boss_mushmom", "name": "Mushmom", "rarity": "epic", "elementalType": "nature", "specialTrait": "Spore Matriarch", "description": "The beloved but dangerous mother of Henesys mushrooms.", "spriteKey": "mushmom", "spawnWeight": 1, "abilities": [{ "id": "spore_burst", "name": "Spore Burst", "effect": "aoe", "cooldown": 12, "description": "Covers the field with spores." }, { "id": "mushroom_call", "name": "Mushroom Call", "effect": "summon", "cooldown": 18, "description": "Calls young mushrooms to defend her." }], "phaseHooks": ["summon_minions", "spore_cloud", "last_stand"] }
+  },
+  {
+    "mapId": "ellinia",
+    "name": "Ellinia Treetops",
+    "theme": "forest",
+    "region": "Victoria Island",
+    "levelRequirement": 4,
+    "recommendedPower": 420,
+    "difficultyTier": "starter",
+    "flavorText": "Blue treetops filled with fairies, eyes, and living vines.",
+    "normalMonsters": [
+      { "id": "ellinia_forest_slime", "name": "Forest Slime", "rarity": "common", "elementalType": "nature", "specialTrait": "Sticky Leaf", "description": "A slime that collected too many leaves.", "spriteKey": "forest_slime", "spawnWeight": 25 },
+      { "id": "ellinia_tree_sprite", "name": "Tree Sprite", "rarity": "common", "elementalType": "nature", "specialTrait": "Root Hop", "description": "A small spirit born from old Ellinia bark.", "spriteKey": "tree_sprite", "spawnWeight": 22 },
+      { "id": "ellinia_faerie_wisp", "name": "Faerie Wisp", "rarity": "rare", "elementalType": "wind", "specialTrait": "Glitter Veil", "description": "A playful wisp that hides in the canopy.", "spriteKey": "faerie_wisp", "spawnWeight": 18 },
+      { "id": "ellinia_horned_mushroom", "name": "Horned Mushroom", "rarity": "common", "elementalType": "nature", "specialTrait": "Sharp Cap", "description": "A forest mushroom with a pointy temper.", "spriteKey": "horned_mushroom", "spawnWeight": 21 },
+      { "id": "ellinia_green_eye", "name": "Green Eye", "rarity": "rare", "elementalType": "shadow", "specialTrait": "Gaze", "description": "A lurking eye monster watching from tree hollows.", "spriteKey": "green_eye", "spawnWeight": 14 }
+    ],
+    "eliteMonster": { "id": "ellinia_elite_curse_eye", "name": "Curse Eye Stalker", "rarity": "rare", "elementalType": "shadow", "specialTrait": "Cursed Gaze", "description": "A stronger eye that learned old forest curses.", "spriteKey": "curse_eye_stalker", "spawnWeight": 1, "abilities": [{ "id": "curse_gaze", "name": "Curse Gaze", "effect": "seal", "cooldown": 10, "description": "Weakens hero damage for a short moment." }] },
+    "bossMonster": { "id": "ellinia_boss_elder_curse_eye", "name": "Elder Curse Eye", "rarity": "epic", "elementalType": "shadow", "specialTrait": "Canopy Hex", "description": "A giant eye spirit rooted deep in Ellinia magic.", "spriteKey": "elder_curse_eye", "spawnWeight": 1, "abilities": [{ "id": "canopy_hex", "name": "Canopy Hex", "effect": "curse", "cooldown": 12, "description": "Halves momentum with a forest curse." }, { "id": "vine_grasp", "name": "Vine Grasp", "effect": "root", "cooldown": 15, "description": "Roots the party in place." }], "phaseHooks": ["curse_mark", "vine_prison", "eye_frenzy"] }
+  },
+  {
+    "mapId": "kerning",
+    "name": "Kerning City Sewers",
+    "theme": "sewer",
+    "region": "Victoria Island",
+    "levelRequirement": 8,
+    "recommendedPower": 1050,
+    "difficultyTier": "early",
+    "flavorText": "Underground tunnels packed with toxic slime and street beasts.",
+    "normalMonsters": [
+      { "id": "kerning_sewer_rat", "name": "Sewer Rat", "rarity": "common", "elementalType": "poison", "specialTrait": "Gnaw", "description": "A fast rat raised in the drain tunnels.", "spriteKey": "sewer_rat", "spawnWeight": 24 },
+      { "id": "kerning_bubbling", "name": "Bubbling", "rarity": "common", "elementalType": "water", "specialTrait": "Bubble Pop", "description": "A sewer slime that pops under pressure.", "spriteKey": "bubbling", "spawnWeight": 23 },
+      { "id": "kerning_jr_ligator", "name": "Jr. Ligator", "rarity": "common", "elementalType": "water", "specialTrait": "Snap Bite", "description": "A young reptile hiding below Kerning streets.", "spriteKey": "jr_ligator", "spawnWeight": 21 },
+      { "id": "kerning_pipe_specter", "name": "Pipe Specter", "rarity": "rare", "elementalType": "shadow", "specialTrait": "Pipe Drift", "description": "A ghostly shape moving through broken pipes.", "spriteKey": "pipe_specter", "spawnWeight": 16 },
+      { "id": "kerning_toxic_slime", "name": "Toxic Slime", "rarity": "rare", "elementalType": "poison", "specialTrait": "Toxic Ooze", "description": "A bubbling slime born from sewer runoff.", "spriteKey": "toxic_slime", "spawnWeight": 16 }
+    ],
+    "eliteMonster": { "id": "kerning_elite_croco", "name": "Croco Enforcer", "rarity": "rare", "elementalType": "water", "specialTrait": "Tunnel Ambush", "description": "A sewer enforcer that controls the flooded lanes.", "spriteKey": "croco_enforcer", "spawnWeight": 1, "abilities": [{ "id": "tunnel_ambush", "name": "Tunnel Ambush", "effect": "bleed", "cooldown": 9, "description": "Strikes from a dark tunnel." }] },
+    "bossMonster": { "id": "kerning_boss_king_ligator", "name": "King Ligator", "rarity": "epic", "elementalType": "water", "specialTrait": "Drain Tyrant", "description": "The huge reptile king beneath Kerning City.", "spriteKey": "king_ligator", "spawnWeight": 1, "abilities": [{ "id": "drain_crush", "name": "Drain Crush", "effect": "aoe", "cooldown": 13, "description": "Crushes the sewer path." }, { "id": "meso_snatch", "name": "Meso Snatch", "effect": "steal", "cooldown": 16, "description": "Steals part of the reward if not defeated quickly." }], "phaseHooks": ["flood_lane", "snatch_reward", "jaw_lock"] }
+  },
+  {
+    "mapId": "perion",
+    "name": "Perion Wasteland",
+    "theme": "wasteland",
+    "region": "Victoria Island",
+    "levelRequirement": 12,
+    "recommendedPower": 2100,
+    "difficultyTier": "early",
+    "flavorText": "Scorched cliffs where stone creatures and boars roam.",
+    "normalMonsters": [
+      { "id": "perion_axe_stump", "name": "Axe Stump", "rarity": "common", "elementalType": "earth", "specialTrait": "Splinter Swing", "description": "A rugged stump sharpened by dry winds.", "spriteKey": "axe_stump", "spawnWeight": 24 },
+      { "id": "perion_fire_boar", "name": "Fire Boar", "rarity": "common", "elementalType": "fire", "specialTrait": "Burning Charge", "description": "A hot-tempered boar racing over cracked soil.", "spriteKey": "fire_boar", "spawnWeight": 22 },
+      { "id": "perion_rock_lizard", "name": "Rock Lizard", "rarity": "common", "elementalType": "earth", "specialTrait": "Stone Hide", "description": "A lizard with scales like dried stone.", "spriteKey": "rock_lizard", "spawnWeight": 20 },
+      { "id": "perion_copper_drake", "name": "Copper Drake", "rarity": "rare", "elementalType": "fire", "specialTrait": "Ember Breath", "description": "A young drake warmed by the wasteland heat.", "spriteKey": "copper_drake", "spawnWeight": 18 },
+      { "id": "perion_dust_golem", "name": "Dust Golem", "rarity": "rare", "elementalType": "earth", "specialTrait": "Dust Armor", "description": "A small golem built from cracked canyon rock.", "spriteKey": "dust_golem", "spawnWeight": 16 }
+    ],
+    "eliteMonster": { "id": "perion_elite_dark_golem", "name": "Dark Stone Golem", "rarity": "rare", "elementalType": "earth", "specialTrait": "Armored Core", "description": "A heavy golem with a dark mineral heart.", "spriteKey": "dark_stone_golem", "spawnWeight": 1, "abilities": [{ "id": "stone_guard", "name": "Stone Guard", "effect": "shield", "cooldown": 11, "description": "Hardens its rocky body." }] },
+    "bossMonster": { "id": "perion_boss_stone_golem", "name": "Stone Golem Prime", "rarity": "epic", "elementalType": "earth", "specialTrait": "Canyon Colossus", "description": "A massive ancient golem that blocks the Perion pass.", "spriteKey": "stone_golem_prime", "spawnWeight": 1, "abilities": [{ "id": "canyon_slam", "name": "Canyon Slam", "effect": "aoe", "cooldown": 12, "description": "Shakes the whole arena." }, { "id": "granite_shell", "name": "Granite Shell", "effect": "shield", "cooldown": 18, "description": "Reduces incoming damage." }], "phaseHooks": ["granite_shell", "earthquake", "stagger_break"] }
+  },
+  {
+    "mapId": "sleepywood",
+    "name": "Sleepywood Dungeon",
+    "theme": "dungeon",
+    "region": "Victoria Island",
+    "levelRequirement": 18,
+    "recommendedPower": 4200,
+    "difficultyTier": "early",
+    "flavorText": "A sealed dungeon filled with cave slime, drakes, and old magic.",
+    "normalMonsters": [
+      { "id": "sleepywood_cave_slime", "name": "Cave Slime", "rarity": "common", "elementalType": "earth", "specialTrait": "Gel Hide", "description": "A slime adapted to cold stone caverns.", "spriteKey": "cave_slime", "spawnWeight": 23 },
+      { "id": "sleepywood_bat", "name": "Dungeon Bat", "rarity": "common", "elementalType": "shadow", "specialTrait": "Screech", "description": "A noisy bat circling in old halls.", "spriteKey": "dungeon_bat", "spawnWeight": 22 },
+      { "id": "sleepywood_jr_boogie", "name": "Jr. Boogie", "rarity": "rare", "elementalType": "shadow", "specialTrait": "Hex Dance", "description": "A tiny cave demon that loves bad luck.", "spriteKey": "jr_boogie", "spawnWeight": 19 },
+      { "id": "sleepywood_dark_drake", "name": "Dark Drake", "rarity": "rare", "elementalType": "shadow", "specialTrait": "Dark Claw", "description": "A drake lurking near forbidden caverns.", "spriteKey": "dark_drake", "spawnWeight": 18 },
+      { "id": "sleepywood_stone_worm", "name": "Stone Worm", "rarity": "common", "elementalType": "earth", "specialTrait": "Burrow", "description": "A worm that tunnels through dungeon bricks.", "spriteKey": "stone_worm", "spawnWeight": 18 }
+    ],
+    "eliteMonster": { "id": "sleepywood_elite_tauromacis", "name": "Tauromacis Sentinel", "rarity": "epic", "elementalType": "shadow", "specialTrait": "Abyss Horns", "description": "A horned dungeon guardian from the deeper halls.", "spriteKey": "tauromacis_sentinel", "spawnWeight": 1, "abilities": [{ "id": "abyss_horns", "name": "Abyss Horns", "effect": "aoe", "cooldown": 10, "description": "A horn charge that hits all heroes." }] },
+    "bossMonster": { "id": "sleepywood_boss_king_slime", "name": "King Slime", "rarity": "epic", "elementalType": "earth", "specialTrait": "Royal Absorb", "description": "A giant slime king ruling the dungeon floor.", "spriteKey": "king_slime", "spawnWeight": 1, "abilities": [{ "id": "royal_bounce", "name": "Royal Bounce", "effect": "aoe", "cooldown": 12, "description": "Bounces across the arena." }, { "id": "slime_absorb", "name": "Slime Absorb", "effect": "lifesteal", "cooldown": 17, "description": "Absorbs small slimes to recover." }], "phaseHooks": ["summon_slimes", "absorb_minions", "royal_bounce"] }
+  },
+  {
+    "mapId": "ludibrium",
+    "name": "Ludibrium Clocktower",
+    "theme": "clocktower",
+    "region": "Ludus Lake",
+    "levelRequirement": 24,
+    "recommendedPower": 7800,
+    "difficultyTier": "mid",
+    "flavorText": "A toy tower where clocks, dolls, and blocks refuse to stay still.",
+    "normalMonsters": [
+      { "id": "ludibrium_block_golem", "name": "Block Golem", "rarity": "common", "elementalType": "neutral", "specialTrait": "Stack Guard", "description": "Toy blocks animated by tower gears.", "spriteKey": "block_golem", "spawnWeight": 23 },
+      { "id": "ludibrium_toy_trojan", "name": "Toy Trojan", "rarity": "common", "elementalType": "neutral", "specialTrait": "Toy Lance", "description": "A marching toy horse with a wooden lance.", "spriteKey": "toy_trojan", "spawnWeight": 20 },
+      { "id": "ludibrium_tick_tockling", "name": "Tick-Tockling", "rarity": "rare", "elementalType": "time", "specialTrait": "Mini Rewind", "description": "A small clock spirit from the tower gears.", "spriteKey": "tick_tockling", "spawnWeight": 19 },
+      { "id": "ludibrium_doll_mender", "name": "Doll Mender", "rarity": "rare", "elementalType": "arcane", "specialTrait": "Patchwork", "description": "A doll that repairs other toy monsters.", "spriteKey": "doll_mender", "spawnWeight": 17 },
+      { "id": "ludibrium_gear_rat", "name": "Gear Rat", "rarity": "common", "elementalType": "metal", "specialTrait": "Gear Bite", "description": "A small metal rat chewing through clock gears.", "spriteKey": "gear_rat", "spawnWeight": 21 }
+    ],
+    "eliteMonster": { "id": "ludibrium_elite_master_chronos", "name": "Master Chronos", "rarity": "epic", "elementalType": "time", "specialTrait": "Time Slip", "description": "A clocktower elite that bends seconds around itself.", "spriteKey": "master_chronos", "spawnWeight": 1, "abilities": [{ "id": "time_slip", "name": "Time Slip", "effect": "rewind", "cooldown": 12, "description": "Briefly reverses damage pressure." }] },
+    "bossMonster": { "id": "ludibrium_boss_tick_tock", "name": "Tick-Tock", "rarity": "epic", "elementalType": "time", "specialTrait": "Tower Rewind", "description": "The living heart of Ludibrium's broken clocktower.", "spriteKey": "tick_tock", "spawnWeight": 1, "abilities": [{ "id": "tower_rewind", "name": "Tower Rewind", "effect": "regen", "cooldown": 16, "description": "Restores a chunk of HP." }, { "id": "gear_storm", "name": "Gear Storm", "effect": "aoe", "cooldown": 13, "description": "Throws spinning gears everywhere." }], "phaseHooks": ["rewind_time", "gear_storm", "clock_break"] }
+  },
+  {
+    "mapId": "omega_sector",
+    "name": "Omega Sector",
+    "theme": "sci-fi",
+    "region": "Ludus Lake",
+    "levelRequirement": 30,
+    "recommendedPower": 13000,
+    "difficultyTier": "mid",
+    "flavorText": "A secret base under siege by alien machines.",
+    "normalMonsters": [
+      { "id": "omega_barnard_gray", "name": "Barnard Gray", "rarity": "common", "elementalType": "lightning", "specialTrait": "Plasma Blink", "description": "A small alien scout with unstable tech.", "spriteKey": "barnard_gray", "spawnWeight": 24 },
+      { "id": "omega_mega_gray", "name": "Mega Gray", "rarity": "rare", "elementalType": "lightning", "specialTrait": "Ion Guard", "description": "A tougher alien wearing field armor.", "spriteKey": "mega_gray", "spawnWeight": 20 },
+      { "id": "omega_security_bot", "name": "Security Bot", "rarity": "common", "elementalType": "metal", "specialTrait": "Laser Sweep", "description": "A patrol bot reprogrammed by aliens.", "spriteKey": "security_bot", "spawnWeight": 20 },
+      { "id": "omega_space_drone", "name": "Space Drone", "rarity": "common", "elementalType": "wind", "specialTrait": "Hover", "description": "A hovering drone scanning the base.", "spriteKey": "space_drone", "spawnWeight": 18 },
+      { "id": "omega_ultra_gray", "name": "Ultra Gray", "rarity": "rare", "elementalType": "lightning", "specialTrait": "Pulse Beam", "description": "An alien fighter with a stronger plasma core.", "spriteKey": "ultra_gray", "spawnWeight": 18 }
+    ],
+    "eliteMonster": { "id": "omega_elite_chief_gray", "name": "Chief Gray", "rarity": "epic", "elementalType": "lightning", "specialTrait": "Command Signal", "description": "An alien commander directing base raids.", "spriteKey": "chief_gray", "spawnWeight": 1, "abilities": [{ "id": "command_signal", "name": "Command Signal", "effect": "summon", "cooldown": 13, "description": "Calls drones into battle." }] },
+    "bossMonster": { "id": "omega_boss_platoon_chronos", "name": "Platoon Chronos", "rarity": "epic", "elementalType": "lightning", "specialTrait": "Energy Shield", "description": "A chrono-mech prototype powered by alien cores.", "spriteKey": "platoon_chronos", "spawnWeight": 1, "abilities": [{ "id": "energy_shield", "name": "Energy Shield", "effect": "shield", "cooldown": 14, "description": "Absorbs incoming damage." }, { "id": "chrono_blast", "name": "Chrono Blast", "effect": "aoe", "cooldown": 17, "description": "Fires a charged time beam." }], "phaseHooks": ["shield_wall", "drone_call", "chrono_overload"] }
+  },
+  {
+    "mapId": "elnath",
+    "name": "El Nath Ice Fields",
+    "theme": "frozen",
+    "region": "El Nath",
+    "levelRequirement": 38,
+    "recommendedPower": 22000,
+    "difficultyTier": "mid",
+    "flavorText": "Frozen fields where wolves, zombies, and yetis endure the storm.",
+    "normalMonsters": [
+      { "id": "elnath_pepe", "name": "Pepe", "rarity": "common", "elementalType": "ice", "specialTrait": "Snow Slide", "description": "A playful penguin sliding across icy fields.", "spriteKey": "pepe", "spawnWeight": 24 },
+      { "id": "elnath_hector", "name": "Hector", "rarity": "common", "elementalType": "ice", "specialTrait": "Frost Fang", "description": "A snow wolf hunting in the cold.", "spriteKey": "hector", "spawnWeight": 22 },
+      { "id": "elnath_coolie_zombie", "name": "Coolie Zombie", "rarity": "rare", "elementalType": "shadow", "specialTrait": "Cold Rot", "description": "A frozen undead miner from old El Nath.", "spriteKey": "coolie_zombie", "spawnWeight": 18 },
+      { "id": "elnath_ice_sprite", "name": "Ice Sprite", "rarity": "common", "elementalType": "ice", "specialTrait": "Frost Spark", "description": "A tiny spirit dancing in snowfall.", "spriteKey": "ice_sprite", "spawnWeight": 19 },
+      { "id": "elnath_snow_boar", "name": "Snow Boar", "rarity": "rare", "elementalType": "ice", "specialTrait": "Frozen Charge", "description": "A frost-coated boar charging through drifts.", "spriteKey": "snow_boar", "spawnWeight": 17 }
+    ],
+    "eliteMonster": { "id": "elnath_elite_ice_sentinel", "name": "Ice Sentinel", "rarity": "epic", "elementalType": "ice", "specialTrait": "Blizzard Guard", "description": "A frost guardian watching the mountain trail.", "spriteKey": "ice_sentinel", "spawnWeight": 1, "abilities": [{ "id": "blizzard_guard", "name": "Blizzard Guard", "effect": "freeze", "cooldown": 13, "description": "Freezes combat rhythm briefly." }] },
+    "bossMonster": { "id": "elnath_boss_yeti", "name": "Yeti", "rarity": "epic", "elementalType": "ice", "specialTrait": "Mountain Roar", "description": "A huge yeti that rules the frozen slopes.", "spriteKey": "yeti", "spawnWeight": 1, "abilities": [{ "id": "blizzard_roar", "name": "Blizzard Roar", "effect": "freeze", "cooldown": 15, "description": "Freezes the battlefield." }, { "id": "snow_crush", "name": "Snow Crush", "effect": "aoe", "cooldown": 12, "description": "Crushes heroes under packed snow." }], "phaseHooks": ["snowstorm", "freeze_lock", "mountain_rage"] }
+  },
+  {
+    "mapId": "ice_valley",
+    "name": "Ice Valley II",
+    "theme": "ice_cave",
+    "region": "El Nath",
+    "levelRequirement": 48,
+    "recommendedPower": 36000,
+    "difficultyTier": "mid",
+    "flavorText": "Deep ice caves where sealed demons and wyverns awaken.",
+    "normalMonsters": [
+      { "id": "ice_valley_frost_bat", "name": "Frost Bat", "rarity": "common", "elementalType": "ice", "specialTrait": "Cold Screech", "description": "A cave bat coated in ice crystals.", "spriteKey": "frost_bat", "spawnWeight": 23 },
+      { "id": "ice_valley_ice_golem", "name": "Ice Golem", "rarity": "rare", "elementalType": "ice", "specialTrait": "Crystal Hide", "description": "A golem built from frozen cave walls.", "spriteKey": "ice_golem", "spawnWeight": 20 },
+      { "id": "ice_valley_blue_wyvern", "name": "Blue Wyvern", "rarity": "rare", "elementalType": "ice", "specialTrait": "Frost Breath", "description": "A young wyvern guarding frozen ledges.", "spriteKey": "blue_wyvern", "spawnWeight": 19 },
+      { "id": "ice_valley_dark_imp", "name": "Dark Imp", "rarity": "common", "elementalType": "shadow", "specialTrait": "Imp Curse", "description": "A small demon freed from an ice seal.", "spriteKey": "dark_imp", "spawnWeight": 19 },
+      { "id": "ice_valley_cold_shark", "name": "Cold Shark", "rarity": "rare", "elementalType": "ice", "specialTrait": "Frozen Bite", "description": "A strange ice beast that swims through snow.", "spriteKey": "cold_shark", "spawnWeight": 19 }
+    ],
+    "eliteMonster": { "id": "ice_valley_elite_blue_wyvern", "name": "Ancient Blue Wyvern", "rarity": "epic", "elementalType": "ice", "specialTrait": "Wing Freeze", "description": "An old wyvern with frozen wings of glass.", "spriteKey": "ancient_blue_wyvern", "spawnWeight": 1, "abilities": [{ "id": "wing_freeze", "name": "Wing Freeze", "effect": "freeze", "cooldown": 14, "description": "Chills the battlefield with wingbeats." }] },
+    "bossMonster": { "id": "ice_valley_boss_jr_balrog", "name": "Jr. Balrog", "rarity": "legendary", "elementalType": "shadow", "specialTrait": "Demon Seal", "description": "A sealed demon stirring beneath the ice.", "spriteKey": "jr_balrog", "spawnWeight": 1, "abilities": [{ "id": "dark_aura", "name": "Dark Aura", "effect": "seal", "cooldown": 15, "description": "Cuts healing and momentum." }, { "id": "demon_cleave", "name": "Demon Cleave", "effect": "aoe", "cooldown": 12, "description": "A wide demonic slash." }], "phaseHooks": ["seal_break", "dark_aura", "demon_enrage"] }
+  },
+  {
+    "mapId": "aqua_road",
+    "name": "Aqua Road",
+    "theme": "underwater",
+    "region": "Aqua Road",
+    "levelRequirement": 58,
+    "recommendedPower": 58000,
+    "difficultyTier": "mid",
+    "flavorText": "Undersea roads where fish, ruins, and ancient currents collide.",
+    "normalMonsters": [
+      { "id": "aqua_bubble_fish", "name": "Bubble Fish", "rarity": "common", "elementalType": "water", "specialTrait": "Bubble Shield", "description": "A fish hiding behind a bubble veil.", "spriteKey": "bubble_fish", "spawnWeight": 24 },
+      { "id": "aqua_flower_fish", "name": "Flower Fish", "rarity": "common", "elementalType": "water", "specialTrait": "Coral Bloom", "description": "A bright reef fish with sharp petals.", "spriteKey": "flower_fish", "spawnWeight": 21 },
+      { "id": "aqua_bone_fish", "name": "Bone Fish", "rarity": "rare", "elementalType": "shadow", "specialTrait": "Bone Snap", "description": "An undead fish drifting through ruins.", "spriteKey": "bone_fish", "spawnWeight": 19 },
+      { "id": "aqua_sea_slime", "name": "Sea Slime", "rarity": "common", "elementalType": "water", "specialTrait": "Tidal Gel", "description": "A slime that learned to swim.", "spriteKey": "sea_slime", "spawnWeight": 20 },
+      { "id": "aqua_ruin_crab", "name": "Ruin Crab", "rarity": "rare", "elementalType": "earth", "specialTrait": "Shell Guard", "description": "A crab wearing pieces of underwater ruins.", "spriteKey": "ruin_crab", "spawnWeight": 16 }
+    ],
+    "eliteMonster": { "id": "aqua_elite_shark_guard", "name": "Shark Guardian", "rarity": "epic", "elementalType": "water", "specialTrait": "Riptide Bite", "description": "A reef guardian patrolling deep currents.", "spriteKey": "shark_guardian", "spawnWeight": 1, "abilities": [{ "id": "riptide_bite", "name": "Riptide Bite", "effect": "bleed", "cooldown": 11, "description": "A rushing bite from the current." }] },
+    "bossMonster": { "id": "aqua_boss_pianus", "name": "Pianus", "rarity": "legendary", "elementalType": "water", "specialTrait": "Abyss Twin", "description": "A legendary fish boss guarding the deepest road.", "spriteKey": "pianus", "spawnWeight": 1, "abilities": [{ "id": "twin_tide", "name": "Twin Tide", "effect": "summon", "cooldown": 18, "description": "Calls a twin current form." }, { "id": "abyss_wave", "name": "Abyss Wave", "effect": "aoe", "cooldown": 13, "description": "Floods the arena with pressure." }], "phaseHooks": ["twin_form", "abyss_wave", "deep_pressure"] }
+  },
+  {
+    "mapId": "minar_forest",
+    "name": "Minar Forest",
+    "theme": "dragon_forest",
+    "region": "Leafre",
+    "levelRequirement": 68,
+    "recommendedPower": 90000,
+    "difficultyTier": "advanced",
+    "flavorText": "Ancient forest paths where dragon blood still warms the soil.",
+    "normalMonsters": [
+      { "id": "minar_beetle_drake", "name": "Beetle Drake", "rarity": "common", "elementalType": "nature", "specialTrait": "Scale Buzz", "description": "A beetle-drake hybrid in the old forest.", "spriteKey": "beetle_drake", "spawnWeight": 22 },
+      { "id": "minar_blood_harp", "name": "Blood Harp", "rarity": "rare", "elementalType": "wind", "specialTrait": "Piercing Song", "description": "A sharp-winged harp nesting above Leafre.", "spriteKey": "blood_harp", "spawnWeight": 20 },
+      { "id": "minar_red_kentaurus", "name": "Red Kentaurus", "rarity": "rare", "elementalType": "fire", "specialTrait": "Lance Charge", "description": "A fierce centaur of dragon country.", "spriteKey": "red_kentaurus", "spawnWeight": 19 },
+      { "id": "minar_blue_kentaurus", "name": "Blue Kentaurus", "rarity": "rare", "elementalType": "water", "specialTrait": "Aqua Lance", "description": "A forest centaur carrying water magic.", "spriteKey": "blue_kentaurus", "spawnWeight": 19 },
+      { "id": "minar_forest_wyvern", "name": "Forest Wyvern", "rarity": "rare", "elementalType": "nature", "specialTrait": "Leaf Breath", "description": "A wyvern raised under ancient branches.", "spriteKey": "forest_wyvern", "spawnWeight": 20 }
+    ],
+    "eliteMonster": { "id": "minar_elite_white_kentaurus", "name": "White Kentaurus Captain", "rarity": "epic", "elementalType": "holy", "specialTrait": "Captain Lance", "description": "A proud Leafre captain guarding dragon trails.", "spriteKey": "white_kentaurus_captain", "spawnWeight": 1, "abilities": [{ "id": "captain_lance", "name": "Captain Lance", "effect": "pierce", "cooldown": 12, "description": "Pierces defenses with a holy lance." }] },
+    "bossMonster": { "id": "minar_boss_manon", "name": "Manon", "rarity": "legendary", "elementalType": "fire", "specialTrait": "Dragon Breath", "description": "A mighty dragon watching the heart of Minar Forest.", "spriteKey": "manon", "spawnWeight": 1, "abilities": [{ "id": "dragon_breath", "name": "Dragon Breath", "effect": "aoe", "cooldown": 14, "description": "Burns the field with dragon fire." }, { "id": "scale_barrier", "name": "Scale Barrier", "effect": "shield", "cooldown": 18, "description": "Hardens dragon scales." }], "phaseHooks": ["breath_warning", "scale_barrier", "dragon_rage"] }
+  },
+  {
+    "mapId": "dragon_nest",
+    "name": "Dragon Nest",
+    "theme": "cliff",
+    "region": "Leafre",
+    "levelRequirement": 80,
+    "recommendedPower": 135000,
+    "difficultyTier": "advanced",
+    "flavorText": "High cliffs and nests where elder dragons sharpen their wings.",
+    "normalMonsters": [
+      { "id": "nest_red_wyvern", "name": "Red Wyvern", "rarity": "rare", "elementalType": "fire", "specialTrait": "Flame Dive", "description": "A fiery wyvern circling the cliffs.", "spriteKey": "red_wyvern", "spawnWeight": 22 },
+      { "id": "nest_dark_wyvern", "name": "Dark Wyvern", "rarity": "rare", "elementalType": "shadow", "specialTrait": "Shadow Wing", "description": "A wyvern gliding through cliff shadows.", "spriteKey": "dark_wyvern", "spawnWeight": 21 },
+      { "id": "nest_skeleon", "name": "Skeleon", "rarity": "rare", "elementalType": "shadow", "specialTrait": "Bone Guard", "description": "A dragon skeleton reanimated by old magic.", "spriteKey": "skeleon", "spawnWeight": 19 },
+      { "id": "nest_bone_dragon", "name": "Bone Dragon", "rarity": "epic", "elementalType": "shadow", "specialTrait": "Rib Crush", "description": "A powerful dragon bone beast.", "spriteKey": "bone_dragon", "spawnWeight": 18 },
+      { "id": "nest_cliff_harp", "name": "Cliff Harp", "rarity": "rare", "elementalType": "wind", "specialTrait": "Gale Song", "description": "A harp bird nesting above dragon eggs.", "spriteKey": "cliff_harp", "spawnWeight": 20 }
+    ],
+    "eliteMonster": { "id": "nest_elite_dark_wyvern_lord", "name": "Dark Wyvern Lord", "rarity": "epic", "elementalType": "shadow", "specialTrait": "Aerial Ambush", "description": "A dominant wyvern that controls the air.", "spriteKey": "dark_wyvern_lord", "spawnWeight": 1, "abilities": [{ "id": "aerial_ambush", "name": "Aerial Ambush", "effect": "evade", "cooldown": 13, "description": "Lifts out of reach for a short burst." }] },
+    "bossMonster": { "id": "nest_boss_griffey", "name": "Griffey", "rarity": "legendary", "elementalType": "wind", "specialTrait": "Sky Hunt", "description": "A legendary winged guardian of the dragon nest.", "spriteKey": "griffey", "spawnWeight": 1, "abilities": [{ "id": "sky_hunt", "name": "Sky Hunt", "effect": "evade", "cooldown": 14, "description": "Takes to the sky and evades attacks." }, { "id": "cliff_gale", "name": "Cliff Gale", "effect": "aoe", "cooldown": 12, "description": "Throws heroes back with a gale." }], "phaseHooks": ["airborne", "gale_burst", "talon_execute"] }
+  },
+  {
+    "mapId": "mu_lung",
+    "name": "Mu Lung Gardens",
+    "theme": "oriental",
+    "region": "Mu Lung",
+    "levelRequirement": 92,
+    "recommendedPower": 190000,
+    "difficultyTier": "advanced",
+    "flavorText": "Bamboo gardens where martial spirits test every traveler.",
+    "normalMonsters": [
+      { "id": "mulung_bamboo_dummy", "name": "Bamboo Dummy", "rarity": "common", "elementalType": "nature", "specialTrait": "Training Guard", "description": "A training dummy animated by garden chi.", "spriteKey": "bamboo_dummy", "spawnWeight": 23 },
+      { "id": "mulung_grass_monk", "name": "Grass Monk", "rarity": "rare", "elementalType": "nature", "specialTrait": "Palm Strike", "description": "A wandering garden spirit practicing martial arts.", "spriteKey": "grass_monk", "spawnWeight": 20 },
+      { "id": "mulung_ghost_panda", "name": "Ghost Panda", "rarity": "rare", "elementalType": "shadow", "specialTrait": "Spirit Paw", "description": "A panda spirit drifting through bamboo.", "spriteKey": "ghost_panda", "spawnWeight": 20 },
+      { "id": "mulung_crane_wisp", "name": "Crane Wisp", "rarity": "rare", "elementalType": "wind", "specialTrait": "Wing Kata", "description": "A crane-shaped spirit with fast strikes.", "spriteKey": "crane_wisp", "spawnWeight": 18 },
+      { "id": "mulung_peach_imp", "name": "Peach Imp", "rarity": "common", "elementalType": "nature", "specialTrait": "Fruit Toss", "description": "A mischievous imp hiding near peach trees.", "spriteKey": "peach_imp", "spawnWeight": 19 }
+    ],
+    "eliteMonster": { "id": "mulung_elite_dojo_master", "name": "Dojo Master Panda", "rarity": "epic", "elementalType": "neutral", "specialTrait": "Stance Shift", "description": "A panda master switching forms mid-fight.", "spriteKey": "dojo_master_panda", "spawnWeight": 1, "abilities": [{ "id": "stance_shift", "name": "Stance Shift", "effect": "shield", "cooldown": 12, "description": "Changes stance to resist attacks." }] },
+    "bossMonster": { "id": "mulung_boss_gatekeeper", "name": "Gatekeeper", "rarity": "legendary", "elementalType": "neutral", "specialTrait": "Forbidden Stance", "description": "The guardian who permits only worthy heroes onward.", "spriteKey": "gatekeeper", "spawnWeight": 1, "abilities": [{ "id": "forbidden_stance", "name": "Forbidden Stance", "effect": "immune_shift", "cooldown": 16, "description": "Alternates between physical and magical guard." }, { "id": "chi_burst", "name": "Chi Burst", "effect": "aoe", "cooldown": 12, "description": "Explodes stored chi outward." }], "phaseHooks": ["stance_shift", "chi_burst", "master_trial"] }
+  },
+  {
+    "mapId": "nihal_desert",
+    "name": "Nihal Desert",
+    "theme": "desert",
+    "region": "Nihal Desert",
+    "levelRequirement": 104,
+    "recommendedPower": 270000,
+    "difficultyTier": "advanced",
+    "flavorText": "Endless dunes filled with cactus beasts, sand rats, and buried kings.",
+    "normalMonsters": [
+      { "id": "nihal_jr_cactus", "name": "Jr. Cactus", "rarity": "common", "elementalType": "earth", "specialTrait": "Needle Pop", "description": "A small cactus monster with sharp needles.", "spriteKey": "jr_cactus", "spawnWeight": 23 },
+      { "id": "nihal_bellamoa", "name": "Bellamoa", "rarity": "rare", "elementalType": "earth", "specialTrait": "Sand Curl", "description": "A snake-like desert beast.", "spriteKey": "bellamoa", "spawnWeight": 21 },
+      { "id": "nihal_sand_rat", "name": "Sand Rat", "rarity": "common", "elementalType": "earth", "specialTrait": "Burrow Dash", "description": "A quick rat that dives under the dunes.", "spriteKey": "sand_rat", "spawnWeight": 21 },
+      { "id": "nihal_scorpion", "name": "Sand Scorpion", "rarity": "rare", "elementalType": "poison", "specialTrait": "Venom Tail", "description": "A desert scorpion with toxic stings.", "spriteKey": "sand_scorpion", "spawnWeight": 19 },
+      { "id": "nihal_dune_spirit", "name": "Dune Spirit", "rarity": "rare", "elementalType": "wind", "specialTrait": "Dust Veil", "description": "A spirit carried by desert winds.", "spriteKey": "dune_spirit", "spawnWeight": 16 }
+    ],
+    "eliteMonster": { "id": "nihal_elite_sand_worm", "name": "Ancient Sand Worm", "rarity": "epic", "elementalType": "earth", "specialTrait": "Dune Swallow", "description": "A huge worm that controls buried tunnels.", "spriteKey": "ancient_sand_worm", "spawnWeight": 1, "abilities": [{ "id": "dune_swallow", "name": "Dune Swallow", "effect": "stagger", "cooldown": 13, "description": "Swallows the lane in moving sand." }] },
+    "bossMonster": { "id": "nihal_boss_deo", "name": "Deo", "rarity": "legendary", "elementalType": "earth", "specialTrait": "Sandstorm King", "description": "The desert ruler hidden inside a violent sandstorm.", "spriteKey": "deo", "spawnWeight": 1, "abilities": [{ "id": "sandstorm", "name": "Sandstorm", "effect": "seal", "cooldown": 16, "description": "Blocks skills during a storm." }, { "id": "dune_crush", "name": "Dune Crush", "effect": "aoe", "cooldown": 12, "description": "Crushes heroes under dunes." }], "phaseHooks": ["sandstorm", "buried_treasure", "desert_wrath"] }
+  },
+  {
+    "mapId": "magatia",
+    "name": "Magatia Alchemy City",
+    "theme": "alchemy",
+    "region": "Nihal Desert",
+    "levelRequirement": 116,
+    "recommendedPower": 380000,
+    "difficultyTier": "advanced",
+    "flavorText": "Alchemy labs packed with strange machines and homunculi.",
+    "normalMonsters": [
+      { "id": "magatia_homun", "name": "Homun", "rarity": "common", "elementalType": "arcane", "specialTrait": "Lab Reflex", "description": "A basic homunculus from old experiments.", "spriteKey": "homun", "spawnWeight": 23 },
+      { "id": "magatia_neo_huroid", "name": "Neo Huroid", "rarity": "rare", "elementalType": "metal", "specialTrait": "Gear Punch", "description": "An alchemical android patrolling the lab.", "spriteKey": "neo_huroid", "spawnWeight": 21 },
+      { "id": "magatia_zenu_mist", "name": "Zenumist Flask", "rarity": "rare", "elementalType": "poison", "specialTrait": "Acid Pop", "description": "A living experiment sealed in a flask.", "spriteKey": "zenumist_flask", "spawnWeight": 19 },
+      { "id": "magatia_alcadno_core", "name": "Alcadno Core", "rarity": "rare", "elementalType": "lightning", "specialTrait": "Spark Engine", "description": "A machine core powered by unstable sparks.", "spriteKey": "alcadno_core", "spawnWeight": 19 },
+      { "id": "magatia_mutant_slime", "name": "Mutant Slime", "rarity": "common", "elementalType": "poison", "specialTrait": "Chemical Split", "description": "A slime twisted by laboratory runoff.", "spriteKey": "mutant_slime", "spawnWeight": 18 }
+    ],
+    "eliteMonster": { "id": "magatia_elite_frankenroid", "name": "Frankenroid Prototype", "rarity": "epic", "elementalType": "lightning", "specialTrait": "Voltage Surge", "description": "A prototype android with too much power.", "spriteKey": "frankenroid_prototype", "spawnWeight": 1, "abilities": [{ "id": "voltage_surge", "name": "Voltage Surge", "effect": "aoe", "cooldown": 12, "description": "Releases unstable lightning." }] },
+    "bossMonster": { "id": "magatia_boss_homunculus", "name": "Homunculus", "rarity": "legendary", "elementalType": "arcane", "specialTrait": "Perfect Regeneration", "description": "A perfected lab creation that refuses to die.", "spriteKey": "homunculus", "spawnWeight": 1, "abilities": [{ "id": "perfect_regen", "name": "Perfect Regen", "effect": "regen", "cooldown": 10, "description": "Regenerates constantly." }, { "id": "acid_bloom", "name": "Acid Bloom", "effect": "poison", "cooldown": 13, "description": "Poisons the arena." }], "phaseHooks": ["regen_check", "acid_bloom", "lab_overload"] }
+  },
+  {
+    "mapId": "singapore",
+    "name": "Singapore Streets",
+    "theme": "urban",
+    "region": "Singapore",
+    "levelRequirement": 128,
+    "recommendedPower": 520000,
+    "difficultyTier": "late",
+    "flavorText": "Neon streets where city monsters and haunted machines crowd the alleys.",
+    "normalMonsters": [
+      { "id": "singapore_dark_leatty", "name": "Dark Leatty", "rarity": "rare", "elementalType": "shadow", "specialTrait": "Neon Drift", "description": "A dark street beast moving through neon fog.", "spriteKey": "dark_leatty", "spawnWeight": 22 },
+      { "id": "singapore_bubbling", "name": "Neon Bubbling", "rarity": "common", "elementalType": "water", "specialTrait": "Street Pop", "description": "A city slime glowing under streetlights.", "spriteKey": "neon_bubbling", "spawnWeight": 21 },
+      { "id": "singapore_veetron", "name": "Veetron", "rarity": "rare", "elementalType": "lightning", "specialTrait": "Signal Pulse", "description": "A rogue machine running street signals.", "spriteKey": "veetron", "spawnWeight": 20 },
+      { "id": "singapore_gang_shadow", "name": "Gang Shadow", "rarity": "rare", "elementalType": "shadow", "specialTrait": "Back Alley", "description": "A shadowy fighter guarding the alley.", "spriteKey": "gang_shadow", "spawnWeight": 19 },
+      { "id": "singapore_traffic_imp", "name": "Traffic Imp", "rarity": "common", "elementalType": "metal", "specialTrait": "Horn Blast", "description": "An imp causing chaos on the street.", "spriteKey": "traffic_imp", "spawnWeight": 18 }
+    ],
+    "eliteMonster": { "id": "singapore_elite_neon_enforcer", "name": "Neon Enforcer", "rarity": "epic", "elementalType": "lightning", "specialTrait": "Street Lockdown", "description": "A city elite locking down the district.", "spriteKey": "neon_enforcer", "spawnWeight": 1, "abilities": [{ "id": "street_lockdown", "name": "Street Lockdown", "effect": "seal", "cooldown": 13, "description": "Locks action buttons briefly." }] },
+    "bossMonster": { "id": "singapore_boss_krexel", "name": "Krexel", "rarity": "legendary", "elementalType": "nature", "specialTrait": "Twin Eye Core", "description": "A massive urban tree-monster rooted under the city.", "spriteKey": "krexel", "spawnWeight": 1, "abilities": [{ "id": "left_eye_heal", "name": "Left Eye Heal", "effect": "regen", "cooldown": 14, "description": "One eye restores the other." }, { "id": "root_quake", "name": "Root Quake", "effect": "aoe", "cooldown": 12, "description": "Roots crack the street." }], "phaseHooks": ["left_eye", "right_eye", "root_quake"] }
+  },
+  {
+    "mapId": "masteria",
+    "name": "New Leaf City",
+    "theme": "shadow_city",
+    "region": "Masteria",
+    "levelRequirement": 140,
+    "recommendedPower": 720000,
+    "difficultyTier": "late",
+    "flavorText": "A dark alternate city crawling with nightmares and crimson beasts.",
+    "normalMonsters": [
+      { "id": "masteria_shadow_lurker", "name": "Shadow Lurker", "rarity": "rare", "elementalType": "shadow", "specialTrait": "Fade Step", "description": "A monster that slips through city shadows.", "spriteKey": "shadow_lurker", "spawnWeight": 22 },
+      { "id": "masteria_ghost_soldier", "name": "Ghost Soldier", "rarity": "rare", "elementalType": "shadow", "specialTrait": "Phantom Slash", "description": "An old soldier bound to Masteria streets.", "spriteKey": "ghost_soldier", "spawnWeight": 21 },
+      { "id": "masteria_nightmare", "name": "Nightmare", "rarity": "epic", "elementalType": "shadow", "specialTrait": "Fear Pulse", "description": "A living bad dream with hooves of smoke.", "spriteKey": "nightmare", "spawnWeight": 19 },
+      { "id": "masteria_crimson_guard", "name": "Crimson Guard", "rarity": "rare", "elementalType": "fire", "specialTrait": "Crimson Guard", "description": "A fiery guard patrolling old streets.", "spriteKey": "crimson_guard", "spawnWeight": 19 },
+      { "id": "masteria_void_bat", "name": "Void Bat", "rarity": "rare", "elementalType": "void", "specialTrait": "Void Screech", "description": "A bat from the darker side of Maple World.", "spriteKey": "void_bat", "spawnWeight": 19 }
+    ],
+    "eliteMonster": { "id": "masteria_elite_crimson_guardian", "name": "Crimson Guardian", "rarity": "epic", "elementalType": "fire", "specialTrait": "Rage Guard", "description": "A guardian empowered by Masteria flames.", "spriteKey": "crimson_guardian", "spawnWeight": 1, "abilities": [{ "id": "rage_guard", "name": "Rage Guard", "effect": "rage", "cooldown": 12, "description": "Grows stronger as it fights." }] },
+    "bossMonster": { "id": "masteria_boss_crimson_balrog", "name": "Crimson Balrog", "rarity": "legendary", "elementalType": "fire", "specialTrait": "Rage Form", "description": "A demonic balrog burning above New Leaf City.", "spriteKey": "crimson_balrog", "spawnWeight": 1, "abilities": [{ "id": "rage_form", "name": "Rage Form", "effect": "rage", "cooldown": 16, "description": "Doubles danger in the final phase." }, { "id": "crimson_dive", "name": "Crimson Dive", "effect": "aoe", "cooldown": 12, "description": "Dives into the arena with fire." }], "phaseHooks": ["rage_form", "crimson_dive", "execute_window"] }
+  },
+  {
+    "mapId": "crimsonwood",
+    "name": "Crimsonwood Keep",
+    "theme": "fortress",
+    "region": "Masteria",
+    "levelRequirement": 155,
+    "recommendedPower": 980000,
+    "difficultyTier": "late",
+    "flavorText": "A haunted keep defended by cursed soldiers and fortress spirits.",
+    "normalMonsters": [
+      { "id": "crimsonwood_phantom_watch", "name": "Phantom Watch", "rarity": "rare", "elementalType": "shadow", "specialTrait": "Watcher's Bell", "description": "A ghostly watchman guarding the keep.", "spriteKey": "phantom_watch", "spawnWeight": 22 },
+      { "id": "crimsonwood_dual_ghost", "name": "Dual Ghost Pirate", "rarity": "epic", "elementalType": "shadow", "specialTrait": "Twin Cutlass", "description": "A pirate ghost with two haunted blades.", "spriteKey": "dual_ghost_pirate", "spawnWeight": 20 },
+      { "id": "crimsonwood_crimson_sabre", "name": "Crimson Sabre", "rarity": "rare", "elementalType": "fire", "specialTrait": "Burning Blade", "description": "A cursed blade spirit of the keep.", "spriteKey": "crimson_sabre", "spawnWeight": 20 },
+      { "id": "crimsonwood_dark_watcher", "name": "Dark Watcher", "rarity": "rare", "elementalType": "shadow", "specialTrait": "Watcher Mark", "description": "A watcher that marks intruders.", "spriteKey": "dark_watcher", "spawnWeight": 19 },
+      { "id": "crimsonwood_keep_golem", "name": "Keep Golem", "rarity": "rare", "elementalType": "earth", "specialTrait": "Fortress Stone", "description": "A stone guardian built into the keep walls.", "spriteKey": "keep_golem", "spawnWeight": 19 }
+    ],
+    "eliteMonster": { "id": "crimsonwood_elite_keep_captain", "name": "Crimson Keep Captain", "rarity": "epic", "elementalType": "fire", "specialTrait": "Captain's Banner", "description": "A fortress captain rallying cursed soldiers.", "spriteKey": "crimson_keep_captain", "spawnWeight": 1, "abilities": [{ "id": "captains_banner", "name": "Captain's Banner", "effect": "summon", "cooldown": 13, "description": "Summons keep guards." }] },
+    "bossMonster": { "id": "crimsonwood_boss_headless_horseman", "name": "Headless Horseman", "rarity": "legendary", "elementalType": "shadow", "specialTrait": "Missing Head", "description": "A legendary rider haunting Crimsonwood roads.", "spriteKey": "headless_horseman", "spawnWeight": 1, "abilities": [{ "id": "headless_phase", "name": "Headless Phase", "effect": "evade", "cooldown": 17, "description": "Becomes hard to hit." }, { "id": "spectral_charge", "name": "Spectral Charge", "effect": "aoe", "cooldown": 11, "description": "Charges through the party." }], "phaseHooks": ["headless_evade", "head_return", "spectral_charge"] }
+  },
+  {
+    "mapId": "zipangu",
+    "name": "Zipangu Shrine",
+    "theme": "shrine",
+    "region": "Zipangu",
+    "levelRequirement": 170,
+    "recommendedPower": 1350000,
+    "difficultyTier": "late",
+    "flavorText": "Sacred shrine paths haunted by fox fire, oni, and old spirits.",
+    "normalMonsters": [
+      { "id": "zipangu_fox_fire", "name": "Fox Fire", "rarity": "rare", "elementalType": "fire", "specialTrait": "Spirit Flame", "description": "A fox-shaped flame dancing near shrine gates.", "spriteKey": "fox_fire", "spawnWeight": 22 },
+      { "id": "zipangu_oni", "name": "Oni", "rarity": "epic", "elementalType": "shadow", "specialTrait": "Demon Club", "description": "A shrine demon with a heavy club.", "spriteKey": "oni", "spawnWeight": 20 },
+      { "id": "zipangu_ghost", "name": "Shrine Ghost", "rarity": "rare", "elementalType": "shadow", "specialTrait": "Paper Lantern", "description": "A ghost drifting through lantern smoke.", "spriteKey": "shrine_ghost", "spawnWeight": 21 },
+      { "id": "zipangu_spirit_rock", "name": "Spirit of Rock", "rarity": "rare", "elementalType": "earth", "specialTrait": "Sacred Stone", "description": "A holy rock spirit guarding the path.", "spriteKey": "spirit_of_rock", "spawnWeight": 19 },
+      { "id": "zipangu_lantern_imp", "name": "Lantern Imp", "rarity": "common", "elementalType": "fire", "specialTrait": "Lantern Toss", "description": "An imp carrying stolen shrine lanterns.", "spriteKey": "lantern_imp", "spawnWeight": 18 }
+    ],
+    "eliteMonster": { "id": "zipangu_elite_kitsune_spirit", "name": "Kitsune Spirit", "rarity": "epic", "elementalType": "fire", "specialTrait": "Fox Illusion", "description": "A fox spirit that splits into false forms.", "spriteKey": "kitsune_spirit", "spawnWeight": 1, "abilities": [{ "id": "fox_illusion", "name": "Fox Illusion", "effect": "illusion", "cooldown": 13, "description": "Creates a false target." }] },
+    "bossMonster": { "id": "zipangu_boss_tengu", "name": "Tengu", "rarity": "legendary", "elementalType": "wind", "specialTrait": "Illusion Split", "description": "A winged shrine lord with terrible speed.", "spriteKey": "tengu", "spawnWeight": 1, "abilities": [{ "id": "illusion_split", "name": "Illusion Split", "effect": "illusion", "cooldown": 16, "description": "Creates clones; only one is real." }, { "id": "fan_gale", "name": "Fan Gale", "effect": "aoe", "cooldown": 12, "description": "Cuts the arena with a wind fan." }], "phaseHooks": ["clone_split", "real_target", "fan_gale"] }
+  },
+  {
+    "mapId": "leafre_sky",
+    "name": "Leafre Dragon Skies",
+    "theme": "sky",
+    "region": "Leafre",
+    "levelRequirement": 185,
+    "recommendedPower": 1800000,
+    "difficultyTier": "endgame",
+    "flavorText": "Cloud lanes where sky beasts and lightning dragons rule the air.",
+    "normalMonsters": [
+      { "id": "sky_cloud_fox", "name": "Cloud Fox", "rarity": "rare", "elementalType": "wind", "specialTrait": "Cloud Step", "description": "A fox that runs across clouds.", "spriteKey": "cloud_fox", "spawnWeight": 22 },
+      { "id": "sky_wind_drake", "name": "Wind Drake", "rarity": "epic", "elementalType": "wind", "specialTrait": "Gale Breath", "description": "A drake born above Leafre canopy.", "spriteKey": "wind_drake", "spawnWeight": 21 },
+      { "id": "sky_storm_harp", "name": "Storm Harp", "rarity": "rare", "elementalType": "lightning", "specialTrait": "Storm Song", "description": "A harp bird that sings thunder.", "spriteKey": "storm_harp", "spawnWeight": 20 },
+      { "id": "sky_whale", "name": "Sky Whale", "rarity": "epic", "elementalType": "wind", "specialTrait": "Cloud Wake", "description": "A huge sky whale floating through storms.", "spriteKey": "sky_whale", "spawnWeight": 18 },
+      { "id": "sky_cloud_imp", "name": "Cloud Imp", "rarity": "common", "elementalType": "wind", "specialTrait": "Puff Toss", "description": "A small imp throwing cloud puffs.", "spriteKey": "cloud_imp", "spawnWeight": 19 }
+    ],
+    "eliteMonster": { "id": "sky_elite_thunder_drake", "name": "Thunder Drake", "rarity": "epic", "elementalType": "lightning", "specialTrait": "Storm Charge", "description": "A drake charged by sky lightning.", "spriteKey": "thunder_drake", "spawnWeight": 1, "abilities": [{ "id": "storm_charge", "name": "Storm Charge", "effect": "lightning", "cooldown": 12, "description": "Builds a dangerous lightning charge." }] },
+    "bossMonster": { "id": "sky_boss_zeno", "name": "Zeno", "rarity": "legendary", "elementalType": "lightning", "specialTrait": "Lightning Storm", "description": "A sky boss that turns clouds into weapons.", "spriteKey": "zeno", "spawnWeight": 1, "abilities": [{ "id": "lightning_storm", "name": "Lightning Storm", "effect": "enrage", "cooldown": 18, "description": "Charges a one-shot storm." }, { "id": "cloud_break", "name": "Cloud Break", "effect": "aoe", "cooldown": 12, "description": "Breaks the cloud floor." }], "phaseHooks": ["storm_charge", "cloud_break", "lightning_execute"] }
+  },
+  {
+    "mapId": "temple_of_time",
+    "name": "Temple of Time",
+    "theme": "time",
+    "region": "Temple of Time",
+    "levelRequirement": 200,
+    "recommendedPower": 2500000,
+    "difficultyTier": "endgame",
+    "flavorText": "A sacred time ruin where memories, regret, and oblivion become enemies.",
+    "normalMonsters": [
+      { "id": "tot_memory_keeper", "name": "Memory Keeper", "rarity": "rare", "elementalType": "time", "specialTrait": "Memory Loop", "description": "A monk-like keeper preserving old battles.", "spriteKey": "memory_keeper", "spawnWeight": 22 },
+      { "id": "tot_regret_guard", "name": "Regret Guard", "rarity": "epic", "elementalType": "time", "specialTrait": "Regret Shield", "description": "A guardian formed from broken choices.", "spriteKey": "regret_guard", "spawnWeight": 20 },
+      { "id": "tot_oblivion_monk", "name": "Oblivion Monk", "rarity": "epic", "elementalType": "void", "specialTrait": "Forget", "description": "A monk who erases old power.", "spriteKey": "oblivion_monk", "spawnWeight": 19 },
+      { "id": "tot_time_soldier", "name": "Time Soldier", "rarity": "rare", "elementalType": "time", "specialTrait": "Second Cut", "description": "A soldier marching in a loop.", "spriteKey": "time_soldier", "spawnWeight": 20 },
+      { "id": "tot_paradox_wisp", "name": "Paradox Wisp", "rarity": "rare", "elementalType": "arcane", "specialTrait": "Paradox Spark", "description": "A time spark that should not exist.", "spriteKey": "paradox_wisp", "spawnWeight": 19 }
+    ],
+    "eliteMonster": { "id": "tot_elite_paradox_monk", "name": "Paradox Monk", "rarity": "epic", "elementalType": "time", "specialTrait": "Paradox Guard", "description": "A monk split between two timelines.", "spriteKey": "paradox_monk", "spawnWeight": 1, "abilities": [{ "id": "paradox_guard", "name": "Paradox Guard", "effect": "reflect", "cooldown": 14, "description": "Reflects part of incoming force." }] },
+    "bossMonster": { "id": "tot_boss_time_controller", "name": "Time Controller", "rarity": "legendary", "elementalType": "time", "specialTrait": "Full Reset", "description": "The controller of fractured temple timelines.", "spriteKey": "time_controller", "spawnWeight": 1, "abilities": [{ "id": "full_reset", "name": "Full Reset", "effect": "rewind", "cooldown": 20, "description": "Resets progress if not burst down." }, { "id": "hourglass_crush", "name": "Hourglass Crush", "effect": "aoe", "cooldown": 13, "description": "Crushes the arena with falling time." }], "phaseHooks": ["rewind_once", "paradox_phase", "timeline_break"] }
+  },
+  {
+    "mapId": "black_mage_lair",
+    "name": "Black Mage's Lair",
+    "theme": "abyss",
+    "region": "Maple World Dark",
+    "levelRequirement": 220,
+    "recommendedPower": 3600000,
+    "difficultyTier": "endgame",
+    "flavorText": "The final darkness where void servants and cursed knights gather.",
+    "normalMonsters": [
+      { "id": "black_lair_dark_servant", "name": "Dark Servant", "rarity": "epic", "elementalType": "void", "specialTrait": "Void Duty", "description": "A servant bound to the Black Mage's will.", "spriteKey": "dark_servant", "spawnWeight": 22 },
+      { "id": "black_lair_void_golem", "name": "Void Golem", "rarity": "epic", "elementalType": "void", "specialTrait": "Void Core", "description": "A golem assembled from dark fragments.", "spriteKey": "void_golem", "spawnWeight": 21 },
+      { "id": "black_lair_shadow_archon", "name": "Shadow Archon", "rarity": "legendary", "elementalType": "shadow", "specialTrait": "Archon Mark", "description": "A high shadow creature guarding the seal.", "spriteKey": "shadow_archon", "spawnWeight": 19 },
+      { "id": "black_lair_black_knight", "name": "Black Knight", "rarity": "epic", "elementalType": "shadow", "specialTrait": "Cursed Blade", "description": "A knight swallowed by dark magic.", "spriteKey": "black_knight", "spawnWeight": 20 },
+      { "id": "black_lair_seal_wraith", "name": "Seal Wraith", "rarity": "epic", "elementalType": "void", "specialTrait": "Seal Drain", "description": "A wraith feeding on world seals.", "spriteKey": "seal_wraith", "spawnWeight": 18 }
+    ],
+    "eliteMonster": { "id": "black_lair_elite_void_archon", "name": "Void Archon", "rarity": "legendary", "elementalType": "void", "specialTrait": "World Seal", "description": "An elite archon maintaining the final seal.", "spriteKey": "void_archon", "spawnWeight": 1, "abilities": [{ "id": "world_seal", "name": "World Seal", "effect": "seal", "cooldown": 15, "description": "Cuts the party's total output." }] },
+    "bossMonster": { "id": "black_lair_boss_black_mage", "name": "Black Mage", "rarity": "legendary", "elementalType": "void", "specialTrait": "Final Darkness", "description": "The final boss and source of the world's deepest darkness.", "spriteKey": "black_mage", "spawnWeight": 1, "abilities": [{ "id": "world_seal", "name": "World Seal", "effect": "seal", "cooldown": 16, "description": "Seals most player power." }, { "id": "abyss_collapse", "name": "Abyss Collapse", "effect": "aoe", "cooldown": 12, "description": "Collapses darkness around the party." }, { "id": "final_rage", "name": "Final Rage", "effect": "enrage", "cooldown": 24, "description": "Enters the final darkness phase." }], "phaseHooks": ["world_seal", "abyss_collapse", "final_darkness"] }
+  }
+]

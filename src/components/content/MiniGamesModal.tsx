@@ -81,9 +81,11 @@ function MiniGamesModalContent({
 }) {
   const { t, td } = useI18n();
   const [isLoading, setIsLoading] = useState(true);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const meta = useGameMeta();
   const { favorites } = useGameFavorites();
-  const featuredGame = useMemo(() => miniGames.find((game) => game.id === "boss-dodge") ?? miniGames[0], []);
+  const featuredGame = useMemo(() => miniGames.find((game) => game.id === "idlestory-world") ?? miniGames[0], []);
+  const isIdleStory = activeGame.id === "idlestory-world";
   const favoriteGames = useMemo(
     () => favorites.map((id) => miniGames.find((game) => game.id === id)).filter(Boolean) as MiniGameDefinition[],
     [favorites]
@@ -105,6 +107,22 @@ function MiniGamesModalContent({
     };
   }, [activeGame.id]);
 
+  useEffect(() => {
+    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
+
+  const toggleIdleStoryFullscreen = async () => {
+    const target = panelRef.current?.querySelector(".game-shell");
+    if (!(target instanceof HTMLElement) || !document.documentElement.requestFullscreen) return;
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+      return;
+    }
+    await target.requestFullscreen();
+  };
+
   return (
     <div className="mini-games-modal" role="dialog" aria-modal="true" aria-labelledby="mini-games-title">
       <button aria-label={t("Close mini games")} className="mini-games-modal__backdrop" onClick={onClose} type="button" />
@@ -115,13 +133,18 @@ function MiniGamesModalContent({
             <h2 id="mini-games-title">{t("Pick a game. Play.")}</h2>
           </div>
           <div className="mini-games-modal__header-actions">
+            {isIdleStory ? (
+              <button className="mini-games-modal__close" onClick={toggleIdleStoryFullscreen} type="button">
+                {isFullscreen ? t("Exit Fullscreen") : t("Fullscreen")}
+              </button>
+            ) : null}
             <button aria-label={t("Close mini games")} className="mini-games-modal__close" onClick={onClose} type="button">
               {t("Close")}
             </button>
           </div>
         </div>
 
-        <div className="mini-games-modal__body">
+        <div className={`mini-games-modal__body ${isIdleStory ? "is-idlestory" : ""}`}>
           <aside className="mini-games-modal__sidebar" aria-label={t("Mini game selection")}>
             <div className="mini-games-modal__sidebar-head">
               <span className="mini-games-modal__sidebar-label">{t("Game Library")}</span>

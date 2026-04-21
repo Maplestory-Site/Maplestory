@@ -21,6 +21,7 @@ export const router = createBrowserRouter([
       { index: true, element: <HomePage /> },
       { path: "classes", element: <ClassesJobsPage /> },
       { path: "database", element: <Navigate replace to="/database/monster" /> },
+      { path: "database/simulator", element: <Navigate replace to="/database/monster" /> },
       { path: "database/:section", element: <MonstersPage /> },
       { path: "monsters", element: <Navigate replace to="/database/monster" /> },
       { path: "news", element: <NewsPage /> },

@@ -87,6 +87,7 @@ export function SimulatorStudio() {
   const [hoveredPaletteId, setHoveredPaletteId] = useState<PaletteItem["id"] | null>(null);
   const [dragState, setDragState] = useState<DragState | null>(null);
   const stageRef = useRef<HTMLDivElement | null>(null);
+  const entityCounterRef = useRef(0);
 
   const scene = useMemo(() => scenes.find((item) => item.id === sceneId) ?? scenes[0], [sceneId]);
   const selectedEntity = useMemo(() => entities.find((item) => item.id === selectedId) ?? null, [entities, selectedId]);
@@ -148,7 +149,7 @@ export function SimulatorStudio() {
 
   const handleAddEntity = (item: PaletteItem) => {
     const nextEntity: SceneEntity = {
-      id: `entity-${item.id}-${Date.now()}`,
+      id: `entity-${item.id}-${++entityCounterRef.current}`,
       typeId: item.id,
       x: 520 + entities.length * 6,
       y: item.group === "Prop" ? 420 : 390,

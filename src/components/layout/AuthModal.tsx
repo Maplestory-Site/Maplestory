@@ -13,7 +13,7 @@ export function AuthModal() {
     return null;
   }
 
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
     if (mode === "signup") {
@@ -21,12 +21,12 @@ export function AuthModal() {
         setError("Choose a password with at least 4 characters.");
         return;
       }
-      const ok = signup({ username: name, email, password });
+      const ok = await signup({ username: name, email, password });
       if (!ok) {
         setError("That email is already registered.");
       }
     } else {
-      const ok = login({ email, password });
+      const ok = await login({ email, password });
       if (!ok) {
         setError("Invalid email or password.");
       }

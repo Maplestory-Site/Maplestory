@@ -2,6 +2,10 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 // @ts-expect-error local Vercel-style API handler
 import contentHandler from './api/content.js'
+// @ts-expect-error local Vercel-style API handler
+import databaseHandler from './api/database.js'
+// @ts-expect-error local Vercel-style API handler
+import gameHandler from './api/game.js'
 // @ts-expect-error local Node-side mjs helper
 import { fetchKmsArticle } from './server/news/kmsArticle.mjs'
 // @ts-expect-error local Node-side mjs helper
@@ -84,6 +88,48 @@ export default defineConfig({
               }
               localReq.body = {}
               await contentHandler(localReq, createLocalApiResponse(res))
+              return
+            }
+            const databaseRoutes: Record<string, string> = {
+              '/api/items': 'items',
+              '/api/maps': 'maps',
+              '/api/monsters': 'monsters'
+            }
+            const databaseUrl = new URL(req.url, 'http://localhost')
+            const databaseResource = databaseRoutes[databaseUrl.pathname]
+            if (databaseResource) {
+              const localReq = req as typeof req & {
+                query: Record<string, string>
+                body?: unknown
+              }
+              localReq.query = {
+                resource: databaseResource,
+                ...Object.fromEntries(databaseUrl.searchParams.entries())
+              }
+              localReq.body = {}
+              await databaseHandler(localReq, createLocalApiResponse(res))
+              return
+            }
+            const gameRoutes: Record<string, string> = {
+              '/api/leaderboard': 'leaderboard',
+              '/api/progress': 'progress',
+              '/api/rooms': 'rooms',
+              '/api/auth': 'auth',
+              '/api/guilds': 'guilds',
+              '/api/chat': 'chat'
+            }
+            const gameResource = gameRoutes[databaseUrl.pathname]
+            if (gameResource) {
+              const localReq = req as typeof req & {
+                query: Record<string, string>
+                body?: unknown
+              }
+              localReq.query = { resource: gameResource }
+              databaseUrl.searchParams.forEach((value, key) => {
+                localReq.query[key] = value
+              })
+              localReq.body = req.method === 'POST' ? await readJsonBody(req) : undefined
+              await gameHandler(localReq, createLocalApiResponse(res))
               return
             }
             if (req.url.startsWith('/api/kms?')) {

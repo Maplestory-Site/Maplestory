@@ -10,7 +10,6 @@ export function isGameDebugEnabled() {
 export function gameDebug(label: string, payload?: GameDebugPayload) {
   if (!isGameDebugEnabled()) return;
   const safePayload = payload ?? {};
-  // eslint-disable-next-line no-console
   console.debug(`[GameDebug] ${label}`, safePayload);
 }
 

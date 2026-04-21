@@ -98,8 +98,7 @@ function getLocationQueryScore(locationLabel: string, query: string) {
 
 function getDropBestPick(drop: MonsterDropDatabaseEntry) {
   return [...drop.sourceMonsters]
-    .sort((a, b) => b.farmingScore - a.farmingScore || a.difficulty - b.difficulty)
-    [0];
+    .sort((a, b) => b.farmingScore - a.farmingScore || a.difficulty - b.difficulty)[0];
 }
 
 function getMonsterPrimaryLocation(item: MonsterEntry) {
@@ -194,6 +193,17 @@ export function MonsterDropsDatabase({
 }: MonsterDropsDatabaseProps) {
   const [query, setQuery] = useState(searchQuerySeed ?? "");
   const [view, setView] = useState<ResultView>(viewSeed ?? "Monsters");
+  const [prevSearchQuerySeed, setPrevSearchQuerySeed] = useState(searchQuerySeed);
+  const [prevViewSeed, setPrevViewSeed] = useState(viewSeed);
+
+  if (prevSearchQuerySeed !== searchQuerySeed && searchQuerySeed !== undefined) {
+    setPrevSearchQuerySeed(searchQuerySeed);
+    setQuery(searchQuerySeed);
+  }
+  if (prevViewSeed !== viewSeed && viewSeed) {
+    setPrevViewSeed(viewSeed);
+    setView(viewSeed);
+  }
   const [level, setLevel] = useState<MonsterLevelRange>("All");
   const [hp, setHp] = useState<MonsterHpRange>("All");
   const [difficulty, setDifficulty] = useState<"All" | MonsterDifficultyLabel>("All");
@@ -206,18 +216,6 @@ export function MonsterDropsDatabase({
   const [farming, setFarming] = useState<(typeof farmingOptions)[number]>("All");
   const [sort, setSort] = useState<MonsterDropSort>("Best Farming");
   const [selectedDrop, setSelectedDrop] = useState<MonsterDropDatabaseEntry | null>(null);
-
-  useEffect(() => {
-    if (searchQuerySeed !== undefined) {
-      setQuery(searchQuerySeed);
-    }
-  }, [searchQuerySeed]);
-
-  useEffect(() => {
-    if (viewSeed) {
-      setView(viewSeed);
-    }
-  }, [viewSeed]);
 
   const dropDatabase = useMemo(() => buildMonsterDropsDatabase(items), [items]);
   const suggestions = useMemo(() => getMonsterSearchSuggestions(items, query), [items, query]);

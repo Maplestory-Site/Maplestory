@@ -20,19 +20,16 @@ export function MemoryFlashGame() {
   const [inputIndex, setInputIndex] = useState(0);
   const [flashTile, setFlashTile] = useState<TileId | null>(null);
   const [score, setScore] = useState(0);
-  const [bestScore, setBestScore] = useState(0);
+  const [bestScore, setBestScore] = useState(() => {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    return saved ? (Number(saved) || 0) : 0;
+  });
   const [combo, setCombo] = useState(0);
   const [round, setRound] = useState(1);
   const [shake, setShake] = useState(false);
 
   const playbackRef = useRef<number | null>(null);
   const sequenceRef = useRef<TileId[]>([]);
-  useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      setBestScore(Number(saved) || 0);
-    }
-  }, []);
 
   useEffect(() => {
     sequenceRef.current = sequence;

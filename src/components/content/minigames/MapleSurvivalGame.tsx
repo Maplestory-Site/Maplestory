@@ -207,8 +207,10 @@ export function MapleSurvivalGame() {
             <span
               className="maple-survival__player"
               style={{
+                /* eslint-disable react-hooks/refs */
                 left: `${playerRef.current.x}%`,
                 top: `${playerRef.current.y}%`,
+                /* eslint-enable react-hooks/refs */
                 width: `${evo.size}px`,
                 height: `${evo.size}px`,
                 background: evo.color

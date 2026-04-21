@@ -38,7 +38,10 @@ export function BossDodgeGame() {
   const [playerLane, setPlayerLane] = useState(1);
   const [attacks, setAttacks] = useState<Attack[]>([]);
   const [survivalTime, setSurvivalTime] = useState(0);
-  const [bestTime, setBestTime] = useState(0);
+  const [bestTime, setBestTime] = useState(() => {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    return saved ? (Number(saved) || 0) : 0;
+  });
   const [lastTime, setLastTime] = useState(0);
   const [clutches, setClutches] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -88,6 +91,26 @@ export function BossDodgeGame() {
     });
   }
 
+  function startRun() {
+    nextId.current = 1;
+    spawnTimerRef.current = 0;
+    spawnCountRef.current = 0;
+    setAttacks([]);
+    survivalRef.current = 0;
+    setSurvivalTime(0);
+    setPlayerLane(1);
+    laneRef.current = 1;
+    setLastTime(0);
+    setClutches(0);
+    setStreak(0);
+    comboRef.current = 0;
+    setDodgeFlash(false);
+    setNearMissFlash(false);
+    setScorePulse(false);
+    setPhase("running");
+    playSuccess();
+  }
+
   function moveLeft() {
     if (phase !== "running") {
       startRun();
@@ -114,13 +137,6 @@ export function BossDodgeGame() {
     laneRef.current = playerLane;
     lastLaneRef.current = playerLane;
   }, [playerLane]);
-
-  useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      setBestTime(Number(saved) || 0);
-    }
-  }, []);
 
   useEffect(() => {
     if (phase !== "running") {
@@ -321,26 +337,6 @@ export function BossDodgeGame() {
   const survivalSeconds = survivalTime.toFixed(1);
   const bestSeconds = bestTime.toFixed(1);
   const lastSeconds = lastTime.toFixed(1);
-
-  function startRun() {
-    nextId.current = 1;
-    spawnTimerRef.current = 0;
-    spawnCountRef.current = 0;
-    setAttacks([]);
-    survivalRef.current = 0;
-    setSurvivalTime(0);
-    setPlayerLane(1);
-    laneRef.current = 1;
-    setLastTime(0);
-    setClutches(0);
-    setStreak(0);
-    comboRef.current = 0;
-    setDodgeFlash(false);
-    setNearMissFlash(false);
-    setScorePulse(false);
-    setPhase("running");
-    playSuccess();
-  }
 
   function pauseRun() {
     if (phase !== "running") return;

@@ -83,6 +83,18 @@
       "destination": "/api/game?resource=rooms"
     },
     {
+      "source": "/api/auth",
+      "destination": "/api/game?resource=auth"
+    },
+    {
+      "source": "/api/guilds",
+      "destination": "/api/game?resource=guilds"
+    },
+    {
+      "source": "/api/chat",
+      "destination": "/api/game?resource=chat"
+    },
+    {
       "source": "/api/(.*)",
       "destination": "/api/$1"
     },

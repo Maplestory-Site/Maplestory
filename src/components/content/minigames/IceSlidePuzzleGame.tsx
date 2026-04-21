@@ -82,24 +82,20 @@ export function IceSlidePuzzleGame() {
   const [player, setPlayer] = useState<Point>(LEVELS[0].start);
   const [moves, setMoves] = useState(0);
   const [score, setScore] = useState(0);
-  const [bestScore, setBestScore] = useState(0);
+  const [bestScore, setBestScore] = useState(() => {
+    const saved = window.localStorage.getItem(STORAGE_KEY);
+    return saved ? (Number(saved) || 0) : 0;
+  });
   const [combo, setCombo] = useState(0);
   const [solved, setSolved] = useState(false);
   const [sliding, setSliding] = useState(false);
   const [levelTransition, setLevelTransition] = useState(false);
   const isTouch = useTouchDevice();
 
-  useEffect(() => {
-    const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved) {
-      setBestScore(Number(saved) || 0);
-    }
-  }, []);
-
   const level = LEVELS[levelIndex];
   const wallSet = useMemo(
     () => new Set(level.walls.map((wall) => `${wall.x}:${wall.y}`)),
-    [levelIndex]
+    [level.walls]
   );
 
   useEffect(() => {

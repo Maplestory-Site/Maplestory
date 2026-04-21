@@ -4,6 +4,9 @@ import path from "node:path";
 const LEADERBOARD_FILE = path.join(process.cwd(), "server", "data", "leaderboard.json");
 const PROGRESS_FILE = path.join(process.cwd(), "server", "data", "cloud-progress.json");
 const ROOMS_FILE = path.join(process.cwd(), "server", "data", "rooms.json");
+const USERS_FILE = path.join(process.cwd(), "server", "data", "users.json");
+const GUILDS_FILE = path.join(process.cwd(), "server", "data", "guilds.json");
+const CHAT_FILE = path.join(process.cwd(), "server", "data", "global-chat.json");
 
 async function readStore(file) {
   try {
@@ -47,6 +50,20 @@ function normalizePlayer({ userId, username }) {
     ready: false,
     lastSeen: new Date().toISOString()
   };
+}
+
+function publicUser(user) {
+  if (!user) return null;
+  return {
+    id: user.id,
+    username: user.username,
+    email: user.email,
+    createdAt: user.createdAt
+  };
+}
+
+function sanitizeText(value, fallback = "") {
+  return String(value ?? fallback).trim().slice(0, 180);
 }
 
 function withUpdatedRoom(room, userId, update) {
@@ -151,6 +168,134 @@ async function handleProgress(req, res) {
   }
 
   res.status(405).json({ error: "Method not allowed." });
+}
+
+async function handleAuth(req, res) {
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "Method not allowed." });
+    return;
+  }
+
+  const { action, username, email, password } = req.body ?? {};
+  const safeEmail = sanitizeText(email).toLowerCase();
+  const safeName = sanitizeText(username, "Maple Player") || "Maple Player";
+  const users = await readStore(USERS_FILE);
+  const entries = Array.isArray(users.entries) ? users.entries : [];
+
+  if (action === "signup") {
+    if (!safeEmail || !password) {
+      res.status(400).json({ error: "Missing signup payload." });
+      return;
+    }
+    if (entries.some((user) => user.email === safeEmail)) {
+      res.status(409).json({ error: "Account already exists." });
+      return;
+    }
+    const user = {
+      id: `${safeEmail}-${Date.now()}`,
+      username: safeName,
+      email: safeEmail,
+      password: String(password),
+      createdAt: new Date().toISOString()
+    };
+    entries.push(user);
+    await writeStore(USERS_FILE, { entries });
+    res.status(200).json({ user: publicUser(user) });
+    return;
+  }
+
+  if (action === "login") {
+    const user = entries.find((entry) => entry.email === safeEmail && entry.password === String(password));
+    if (!user) {
+      res.status(401).json({ error: "Invalid login." });
+      return;
+    }
+    res.status(200).json({ user: publicUser(user) });
+    return;
+  }
+
+  res.status(400).json({ error: "Unknown auth action." });
+}
+
+async function handleGuilds(req, res) {
+  const store = await readStore(GUILDS_FILE);
+  const guilds = Array.isArray(store.guilds) ? store.guilds : [];
+
+  if (req.method === "GET") {
+    res.status(200).json({ guilds: guilds.slice(0, 20) });
+    return;
+  }
+
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "Method not allowed." });
+    return;
+  }
+
+  const { action, userId, username, guildId, name } = req.body ?? {};
+
+  if (action === "create") {
+    const guildName = sanitizeText(name, "Maple Guild").slice(0, 32) || "Maple Guild";
+    const guild = {
+      id: `${guildName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`,
+      name: guildName,
+      ownerId: userId,
+      members: [{ userId, username: sanitizeText(username, "Player") }],
+      createdAt: new Date().toISOString()
+    };
+    guilds.push(guild);
+    await writeStore(GUILDS_FILE, { guilds });
+    res.status(200).json({ guild });
+    return;
+  }
+
+  if (action === "join") {
+    const guild = guilds.find((entry) => entry.id === guildId);
+    if (!guild) {
+      res.status(404).json({ error: "Guild not found." });
+      return;
+    }
+    if (!guild.members.some((member) => member.userId === userId)) {
+      guild.members.push({ userId, username: sanitizeText(username, "Player") });
+    }
+    await writeStore(GUILDS_FILE, { guilds });
+    res.status(200).json({ guild });
+    return;
+  }
+
+  res.status(400).json({ error: "Unknown guild action." });
+}
+
+async function handleChat(req, res) {
+  const store = await readStore(CHAT_FILE);
+  const messages = Array.isArray(store.messages) ? store.messages : [];
+
+  if (req.method === "GET") {
+    res.status(200).json({ messages: messages.slice(-40) });
+    return;
+  }
+
+  if (req.method !== "POST") {
+    res.status(405).json({ error: "Method not allowed." });
+    return;
+  }
+
+  const { userId, username, message } = req.body ?? {};
+  const safeMessage = sanitizeText(message);
+  if (!userId || !safeMessage) {
+    res.status(400).json({ error: "Missing chat payload." });
+    return;
+  }
+
+  messages.push({
+    id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+    userId,
+    username: sanitizeText(username, "Player"),
+    message: safeMessage,
+    createdAt: new Date().toISOString()
+  });
+
+  await writeStore(CHAT_FILE, { messages: messages.slice(-100) });
+  res.status(200).json({ ok: true });
 }
 
 async function handleRooms(req, res) {
@@ -312,6 +457,21 @@ export default async function handler(req, res) {
 
   if (resource === "rooms") {
     await handleRooms(req, res);
+    return;
+  }
+
+  if (resource === "auth") {
+    await handleAuth(req, res);
+    return;
+  }
+
+  if (resource === "guilds") {
+    await handleGuilds(req, res);
+    return;
+  }
+
+  if (resource === "chat") {
+    await handleChat(req, res);
     return;
   }
 

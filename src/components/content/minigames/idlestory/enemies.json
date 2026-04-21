@@ -1,0 +1,156 @@
+{
+  "henesys": [
+    { "id": "snail",           "name": "Snail",           "level": 5,   "hp": 35,    "farmingScore": 5,  "isBoss": false },
+    { "id": "orange_mushroom", "name": "Orange Mushroom", "level": 8,   "hp": 70,    "farmingScore": 8,  "isBoss": false },
+    { "id": "green_mushroom",  "name": "Green Mushroom",  "level": 11,  "hp": 110,   "farmingScore": 11, "isBoss": false },
+    { "id": "ribbon_pig",      "name": "Ribbon Pig",      "level": 9,   "hp": 80,    "farmingScore": 9,  "isBoss": false },
+    { "id": "mushmom",         "name": "Mushmom",         "level": 15,  "hp": 3000,  "farmingScore": 80, "isBoss": true  }
+  ],
+  "ellinia": [
+    { "id": "faerie",          "name": "Faerie",          "level": 17,  "hp": 210,   "farmingScore": 18, "isBoss": false },
+    { "id": "green_trixter",   "name": "Green Trixter",   "level": 19,  "hp": 260,   "farmingScore": 20, "isBoss": false },
+    { "id": "zombie_mushroom", "name": "Zombie Mushroom", "level": 21,  "hp": 310,   "farmingScore": 22, "isBoss": false },
+    { "id": "horny_mushroom",  "name": "Horny Mushroom",  "level": 23,  "hp": 370,   "farmingScore": 25, "isBoss": false },
+    { "id": "curse_eye",       "name": "Curse Eye",       "level": 26,  "hp": 7000,  "farmingScore": 95, "isBoss": true  }
+  ],
+  "kerning": [
+    { "id": "ligator",         "name": "Ligator",         "level": 29,  "hp": 480,   "farmingScore": 28, "isBoss": false },
+    { "id": "dark_axe_stump",  "name": "Dark Axe Stump",  "level": 31,  "hp": 540,   "farmingScore": 30, "isBoss": false },
+    { "id": "croco",           "name": "Croco",           "level": 33,  "hp": 620,   "farmingScore": 33, "isBoss": false },
+    { "id": "clang",           "name": "Clang",           "level": 35,  "hp": 700,   "farmingScore": 36, "isBoss": false },
+    { "id": "king_ligator",    "name": "King Ligator",    "level": 38,  "hp": 14000, "farmingScore": 120,"isBoss": true  }
+  ],
+  "perion": [
+    { "id": "rock_lizard",     "name": "Rock Lizard",     "level": 40,  "hp": 860,   "farmingScore": 40, "isBoss": false },
+    { "id": "cold_eye",        "name": "Cold Eye",        "level": 43,  "hp": 950,   "farmingScore": 43, "isBoss": false },
+    { "id": "copper_drake",    "name": "Copper Drake",    "level": 46,  "hp": 1100,  "farmingScore": 48, "isBoss": false },
+    { "id": "bone_fish",       "name": "Dark Stone Golem","level": 49,  "hp": 1250,  "farmingScore": 52, "isBoss": false },
+    { "id": "stone_golem",     "name": "Stone Golem",     "level": 53,  "hp": 22000, "farmingScore": 150,"isBoss": true  }
+  ],
+  "sleepywood": [
+    { "id": "cube_slime",      "name": "Cube Slime",      "level": 56,  "hp": 1400,  "farmingScore": 58, "isBoss": false },
+    { "id": "imp",             "name": "Imp",             "level": 59,  "hp": 1600,  "farmingScore": 62, "isBoss": false },
+    { "id": "dark_drake",      "name": "Dark Drake",      "level": 62,  "hp": 1850,  "farmingScore": 67, "isBoss": false },
+    { "id": "fire_boar",       "name": "Jr. Boogie",      "level": 65,  "hp": 2100,  "farmingScore": 73, "isBoss": false },
+    { "id": "king_slime",      "name": "King Slime",      "level": 70,  "hp": 38000, "farmingScore": 200,"isBoss": true  }
+  ],
+  "ludibrium": [
+    { "id": "blockgolem",      "name": "Block Golem",     "level": 73,  "hp": 2400,  "farmingScore": 80, "isBoss": false },
+    { "id": "doll",            "name": "Toy Trojan",      "level": 76,  "hp": 2750,  "farmingScore": 85, "isBoss": false },
+    { "id": "timer",           "name": "Timer",           "level": 79,  "hp": 3100,  "farmingScore": 90, "isBoss": false },
+    { "id": "platoon_chronos", "name": "Platoon Chronos", "level": 82,  "hp": 3500,  "farmingScore": 96, "isBoss": false },
+    { "id": "tick_tock",       "name": "Tick-Tock",       "level": 87,  "hp": 56000, "farmingScore": 250,"isBoss": true  }
+  ],
+  "omega_sector": [
+    { "id": "barnard_gray",    "name": "Barnard Gray",    "level": 90,  "hp": 3900,  "farmingScore": 100,"isBoss": false },
+    { "id": "mega_gray",       "name": "Mega Gray",       "level": 93,  "hp": 4400,  "farmingScore": 108,"isBoss": false },
+    { "id": "ultra_gray",      "name": "Ultra Gray",      "level": 96,  "hp": 4900,  "farmingScore": 116,"isBoss": false },
+    { "id": "chief_gray",      "name": "Chief Gray",      "level": 99,  "hp": 5500,  "farmingScore": 125,"isBoss": false },
+    { "id": "platoon_chron_b", "name": "Platoon Chronos B","level":104, "hp": 80000, "farmingScore": 310,"isBoss": true  }
+  ],
+  "elnath": [
+    { "id": "pepe",            "name": "Pepe",            "level": 108, "hp": 6100,  "farmingScore": 132,"isBoss": false },
+    { "id": "ice_sentinel",    "name": "Ice Sentinel",    "level": 111, "hp": 6900,  "farmingScore": 140,"isBoss": false },
+    { "id": "hector",          "name": "Hector",          "level": 114, "hp": 7800,  "farmingScore": 150,"isBoss": false },
+    { "id": "coolie_zombie",   "name": "Coolie Zombie",   "level": 117, "hp": 8700,  "farmingScore": 160,"isBoss": false },
+    { "id": "yeti",            "name": "Yeti",            "level": 123, "hp": 110000,"farmingScore": 360,"isBoss": true  }
+  ],
+  "ice_valley": [
+    { "id": "cold_shark",      "name": "Cold Shark",      "level": 127, "hp": 9600,  "farmingScore": 170,"isBoss": false },
+    { "id": "red_wyvern",      "name": "Red Wyvern",      "level": 130, "hp": 10700, "farmingScore": 182,"isBoss": false },
+    { "id": "green_wyvern",    "name": "Green Wyvern",    "level": 133, "hp": 11900, "farmingScore": 194,"isBoss": false },
+    { "id": "blue_wyvern",     "name": "Blue Wyvern",     "level": 136, "hp": 13200, "farmingScore": 208,"isBoss": false },
+    { "id": "jr_balrog",       "name": "Jr. Balrog",      "level": 141, "hp": 160000,"farmingScore": 420,"isBoss": true  }
+  ],
+  "aqua_road": [
+    { "id": "bubble_fish",     "name": "Bubble Fish",     "level": 145, "hp": 14600, "farmingScore": 220,"isBoss": false },
+    { "id": "bone_fish",       "name": "Bone Fish",       "level": 148, "hp": 16100, "farmingScore": 234,"isBoss": false },
+    { "id": "jr_cactus",       "name": "Jr. Cactus",      "level": 151, "hp": 17800, "farmingScore": 250,"isBoss": false },
+    { "id": "tauromacis",      "name": "Tauromacis",      "level": 154, "hp": 19600, "farmingScore": 266,"isBoss": false },
+    { "id": "pianus",          "name": "Pianus",          "level": 160, "hp": 220000,"farmingScore": 500,"isBoss": true  }
+  ],
+  "minar_forest": [
+    { "id": "blood_harp",      "name": "Blood Harp",      "level": 163, "hp": 21500, "farmingScore": 282,"isBoss": false },
+    { "id": "red_kentaurus",   "name": "Red Kentaurus",   "level": 166, "hp": 23600, "farmingScore": 298,"isBoss": false },
+    { "id": "white_kentaurus", "name": "White Kentaurus", "level": 169, "hp": 25900, "farmingScore": 316,"isBoss": false },
+    { "id": "blue_kentaurus",  "name": "Blue Kentaurus",  "level": 172, "hp": 28400, "farmingScore": 335,"isBoss": false },
+    { "id": "manon",           "name": "Manon",           "level": 178, "hp": 300000,"farmingScore": 580,"isBoss": true  }
+  ],
+  "dragon_nest": [
+    { "id": "bone_dragon",     "name": "Bone Dragon",     "level": 182, "hp": 31200, "farmingScore": 354,"isBoss": false },
+    { "id": "skeleon",         "name": "Skeleon",         "level": 185, "hp": 34200, "farmingScore": 374,"isBoss": false },
+    { "id": "war_mage",        "name": "War Mage",        "level": 188, "hp": 37500, "farmingScore": 395,"isBoss": false },
+    { "id": "dark_wyvern",     "name": "Dark Wyvern",     "level": 191, "hp": 41100, "farmingScore": 418,"isBoss": false },
+    { "id": "griffey",         "name": "Griffey",         "level": 197, "hp": 400000,"farmingScore": 680,"isBoss": true  }
+  ],
+  "mu_lung": [
+    { "id": "bamboo_warrior",  "name": "Bamboo Warrior",  "level": 201, "hp": 45000, "farmingScore": 440,"isBoss": false },
+    { "id": "ghost_panda",     "name": "Ghost Panda",     "level": 204, "hp": 49200, "farmingScore": 464,"isBoss": false },
+    { "id": "boogies",         "name": "Boogies",         "level": 207, "hp": 53800, "farmingScore": 490,"isBoss": false },
+    { "id": "flower_fish",     "name": "Flower Fish",     "level": 210, "hp": 58800, "farmingScore": 516,"isBoss": false },
+    { "id": "gatekeeper",      "name": "Gatekeeper",      "level": 217, "hp": 530000,"farmingScore": 790,"isBoss": true  }
+  ],
+  "nihal_desert": [
+    { "id": "cactus",          "name": "Desert Cactus",   "level": 220, "hp": 64200, "farmingScore": 544,"isBoss": false },
+    { "id": "bellamoa",        "name": "Bellamoa",        "level": 223, "hp": 70000, "farmingScore": 572,"isBoss": false },
+    { "id": "sandrat",         "name": "Sand Rat",        "level": 226, "hp": 76200, "farmingScore": 602,"isBoss": false },
+    { "id": "scorpion",        "name": "Sand Scorpion",   "level": 229, "hp": 83000, "farmingScore": 634,"isBoss": false },
+    { "id": "deo",             "name": "Deo",             "level": 236, "hp": 680000,"farmingScore": 900,"isBoss": true  }
+  ],
+  "magatia": [
+    { "id": "homun",           "name": "Homun",           "level": 240, "hp": 90200, "farmingScore": 666,"isBoss": false },
+    { "id": "zenumist",        "name": "Zenumist",        "level": 243, "hp": 98000, "farmingScore": 700,"isBoss": false },
+    { "id": "alcadno",         "name": "Alcadno",         "level": 246, "hp": 107000,"farmingScore": 736,"isBoss": false },
+    { "id": "neo_huroid",      "name": "Neo Huroid",      "level": 249, "hp": 116400,"farmingScore": 774,"isBoss": false },
+    { "id": "homunculus",      "name": "Homunculus",      "level": 256, "hp": 860000,"farmingScore":1020,"isBoss": true  }
+  ],
+  "singapore": [
+    { "id": "leatty",          "name": "Leatty",          "level": 260, "hp": 126500,"farmingScore": 812,"isBoss": false },
+    { "id": "dark_leatty",     "name": "Dark Leatty",     "level": 263, "hp": 137500,"farmingScore": 852,"isBoss": false },
+    { "id": "bubblings",       "name": "Bubblings",       "level": 266, "hp": 149500,"farmingScore": 894,"isBoss": false },
+    { "id": "veetron",         "name": "Veetron",         "level": 269, "hp": 162500,"farmingScore": 938,"isBoss": false },
+    { "id": "krexel",          "name": "Krexel",          "level": 277, "hp":1100000,"farmingScore":1200,"isBoss": true  }
+  ],
+  "masteria": [
+    { "id": "shadow_lurker",   "name": "Shadow Lurker",   "level": 282, "hp": 176000,"farmingScore": 984,"isBoss": false },
+    { "id": "ghost_soldier",   "name": "Ghost Soldier",   "level": 285, "hp": 191000,"farmingScore":1032,"isBoss": false },
+    { "id": "nightmare",       "name": "Nightmare",       "level": 288, "hp": 207500,"farmingScore":1082,"isBoss": false },
+    { "id": "crimson_guard",   "name": "Crimson Guard",   "level": 291, "hp": 225000,"farmingScore":1134,"isBoss": false },
+    { "id": "crimson_balrog",  "name": "Crimson Balrog",  "level": 299, "hp":1400000,"farmingScore":1420,"isBoss": true  }
+  ],
+  "crimsonwood": [
+    { "id": "phantom_watch",   "name": "Phantom Watch",   "level": 304, "hp": 244000,"farmingScore":1188,"isBoss": false },
+    { "id": "dual_ghost_pirate","name":"Dual Ghost Pirate","level": 307, "hp": 265000,"farmingScore":1246,"isBoss": false },
+    { "id": "crimson_sabre",   "name": "Crimson Sabre",   "level": 310, "hp": 288000,"farmingScore":1306,"isBoss": false },
+    { "id": "dark_watcher",    "name": "Dark Watcher",    "level": 313, "hp": 312000,"farmingScore":1368,"isBoss": false },
+    { "id": "headless_horseman","name":"Headless Horseman","level": 322, "hp":1750000,"farmingScore":1650,"isBoss": true  }
+  ],
+  "zipangu": [
+    { "id": "spirit_of_rock",  "name": "Spirit of Rock",  "level": 327, "hp": 338000,"farmingScore":1432,"isBoss": false },
+    { "id": "ghost",           "name": "Ghosts",          "level": 330, "hp": 366000,"farmingScore":1500,"isBoss": false },
+    { "id": "oni",             "name": "Oni",             "level": 333, "hp": 396000,"farmingScore":1570,"isBoss": false },
+    { "id": "fox_fire",        "name": "Fox Fire",        "level": 336, "hp": 429000,"farmingScore":1644,"isBoss": false },
+    { "id": "tengu",           "name": "Tengu",           "level": 345, "hp":2200000,"farmingScore":1950,"isBoss": true  }
+  ],
+  "leafre_sky": [
+    { "id": "sky_whale",       "name": "Sky Whale",       "level": 350, "hp": 464000,"farmingScore":1720,"isBoss": false },
+    { "id": "cloud_fox",       "name": "Cloud Fox",       "level": 353, "hp": 502000,"farmingScore":1800,"isBoss": false },
+    { "id": "wind_drake",      "name": "Wind Drake",      "level": 356, "hp": 542500,"farmingScore":1884,"isBoss": false },
+    { "id": "sky_dragon",      "name": "Sky Dragon",      "level": 359, "hp": 587000,"farmingScore":1972,"isBoss": false },
+    { "id": "zeno",            "name": "Zeno",            "level": 368, "hp":2700000,"farmingScore":2280,"isBoss": true  }
+  ],
+  "temple_of_time": [
+    { "id": "memory_keeper",   "name": "Memory Keeper",   "level": 374, "hp": 635000,"farmingScore":2060,"isBoss": false },
+    { "id": "oblivion_monk",   "name": "Oblivion Monk",   "level": 377, "hp": 687000,"farmingScore":2154,"isBoss": false },
+    { "id": "time_soldier",    "name": "Time Soldier",    "level": 380, "hp": 743000,"farmingScore":2252,"isBoss": false },
+    { "id": "paradox_monk",    "name": "Paradox Monk",    "level": 383, "hp": 803000,"farmingScore":2354,"isBoss": false },
+    { "id": "time_controller", "name": "Time Controller", "level": 393, "hp":3400000,"farmingScore":2700,"isBoss": true  }
+  ],
+  "black_mage_lair": [
+    { "id": "dark_servant",    "name": "Dark Servant",    "level": 400, "hp": 868000,"farmingScore":2460,"isBoss": false },
+    { "id": "void_golem",      "name": "Void Golem",      "level": 404, "hp": 939000,"farmingScore":2575,"isBoss": false },
+    { "id": "shadow_archon",   "name": "Shadow Archon",   "level": 408, "hp":1016000,"farmingScore":2696,"isBoss": false },
+    { "id": "black_knight",    "name": "Black Knight",    "level": 412, "hp":1100000,"farmingScore":2822,"isBoss": false },
+    { "id": "black_mage",      "name": "Black Mage",      "level": 425, "hp":5000000,"farmingScore":3500,"isBoss": true  }
+  ]
+}

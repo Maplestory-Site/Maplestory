@@ -12,7 +12,8 @@ export type MiniGameId =
   | "memory-flash"
   | "lane-switch-runner"
   | "ice-slide-puzzle"
-  | "boss-clicker";
+  | "boss-clicker"
+  | "idlestory-world";
 
 export type MiniGameDefinition = {
   id: MiniGameId;
@@ -25,6 +26,15 @@ export type MiniGameDefinition = {
 };
 
 export const miniGames: MiniGameDefinition[] = [
+  {
+    id: "idlestory-world",
+    title: "IdleStory World",
+    description: "Build an online idle world, recruit heroes, clear zones, and earn while away.",
+    icon: "IW",
+    type: "Idle",
+    difficulty: "World",
+    previewImage: "/game-previews/idlestory-world.png"
+  },
   {
     id: "reaction-test",
     title: "Reaction Test",

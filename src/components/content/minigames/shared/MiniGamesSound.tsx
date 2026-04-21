@@ -7,6 +7,10 @@ type MiniGamesSoundContextValue = {
   playClick: () => void;
   playSuccess: () => void;
   playFailure: () => void;
+  playHit: () => void;
+  playCrit: () => void;
+  playLevelUp: () => void;
+  playReward: () => void;
 };
 
 const STORAGE_KEY = "snailslayer-mini-games-muted";
@@ -28,6 +32,27 @@ export function MiniGamesSoundProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     window.localStorage.setItem(STORAGE_KEY, String(muted));
   }, [muted]);
+
+  function getAudioContext() {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    const AudioCtor = window.AudioContext ?? (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AudioCtor) {
+      return null;
+    }
+
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioCtor();
+    }
+
+    if (audioContextRef.current.state === "suspended") {
+      void audioContextRef.current.resume();
+    }
+
+    return audioContextRef.current;
+  }
 
   useEffect(() => {
     if (muted || !settings.music) {
@@ -74,27 +99,6 @@ export function MiniGamesSoundProvider({ children }: { children: ReactNode }) {
     musicRef.current = { osc, lfo, gain };
   }, [muted, settings.music]);
 
-  function getAudioContext() {
-    if (typeof window === "undefined") {
-      return null;
-    }
-
-    const AudioCtor = window.AudioContext ?? (window as typeof window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
-    if (!AudioCtor) {
-      return null;
-    }
-
-    if (!audioContextRef.current) {
-      audioContextRef.current = new AudioCtor();
-    }
-
-    if (audioContextRef.current.state === "suspended") {
-      void audioContextRef.current.resume();
-    }
-
-    return audioContextRef.current;
-  }
-
   function playTone(frequency: number, duration: number, type: OscillatorType, gainValue: number, delay = 0) {
     if (muted) {
       return;
@@ -134,14 +138,32 @@ export function MiniGamesSoundProvider({ children }: { children: ReactNode }) {
       },
       playFailure: () => {
         playTone(220, 0.12, "sawtooth", 0.012);
+      },
+      playHit: () => {
+        playTone(180, 0.045, "square", 0.01);
+      },
+      playCrit: () => {
+        playTone(520, 0.045, "triangle", 0.018);
+        playTone(1040, 0.09, "sine", 0.015, 0.035);
+      },
+      playLevelUp: () => {
+        playTone(520, 0.08, "triangle", 0.018);
+        playTone(760, 0.1, "triangle", 0.017, 0.055);
+        playTone(1120, 0.13, "sine", 0.014, 0.12);
+      },
+      playReward: () => {
+        playTone(740, 0.06, "triangle", 0.014);
+        playTone(980, 0.08, "sine", 0.012, 0.045);
       }
     }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [muted]
   );
 
   return <MiniGamesSoundContext.Provider value={value}>{children}</MiniGamesSoundContext.Provider>;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export function useMiniGamesSound() {
   const context = useContext(MiniGamesSoundContext);
 

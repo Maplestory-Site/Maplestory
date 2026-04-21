@@ -53,7 +53,7 @@ export function MultiplayerModal({ open, gameId, onClose }: MultiplayerModalProp
       setRoom(payload.room);
       setRoomId(payload.room.id);
       setActiveRoomId(payload.room.id);
-    } catch (err) {
+    } catch {
       setError("Failed to create room.");
     } finally {
       setLoading(false);

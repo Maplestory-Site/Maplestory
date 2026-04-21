@@ -3,7 +3,6 @@ import { miniGames } from "../data/miniGames";
 import type { MiniGameId } from "../data/miniGames";
 import { MiniGamesModal } from "../components/content/MiniGamesModal";
 import { GamesHeader } from "../components/content/GamesHeader";
-import { getDailyChallenge } from "../components/content/minigames/shared/dailyChallenge";
 import { useGameMeta } from "../components/content/minigames/shared/useGameMeta";
 import { useGameFavorites } from "../components/content/minigames/shared/gameFavorites";
 import { getAchievementLabel, getProgressSnapshot, openLootBox, purchaseShopItem, type LootReward } from "../components/content/minigames/shared/gameMeta";
@@ -12,11 +11,10 @@ import { useI18n } from "../i18n/I18nProvider";
 export function GameHubPage() {
   const { t, td } = useI18n();
   const [open, setOpen] = useState(false);
-  const [activeGameId, setActiveGameId] = useState<MiniGameId>("reaction-test");
+  const [activeGameId, setActiveGameId] = useState<MiniGameId>("idlestory-world");
   const [search, setSearch] = useState("");
   const [activeCategory, setActiveCategory] = useState("All");
   const meta = useGameMeta();
-  const daily = getDailyChallenge();
   const { favorites, toggle } = useGameFavorites();
   const progress = useMemo(() => getProgressSnapshot(meta), [meta]);
 
@@ -26,6 +24,7 @@ export function GameHubPage() {
       Reaction: ["Timing", "Reflex"],
       Skill: ["Accuracy", "Precision"],
       Puzzle: ["Puzzle", "Memory"],
+      Idle: ["Idle"],
       Casual: ["Training", "Boss", "Survival", "Pressure"]
     }),
     []
@@ -74,8 +73,8 @@ export function GameHubPage() {
   }, [meta.gamePlays]);
 
   const featured = useMemo(
-    () => miniGames.find((game) => game.id === daily.challenge.gameId) ?? miniGames[0],
-    [daily.challenge.gameId]
+    () => miniGames.find((game) => game.id === "idlestory-world") ?? miniGames[0],
+    []
   );
 
   const favoriteGames = miniGames.filter((game) => favorites.includes(game.id));
@@ -187,38 +186,18 @@ export function GameHubPage() {
               </div>
             </div>
             <div className="game-hub__hero-feature">
-              <div className="game-hub__featured">
+              <button
+                className="game-hub__featured game-hub__featured--image-only"
+                onClick={() => {
+                  setActiveGameId(featured.id);
+                  setOpen(true);
+                }}
+                type="button"
+              >
                 <div className="game-hub__featured-art" aria-hidden="true">
                   <img src={featured.previewImage} alt="" loading="lazy" />
                 </div>
-                <span className="game-hub__featured-label">{t("Featured Today")}</span>
-                <strong>{td(featured.title)}</strong>
-                <p>{td(featured.description)}</p>
-                <div className="game-hub__featured-meta">
-                  <span>{td(featured.type)}</span>
-                  {featured.difficulty ? <span>{td(featured.difficulty)}</span> : null}
-                  <span>{t("High score")} {meta.gameBest[featured.id] ?? 0}</span>
-                </div>
-                <button
-                  className="button button--ghost"
-                  onClick={() => {
-                    setActiveGameId(featured.id);
-                    setOpen(true);
-                  }}
-                  type="button"
-                >
-                  {t("Play Now")}
-                </button>
-              </div>
-              <div className={`game-hub__daily ${daily.completed ? "is-complete" : ""}`}>
-                <span>{t("Daily Challenge")}</span>
-                <strong>{td(daily.challenge.title)}</strong>
-                <p>{td(daily.challenge.description)}</p>
-                <div className="game-hub__daily-meta">
-                  <span>{td(daily.challenge.targetLabel)}</span>
-                  <span>{daily.completed ? t("Complete") : t("Active")}</span>
-                </div>
-              </div>
+              </button>
             </div>
           </div>
 
