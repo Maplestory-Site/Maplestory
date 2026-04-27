@@ -21061,3 +21061,212 @@ body.maple-ui :where(.video-grid, .news-grid, .recommendation-panel__shelf, .rew
 .game-hub__featured--image-only {
   width: 100% !important;
 }
+/* Compact responsive header */
+.site-header__inner {
+  min-height: 64px;
+  gap: clamp(8px, 1.1vw, 14px);
+}
+
+.brand-lockup.site-header__brand {
+  gap: 9px;
+  max-width: 210px;
+}
+
+.site-header__brand .brand-lockup__mark {
+  width: 38px;
+  height: 38px;
+}
+
+.site-header__brand .brand-lockup__copy strong {
+  font-size: 0.92rem;
+  letter-spacing: 0.035em;
+  white-space: nowrap;
+}
+
+.site-header__brand .brand-lockup__copy small {
+  font-size: 0.68rem;
+  line-height: 1.05;
+  opacity: 0.74;
+  white-space: nowrap;
+}
+
+.site-nav,
+body.maple-ui .site-nav {
+  gap: 6px;
+  overflow: visible;
+}
+
+.site-nav__link {
+  min-height: 34px;
+  padding: 0 11px;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  line-height: 1;
+  white-space: nowrap;
+  transition:
+    transform 160ms ease,
+    background 160ms ease,
+    border-color 160ms ease,
+    box-shadow 160ms ease,
+    color 160ms ease;
+}
+
+.site-nav__link:hover,
+.site-nav__link:focus-visible,
+.site-nav__link.is-active {
+  transform: translateY(-1px);
+}
+
+.site-nav__more-button {
+  appearance: none;
+  font: inherit;
+}
+
+.site-nav__chevron {
+  width: 7px;
+  height: 7px;
+  margin-left: 2px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  opacity: 0.72;
+  transform: translateY(-2px) rotate(45deg);
+  transition: transform 160ms ease;
+}
+
+.site-nav__item--has-children:hover .site-nav__chevron,
+.site-nav__item--has-children:focus-within .site-nav__chevron {
+  transform: translateY(1px) rotate(225deg);
+}
+
+.site-nav__submenu--more {
+  right: 0;
+  left: auto;
+  display: grid;
+  width: max-content;
+  min-width: 240px;
+  max-width: min(320px, calc(100vw - 32px));
+  gap: 5px;
+  padding: 8px;
+  transform: translateY(8px) scale(0.98);
+  transform-origin: top right;
+}
+
+.site-nav__item--has-children:hover .site-nav__submenu--more,
+.site-nav__item--has-children:focus-within .site-nav__submenu--more {
+  transform: translateY(0) scale(1);
+}
+
+.site-nav__submenu-group {
+  display: grid;
+  gap: 4px;
+}
+
+.site-nav__submenu-children {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 4px;
+  margin-left: 8px;
+  padding: 2px 0 6px 8px;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.site-nav__submenu-children .site-nav__submenu-link {
+  min-height: 30px;
+  padding: 7px 9px;
+  font-size: 0.7rem;
+  opacity: 0.86;
+}
+
+.site-header__actions,
+.site-header__cta-group,
+body.maple-ui .site-header__actions,
+body.maple-ui .site-header__cta-group {
+  gap: 7px;
+}
+
+.site-header__login,
+.site-header__user,
+.site-header__actions .button,
+.language-switcher__button {
+  min-height: 36px;
+  padding-inline: 11px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  white-space: nowrap;
+}
+
+.site-header__user-action {
+  padding: 5px 8px;
+  border-radius: 999px;
+  font-size: 0.64rem;
+}
+
+.menu-trigger {
+  width: 38px;
+  height: 38px;
+  border-radius: 13px;
+}
+
+@media (min-width: 1180px) {
+  .menu-trigger {
+    display: none;
+  }
+}
+
+@media (max-width: 1319px) {
+  .site-header__brand .brand-lockup__copy small {
+    display: none;
+  }
+
+  .site-nav,
+  body.maple-ui .site-nav {
+    gap: 4px;
+  }
+
+  .site-nav__link {
+    padding-inline: 9px;
+  }
+}
+
+@media (max-width: 1179px) {
+  .site-header__account {
+    display: none;
+  }
+
+  .site-header__actions .button,
+  .language-switcher__button {
+    min-height: 34px;
+    padding-inline: 10px;
+  }
+}
+
+@media (max-width: 959px) {
+  .site-header__inner {
+    min-height: 60px;
+  }
+
+  .site-header__center,
+  .site-header__cta-group {
+    display: none;
+  }
+
+  .menu-trigger {
+    display: inline-grid;
+  }
+}
+
+@media (max-width: 719px) {
+  .site-header__brand .brand-lockup__mark {
+    width: 34px;
+    height: 34px;
+  }
+
+  .site-header__brand .brand-lockup__copy strong {
+    font-size: 0.84rem;
+  }
+
+  .menu-trigger {
+    width: 36px;
+    height: 36px;
+  }
+}
