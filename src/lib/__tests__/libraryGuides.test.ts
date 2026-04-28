@@ -53,13 +53,13 @@ describe("filterGuides — category filter", () => {
   it("'classes' returns only class guides", () => {
     const result = filterGuides(libraryGuides, { ...EMPTY_LIBRARY_FILTER, category: "classes" });
     expect(result.length).toBeGreaterThan(0);
-    expect(result.every((g) => g.category === "classes")).toBe(true);
+    expect(result.every((g) => g.category === "Classes")).toBe(true);
   });
 
   it("'beginner' returns only beginner guides", () => {
     const result = filterGuides(libraryGuides, { ...EMPTY_LIBRARY_FILTER, category: "beginner" });
     expect(result.length).toBeGreaterThan(0);
-    expect(result.every((g) => g.category === "beginner")).toBe(true);
+    expect(result.every((g) => g.category === "Beginner")).toBe(true);
   });
 
   it("each category has at least one guide (catalogue completeness)", () => {
@@ -97,7 +97,7 @@ describe("filterGuides — search", () => {
       category: "classes",
       query: "link"
     });
-    expect(result.every((g) => g.category === "classes")).toBe(true);
+    expect(result.every((g) => g.category === "Classes")).toBe(true);
     expect(result.some((g) => g.id === "link-skills")).toBe(true);
   });
 });
@@ -160,7 +160,7 @@ describe("guideMatches — composite filters", () => {
 
   it("fails when category mismatches", () => {
     expect(
-      guideMatches(guide, { ...EMPTY_LIBRARY_FILTER, category: guide.category === "content" ? "events" : "content" })
+      guideMatches(guide, { ...EMPTY_LIBRARY_FILTER, category: guide.category === "Content" ? "events" : "content" })
     ).toBe(false);
   });
 });
@@ -202,17 +202,21 @@ describe("getRelatedGuides", () => {
   it("resolves IDs to guide objects", () => {
     const guide = getGuideById(libraryGuides, "progression-overview")!;
     const related = getRelatedGuides(libraryGuides, guide);
-    expect(related.length).toBe(guide.relatedIds!.length);
-    expect(related.every((g) => guide.relatedIds!.includes(g.id))).toBe(true);
+    expect(related.length).toBe(guide.relatedGuideIds.length);
+    expect(related.every((g) => guide.relatedGuideIds.includes(g.id))).toBe(true);
   });
 
   it("skips missing IDs gracefully", () => {
-    const fake: LibraryGuide = { ...sample(), relatedIds: ["nope-1", "nope-2"] };
+    const fake: LibraryGuide = {
+      ...sample(),
+      relatedGuideIds: ["nope-1", "nope-2"],
+      relatedIds: undefined
+    };
     expect(getRelatedGuides(libraryGuides, fake)).toEqual([]);
   });
 
   it("returns [] when guide has no relatedIds", () => {
-    const fake: LibraryGuide = { ...sample(), relatedIds: undefined };
+    const fake: LibraryGuide = { ...sample(), relatedGuideIds: [], relatedIds: undefined };
     expect(getRelatedGuides(libraryGuides, fake)).toEqual([]);
   });
 });
@@ -274,7 +278,7 @@ describe("data integrity", () => {
   it("all relatedIds reference existing guides", () => {
     const allIds = new Set(libraryGuides.map((g) => g.id));
     for (const guide of libraryGuides) {
-      for (const id of guide.relatedIds ?? []) {
+      for (const id of guide.relatedGuideIds) {
         expect(allIds.has(id), `Guide '${guide.id}' references missing relatedId '${id}'`).toBe(true);
       }
     }
@@ -289,7 +293,7 @@ describe("data integrity", () => {
   it("every guide has a non-empty body and summary", () => {
     for (const g of libraryGuides) {
       expect(g.summary.length).toBeGreaterThan(20);
-      expect(g.body.length).toBeGreaterThan(20);
+      expect(g.sections.map((section) => section.body).join(" ").length).toBeGreaterThan(20);
     }
   });
 

@@ -10,7 +10,7 @@ describe("createLibraryPageModel", () => {
     expect(model.featured.length).toBeGreaterThan(0);
     expect(model.showFeatured).toBe(true);
     expect(model.empty).toBe(false);
-    expect(getLibraryCategoryTabs().map((tab) => tab.key)).toContain("beginner");
+    expect(getLibraryCategoryTabs().map((tab) => tab.key)).toContain("Beginner");
   });
 
   it("search filters guides by topic", () => {
@@ -31,7 +31,7 @@ describe("createLibraryPageModel", () => {
     });
 
     expect(model.filtered.length).toBeGreaterThan(0);
-    expect(model.filtered.every((guide) => guide.category === "events")).toBe(true);
+    expect(model.filtered.every((guide) => guide.category === "Events")).toBe(true);
   });
 
   it("difficulty filter returns only matching difficulty", () => {

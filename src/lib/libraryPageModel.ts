@@ -15,11 +15,12 @@ import {
   getRelatedGuides,
   getTagList,
   isLibraryEmpty,
+  type LibraryCategoryFilter,
   type LibraryFilter
 } from "./libraryGuides";
 
 export type LibraryPageState = {
-  activeCategory: LibraryCategoryKey | "all";
+  activeCategory: LibraryCategoryFilter;
   query: string;
   difficulty: LibraryDifficulty | null;
   region: LibraryRegion | null;
@@ -31,7 +32,7 @@ export type LibraryPageModel = {
   filter: LibraryFilter;
   filtered: LibraryGuide[];
   featured: LibraryGuide[];
-  counts: Record<LibraryCategoryKey | "all", number>;
+  counts: Record<LibraryCategoryKey | "all" | "All" | import("../data/libraryGuides").LibraryCategory, number>;
   tags: string[];
   selectedGuide: LibraryGuide | null;
   relatedForSelected: LibraryGuide[];

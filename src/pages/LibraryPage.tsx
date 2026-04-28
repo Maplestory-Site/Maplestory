@@ -10,12 +10,12 @@ import {
   libraryDifficulties,
   libraryGuides,
   libraryRegions,
-  type LibraryCategoryKey,
   type LibraryDifficulty,
   type LibraryGuide,
   type LibraryRegion
 } from "../data/libraryGuides";
 import { createLibraryPageModel } from "../lib/libraryPageModel";
+import type { LibraryCategoryFilter } from "../lib/libraryGuides";
 
 export function LibraryPage() {
   usePageMeta(
@@ -26,7 +26,7 @@ export function LibraryPage() {
   const navigate = useNavigate();
   const { guideId } = useParams<{ guideId?: string }>();
 
-  const [activeCategory, setActiveCategory] = useState<LibraryCategoryKey | "all">("all");
+  const [activeCategory, setActiveCategory] = useState<LibraryCategoryFilter>("all");
   const [query, setQuery] = useState("");
   const [difficulty, setDifficulty] = useState<LibraryDifficulty | null>(null);
   const [region, setRegion] = useState<LibraryRegion | null>(null);

@@ -20,6 +20,7 @@ function RootLayoutContent() {
 
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let observer: IntersectionObserver | undefined;
+    let mutationObserver: MutationObserver | undefined;
     let frame = 0;
 
     const isInViewport = (element: HTMLElement) => {
@@ -27,17 +28,23 @@ function RootLayoutContent() {
       return rect.top < window.innerHeight * 0.92 && rect.bottom > 0;
     };
 
-    frame = window.requestAnimationFrame(() => {
-      const revealItems = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
-      if (!revealItems.length) {
-        return;
-      }
-
+    const prepareRevealItem = (item: HTMLElement) => {
       if (reducedMotion) {
-        revealItems.forEach((item) => item.classList.add("is-visible"));
+        item.classList.add("is-visible");
         return;
       }
 
+      item.classList.remove("is-visible");
+
+      if (isInViewport(item)) {
+        item.classList.add("is-visible");
+        return;
+      }
+
+      observer?.observe(item);
+    };
+
+    frame = window.requestAnimationFrame(() => {
       observer = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
@@ -55,20 +62,39 @@ function RootLayoutContent() {
         }
       );
 
+      const revealItems = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
       revealItems.forEach((item) => {
-        item.classList.remove("is-visible");
+        prepareRevealItem(item);
+      });
 
-        if (isInViewport(item)) {
-          item.classList.add("is-visible");
-          return;
-        }
+      const mainContent = document.getElementById("main-content");
+      mutationObserver = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+          mutation.addedNodes.forEach((node) => {
+            if (!(node instanceof HTMLElement)) {
+              return;
+            }
 
-        observer?.observe(item);
+            if (node.matches("[data-reveal]")) {
+              prepareRevealItem(node);
+            }
+
+            node.querySelectorAll<HTMLElement>("[data-reveal]").forEach((item) => {
+              prepareRevealItem(item);
+            });
+          });
+        });
+      });
+
+      mutationObserver.observe(mainContent ?? document.body, {
+        childList: true,
+        subtree: true
       });
     });
 
     return () => {
       window.cancelAnimationFrame(frame);
+      mutationObserver?.disconnect();
       observer?.disconnect();
     };
   }, [location.pathname]);

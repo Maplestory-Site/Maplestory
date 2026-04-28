@@ -411,7 +411,7 @@ export function GameHubPage() {
                       setOpen(true);
                     }}
                     onToggleFavorite={() => toggle(game.id)}
-                    key={game.id}
+                    key={`fav-${game.id}`}
                   />
                 ))}
               </div>
@@ -435,7 +435,7 @@ export function GameHubPage() {
                       setOpen(true);
                     }}
                     onToggleFavorite={() => toggle(game.id)}
-                    key={game.id}
+                    key={`most-${game.id}`}
                   />
                 ))}
               </div>
@@ -461,7 +461,7 @@ export function GameHubPage() {
                           setOpen(true);
                         }}
                         onToggleFavorite={() => toggle(game.id)}
-                        key={game.id}
+                        key={`cat-${category}-${game.id}`}
                       />
                     ))}
                   </div>
@@ -485,7 +485,7 @@ export function GameHubPage() {
                       setOpen(true);
                     }}
                     onToggleFavorite={() => toggle(game.id)}
-                    key={game.id}
+                    key={`filtered-${game.id}`}
                   />
                 ))}
               </div>

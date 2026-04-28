@@ -8,11 +8,13 @@ type Props = {
 };
 
 export function LibraryGuideCard({ guide, featured = false, onSelect }: Props) {
+  const image = guide.heroImage ?? guide.image ?? guide.sections.find((section) => section.image)?.image;
+
   return (
     <article className={`card library-card ${featured ? "library-card--featured" : ""}`}>
       <div className="library-card__media" aria-hidden="true">
-        {guide.image ? (
-          <img alt="" className="library-card__image" decoding="async" loading="lazy" src={guide.image} />
+        {image ? (
+          <img alt="" className="library-card__image" decoding="async" loading="lazy" src={image} />
         ) : (
           <span className="library-card__icon">{guide.icon}</span>
         )}
@@ -55,17 +57,17 @@ export function LibraryGuideCard({ guide, featured = false, onSelect }: Props) {
 
 function categoryLabel(category: LibraryGuide["category"]): string {
   switch (category) {
-    case "content":
+    case "Content":
       return "Content";
-    case "classes":
+    case "Classes":
       return "Classes";
-    case "equipment":
+    case "Equipment":
       return "Equipment";
-    case "events":
+    case "Events":
       return "Events";
-    case "resources":
+    case "Resources":
       return "Resources";
-    case "beginner":
+    case "Beginner":
       return "Beginner";
     default:
       return category;

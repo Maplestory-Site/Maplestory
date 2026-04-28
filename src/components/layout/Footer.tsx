@@ -56,7 +56,10 @@ export function Footer({ groups }: FooterProps) {
               <h3>{t(group.title)}</h3>
               <ul className="site-footer__links">
                 {group.links.map((link) => (
-                  <li key={link.href}>{renderLink(link)}</li>
+                  // Composite key: a footer group may contain duplicate hrefs
+                  // (e.g. "Community" + "Join Discord" both pointing to /community).
+                  // Using href alone caused React duplicate-key warnings on /community.
+                  <li key={`${group.title}-${link.label}-${link.href}`}>{renderLink(link)}</li>
                 ))}
               </ul>
             </section>

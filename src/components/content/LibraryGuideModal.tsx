@@ -1,5 +1,6 @@
 import { useEffect } from "react";
 import type { LibraryGuide } from "../../data/libraryGuides";
+import { isThirdPartyLinkType } from "../../lib/libraryGuides";
 import { Button } from "../ui/Button";
 
 type Props = {
@@ -22,8 +23,19 @@ export function LibraryGuideModal({ guide, related, onClose, onSelectRelated }: 
 
   if (!guide) return null;
 
-  const paragraphs = splitParagraphs(guide.body);
-  const hasThirdPartyLink = guide.sourceLinks?.some((link) => link.thirdParty);
+  const sections = guide.sections.length
+    ? guide.sections
+    : guide.body
+      ? [{ heading: "Guide", body: guide.body }]
+      : [];
+  const sourceLinks = guide.externalLinks?.length
+    ? guide.externalLinks.map((link) => ({
+        label: link.label,
+        href: link.url,
+        thirdParty: isThirdPartyLinkType(link.type)
+      }))
+    : guide.sourceLinks ?? [];
+  const hasThirdPartyLink = sourceLinks.some((link) => link.thirdParty);
 
   return (
     <div className="library-modal" role="dialog" aria-modal="true" aria-label={guide.title}>
@@ -73,17 +85,30 @@ export function LibraryGuideModal({ guide, related, onClose, onSelectRelated }: 
           ) : null}
 
           <section className="library-modal__content">
-            {paragraphs.map((paragraph, index) => (
-              <p key={index}>{paragraph}</p>
+            {sections.map((section) => (
+              <article key={section.heading} className="library-modal__section">
+                <h3>{section.heading}</h3>
+                {splitParagraphs(section.body).map((paragraph, index) => (
+                  <p key={`${section.heading}-${index}`}>{paragraph}</p>
+                ))}
+                {section.tips?.length ? (
+                  <ul>
+                    {section.tips.map((tip) => (
+                      <li key={tip}>{tip}</li>
+                    ))}
+                  </ul>
+                ) : null}
+              </article>
             ))}
           </section>
 
-          {guide.sourceLinks?.length ? (
+          {sourceLinks.length ? (
             <section className="library-modal__sources">
               <h3>External Sources</h3>
               <ul>
-                {guide.sourceLinks.map((link) => (
-                  <li key={link.href}>
+                {sourceLinks.map((link, index) => (
+                  // Composite key: defensive — sourceLinks could in theory share an href.
+                  <li key={`${link.href}-${index}`}>
                     <a href={link.href} rel="noopener noreferrer" target="_blank">
                       {link.label}
                     </a>
