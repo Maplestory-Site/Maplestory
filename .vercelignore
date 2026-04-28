@@ -1,0 +1,6 @@
+.claude/
+.codex-*
+tmp-*
+*.log
+node_modules/
+dist/
