@@ -53,6 +53,8 @@
 
 /* ── TOP HUD ──────────────────────────────────────────────────────────────── */
 
+/* ── TOP HUD ──────────────────────────────────────────────────────────────── */
+
 .isw-hud {
   display: flex;
   flex-direction: column;
@@ -97,10 +99,10 @@
   white-space: nowrap;
 }
 
-.isw-hud__chip--gold   { color: var(--gold);    border-color: var(--gold-glow); }
-.isw-hud__chip--crystal{ color: var(--crystal); border-color: var(--crystal-glow); }
-.isw-hud__chip--relic  { color: var(--relic);   border-color: var(--relic-glow); }
-.isw-hud__chip--fame   { color: var(--fame);    border-color: var(--fame-glow); }
+.isw-hud__chip--gold { color: var(--gold);    border-color: var(--gold-glow); }
+.isw-hud__chip--crystal { color: var(--crystal); border-color: var(--crystal-glow); }
+.isw-hud__chip--relic { color: var(--relic);   border-color: var(--relic-glow); }
+.isw-hud__chip--fame { color: var(--fame);    border-color: var(--fame-glow); }
 .isw-hud__chip--capped { opacity: 0.7; }
 .isw-hud__chip--capped .isw-hud__chip-val::after { content: "⚠"; margin-left: 2px; font-size: 9px; }
 
@@ -148,6 +150,8 @@
   white-space: nowrap;
   flex-shrink: 0;
 }
+
+/* ── COMBAT ARENA ─────────────────────────────────────────────────────────── */
 
 /* ── COMBAT ARENA ─────────────────────────────────────────────────────────── */
 
@@ -290,9 +294,6 @@
   100% { filter: brightness(1) drop-shadow(0 8px 24px rgba(0,0,0,0.5)); }
 }
 
-.isw-arena__enemy-dead {
-  animation: enemy-die 0.5s ease forwards;
-}
 
 @keyframes enemy-die {
   to { opacity: 0; transform: scale(0.6) translateY(20px); }
@@ -363,38 +364,9 @@
 }
 
 /* Boss mechanic banner */
-.isw-arena__boss-banner {
-  position: relative;
-  z-index: 3;
-  margin: 0 12px 8px;
-  background: rgba(255,69,0,0.12);
-  border: 1px solid rgba(255,69,0,0.35);
-  border-radius: var(--r-md);
-  padding: 8px 12px;
-  display: flex;
-  align-items: flex-start;
-  gap: 8px;
-}
 
-.isw-arena__boss-banner-icon {
-  font-size: 20px;
-  flex-shrink: 0;
-  line-height: 1;
-}
 
-.isw-arena__boss-banner-text strong {
-  display: block;
-  font-size: 12px;
-  font-weight: 800;
-  color: var(--boss);
-}
-
-.isw-arena__boss-banner-text p {
-  margin: 2px 0 0;
-  font-size: 11px;
-  color: var(--text-2);
-  line-height: 1.4;
-}
+/* ── FLOATING DAMAGE NUMBERS ──────────────────────────────────────────────── */
 
 /* ── FLOATING DAMAGE NUMBERS ──────────────────────────────────────────────── */
 
@@ -421,9 +393,9 @@
 }
 
 .isw-dmg-num--normal { color: #fff; font-size: 18px; }
-.isw-dmg-num--crit   { color: var(--gold); font-size: 26px; }
-.isw-dmg-num--boss   { color: var(--boss); font-size: 22px; }
-.isw-dmg-num--kill   { color: var(--success); font-size: 24px; }
+.isw-dmg-num--crit { color: var(--gold); font-size: 26px; }
+.isw-dmg-num--boss { color: var(--boss); font-size: 22px; }
+.isw-dmg-num--kill { color: var(--success); font-size: 24px; }
 
 .isw-feel-burst {
   position: absolute;
@@ -469,6 +441,8 @@
 
 /* ── BOTTOM TABS ──────────────────────────────────────────────────────────── */
 
+/* ── BOTTOM TABS ──────────────────────────────────────────────────────────── */
+
 .isw-tabs {
   display: flex;
   flex-direction: column;
@@ -487,6 +461,8 @@
   scrollbar-width: none;
 }
 .isw-tab-panel::-webkit-scrollbar { display: none; }
+
+/* ── TAB NAV: supports up to 8+ tabs gracefully on mobile ────────────────── */
 
 /* ── TAB NAV: supports up to 8+ tabs gracefully on mobile ────────────────── */
 
@@ -567,6 +543,8 @@
   border-radius: 50%;
   border: 1.5px solid var(--bg-deep);
 }
+
+/* ── TAB CONTENT PANELS ───────────────────────────────────────────────────── */
 
 /* ── TAB CONTENT PANELS ───────────────────────────────────────────────────── */
 
@@ -767,6 +745,8 @@
   opacity: 0.4;
   cursor: not-allowed;
 }
+
+/* ── CLASS PANEL ──────────────────────────────────────────────────────────── */
 
 /* ── CLASS PANEL ──────────────────────────────────────────────────────────── */
 
@@ -972,6 +952,8 @@
 
 /* ── ECONOMY PANEL ────────────────────────────────────────────────────────── */
 
+/* ── ECONOMY PANEL ────────────────────────────────────────────────────────── */
+
 .isw-economy {
   display: flex;
   flex-direction: column;
@@ -1025,7 +1007,7 @@
 .isw-mult-card__icon { font-size: 18px; line-height: 1; }
 .isw-mult-card__name { font-size: 11px; font-weight: 800; }
 .isw-mult-card__desc { font-size: 10px; color: var(--text-2); line-height: 1.3; }
-.isw-mult-card__lv   { font-size: 10px; color: var(--text-3); }
+.isw-mult-card__lv { font-size: 10px; color: var(--text-3); }
 
 .isw-mult-card__btn {
   margin-top: 4px;
@@ -1120,6 +1102,8 @@
   background: linear-gradient(135deg, #b91c1c, #ef4444);
   box-shadow: 0 3px 0 #7f1d1d, 0 4px 16px rgba(239,68,68,0.35);
 }
+
+/* ── ZONE PANEL ───────────────────────────────────────────────────────────── */
 
 /* ── ZONE PANEL ───────────────────────────────────────────────────────────── */
 
@@ -1266,6 +1250,8 @@
 
 /* ── TOAST ────────────────────────────────────────────────────────────────── */
 
+/* ── TOAST ────────────────────────────────────────────────────────────────── */
+
 .isw-toast {
   position: absolute;
   top: 60px;
@@ -1291,19 +1277,6 @@
 
 /* ── MISC ─────────────────────────────────────────────────────────────────── */
 
-.isw-divider {
-  height: 1px;
-  background: var(--border);
-  margin: 4px 0;
-}
-
-.isw-empty-state {
-  text-align: center;
-  padding: 24px 16px;
-  color: var(--text-3);
-  font-size: 12px;
-  font-weight: 700;
-}
 
 .isw-prestige-badge {
   display: inline-flex;
@@ -1385,22 +1358,10 @@
   font: inherit;
 }
 
-.isw-online-chat {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  max-height: 180px;
-  overflow: auto;
-}
 
-.isw-online-chat__msg {
-  padding: 8px 10px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  background: rgba(255,255,255,0.04);
-  font-size: 12px;
-  color: var(--text-2);
-}
+/* ══════════════════════════════════════════════════════════════════════════
+   BOSS PANEL
+   ══════════════════════════════════════════════════════════════════════════ */
 
 /* ══════════════════════════════════════════════════════════════════════════
    BOSS PANEL
@@ -1497,7 +1458,7 @@
   transition: filter 0.08s;
 }
 .isw-boss__sprite img { width: 100%; height: 100%; object-fit: contain; filter: none; }
-.isw-boss__sprite.is-hit  { filter: brightness(3.5) saturate(0.4); }
+.isw-boss__sprite.is-hit { filter: brightness(3.5) saturate(0.4); }
 .isw-boss__sprite.is-enraged { border-color: rgba(255,0,0,.6); box-shadow: 0 0 18px rgba(255,0,0,.4); }
 .isw-boss__sprite-emoji {
   font-size: clamp(60px, 14vw, 84px);
@@ -1528,7 +1489,7 @@
   background: var(--border-hi);
   transition: background .3s, box-shadow .3s;
 }
-.isw-boss__phase-dot.is-active  { background: var(--boss); }
+.isw-boss__phase-dot.is-active { background: var(--boss); }
 .isw-boss__phase-dot.is-current { box-shadow: 0 0 8px var(--boss); }
 .isw-boss__phase-label {
   font-size: 10px;
@@ -1544,9 +1505,9 @@
   font-size: 12px;
   justify-content: flex-end;
 }
-.isw-boss__hp-val  { color: var(--text-1); font-weight: 700; }
-.isw-boss__hp-sep  { color: var(--text-3); }
-.isw-boss__hp-max  { color: var(--text-2); font-size: 10px; }
+.isw-boss__hp-val { color: var(--text-1); font-weight: 700; }
+.isw-boss__hp-sep { color: var(--text-3); }
+.isw-boss__hp-max { color: var(--text-2); font-size: 10px; }
 .isw-boss__hp-track {
   position: relative;
   height: 12px;
@@ -1590,7 +1551,7 @@
   border-radius: var(--r-md);
   padding: 10px 12px;
 }
-.isw-boss__mechanic-icon { font-size: 22px; flex-shrink: 0; }
+
 .isw-boss__mechanic strong { font-size: 12px; color: var(--text-1); display: block; margin-bottom: 2px; }
 .isw-boss__mechanic p { font-size: 11px; color: var(--text-2); margin: 0; line-height: 1.4; }
 
@@ -1609,9 +1570,9 @@
   font-weight: 700;
   border: 1px solid rgba(255,255,255,.1);
 }
-.isw-boss__reward-chip--gold    { background: rgba(245,200,66,.15); color: var(--gold); }
+.isw-boss__reward-chip--gold { background: rgba(245,200,66,.15); color: var(--gold); }
 .isw-boss__reward-chip--crystal { background: rgba(56,189,248,.15); color: var(--crystal); }
-.isw-boss__reward-chip--fame    { background: rgba(251,146,60,.15); color: var(--fame); }
+.isw-boss__reward-chip--fame { background: rgba(251,146,60,.15); color: var(--fame); }
 
 /* Actions */
 .isw-boss__actions {
@@ -1766,24 +1727,24 @@
   flex-shrink: 0;
   border: 1px solid transparent;
 }
-.isw-boss__mechanic-chip--rage      { background: rgba(220,38,38,.25);  color: #fca5a5; border-color: rgba(220,38,38,.4); }
-.isw-boss__mechanic-chip--shield    { background: rgba(56,189,248,.2);  color: var(--crystal); border-color: rgba(56,189,248,.35); }
-.isw-boss__mechanic-chip--summon    { background: rgba(167,139,250,.2); color: #c4b5fd; border-color: rgba(167,139,250,.35); }
-.isw-boss__mechanic-chip--aoe       { background: rgba(245,200,66,.2);  color: var(--gold); border-color: rgba(245,200,66,.35); }
-.isw-boss__mechanic-chip--poison    { background: rgba(74,222,128,.2);  color: #86efac; border-color: rgba(74,222,128,.3); }
-.isw-boss__mechanic-chip--freeze    { background: rgba(147,224,255,.25);color: #bae6fd; border-color: rgba(147,224,255,.45); }
+.isw-boss__mechanic-chip--rage { background: rgba(220,38,38,.25);  color: #fca5a5; border-color: rgba(220,38,38,.4); }
+.isw-boss__mechanic-chip--shield { background: rgba(56,189,248,.2);  color: var(--crystal); border-color: rgba(56,189,248,.35); }
+.isw-boss__mechanic-chip--summon { background: rgba(167,139,250,.2); color: #c4b5fd; border-color: rgba(167,139,250,.35); }
+.isw-boss__mechanic-chip--aoe { background: rgba(245,200,66,.2);  color: var(--gold); border-color: rgba(245,200,66,.35); }
+.isw-boss__mechanic-chip--poison { background: rgba(74,222,128,.2);  color: #86efac; border-color: rgba(74,222,128,.3); }
+.isw-boss__mechanic-chip--freeze { background: rgba(147,224,255,.25);color: #bae6fd; border-color: rgba(147,224,255,.45); }
 .isw-boss__mechanic-chip--lifesteal { background: rgba(251,146,60,.2);  color: var(--fame); border-color: rgba(251,146,60,.35); }
-.isw-boss__mechanic-chip--seal      { background: rgba(124,58,237,.25); color: #c4b5fd; border-color: rgba(124,58,237,.4); }
+.isw-boss__mechanic-chip--seal { background: rgba(124,58,237,.25); color: #c4b5fd; border-color: rgba(124,58,237,.4); }
 
 /* Progress fill colours matching chips */
-.isw-boss__mechanic-progress-fill.isw-boss__mechanic-chip--rage      { background: #ef4444; }
-.isw-boss__mechanic-progress-fill.isw-boss__mechanic-chip--shield    { background: var(--crystal); }
-.isw-boss__mechanic-progress-fill.isw-boss__mechanic-chip--freeze    { background: #bae6fd; }
-.isw-boss__mechanic-progress-fill.isw-boss__mechanic-chip--seal      { background: #a78bfa; }
-.isw-boss__mechanic-progress-fill.isw-boss__mechanic-chip--poison    { background: #4ade80; }
-.isw-boss__mechanic-progress-fill.isw-boss__mechanic-chip--aoe       { background: var(--gold); }
+.isw-boss__mechanic-progress-fill.isw-boss__mechanic-chip--rage { background: #ef4444; }
+.isw-boss__mechanic-progress-fill.isw-boss__mechanic-chip--shield { background: var(--crystal); }
+.isw-boss__mechanic-progress-fill.isw-boss__mechanic-chip--freeze { background: #bae6fd; }
+.isw-boss__mechanic-progress-fill.isw-boss__mechanic-chip--seal { background: #a78bfa; }
+.isw-boss__mechanic-progress-fill.isw-boss__mechanic-chip--poison { background: #4ade80; }
+.isw-boss__mechanic-progress-fill.isw-boss__mechanic-chip--aoe { background: var(--gold); }
 .isw-boss__mechanic-progress-fill.isw-boss__mechanic-chip--lifesteal { background: var(--fame); }
-.isw-boss__mechanic-progress-fill.isw-boss__mechanic-chip--summon    { background: #a78bfa; }
+.isw-boss__mechanic-progress-fill.isw-boss__mechanic-chip--summon { background: #a78bfa; }
 
 /* Ability chip row */
 .isw-boss__abilities {
@@ -1819,7 +1780,7 @@
 }
 
 /* Speed / rarity reward chips */
-.isw-boss__reward-chip--speed  { background: rgba(251,146,60,.15);  color: var(--fame); }
+.isw-boss__reward-chip--speed { background: rgba(251,146,60,.15);  color: var(--fame); }
 .isw-boss__reward-chip--rarity { background: rgba(167,139,250,.15); font-weight: 800; letter-spacing: .06em; font-size: 10px; }
 
 /* Boss lore */
@@ -1837,6 +1798,10 @@
    INVENTORY PANEL
    ══════════════════════════════════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════════════════════════════════
+   INVENTORY PANEL
+   ══════════════════════════════════════════════════════════════════════════ */
+
 .isw-inv { display: flex; flex-direction: column; gap: 0; }
 
 .isw-inv__section-head {
@@ -1847,87 +1812,14 @@
 }
 
 /* Equipment slots */
-.isw-inv__slots {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
-  margin-bottom: 4px;
-}
-.isw-inv__slot {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  padding: 10px 6px;
-  border-radius: var(--r-md);
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  cursor: pointer;
-  transition: border-color .2s, background .2s;
-  position: relative;
-  text-align: center;
-}
-.isw-inv__slot.is-equipped  { border-color: rgba(129,140,248,.4); background: rgba(129,140,248,.07); }
-.isw-inv__slot.is-active    { border-color: var(--crystal); box-shadow: 0 0 12px var(--crystal-glow); }
-.isw-inv__slot.is-locked    { opacity: .45; cursor: not-allowed; }
-.isw-inv__slot-icon  { font-size: 22px; line-height: 1; }
-.isw-inv__slot-name  { font-size: 11px; font-weight: 700; color: var(--text-1); }
-.isw-inv__slot-level { font-size: 10px; color: var(--text-2); }
-.isw-inv__slot-stat  { font-size: 10px; color: var(--text-3); text-align: center; }
-.isw-inv__slot-btn {
-  margin-top: 4px;
-  padding: 4px 8px;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--border);
-  background: rgba(255,255,255,.05);
-  font: 600 10px var(--font-head);
-  color: var(--text-2);
-  cursor: pointer;
-  width: 100%;
-  transition: background .15s, border-color .15s;
-}
-.isw-inv__slot-btn.can-afford { border-color: var(--gold); color: var(--gold); background: rgba(245,200,66,.1); }
+
 
 /* Item grid */
-.isw-inv__grid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 5px;
-  padding: 4px 0;
-}
-.isw-inv__item {
-  aspect-ratio: 1;
-  border-radius: var(--r-sm);
-  border: 1px solid var(--border);
-  background: var(--bg-card);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-  overflow: hidden;
-  cursor: pointer;
-  padding: 0;
-  font: inherit;
-  transition: border-color .2s, box-shadow .2s;
-}
-.isw-inv__item img { width: 100%; height: 100%; object-fit: contain; }
-.isw-inv__item-placeholder { font-size: 11px; font-weight: 700; color: var(--text-2); }
-.isw-inv__item-glow {
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  border-radius: var(--r-sm);
-  opacity: .45;
-}
+
 
 /* Rarity tier styles */
-.isw-inv__item--common    { border-color: rgba(148,163,184,.3); }
-.isw-inv__item--uncommon  { border-color: rgba(74,222,128,.4); }
-.isw-inv__item--rare      { border-color: rgba(56,189,248,.5); }
-.isw-inv__item--epic      { border-color: rgba(167,139,250,.6); box-shadow: 0 0 8px rgba(167,139,250,.2); }
-.isw-inv__item--legendary { border-color: rgba(245,200,66,.7); box-shadow: 0 0 10px rgba(245,200,66,.3); }
-.isw-inv__item--epic .isw-inv__item-glow      { background: radial-gradient(circle, rgba(167,139,250,.35) 0%, transparent 70%); }
-.isw-inv__item--legendary .isw-inv__item-glow { background: radial-gradient(circle, rgba(245,200,66,.45) 0%, transparent 70%); animation: item-legendary-pulse 2s ease-in-out infinite alternate; }
+
+
 @keyframes item-legendary-pulse {
   from { opacity: .3; }
   to   { opacity: .7; }
@@ -1945,110 +1837,21 @@
 .isw-arena .isw-boss::-webkit-scrollbar { display: none; }
 
 /* Rarity text colors */
-.isw-rarity--common    { color: #94a3b8; }
-.isw-rarity--uncommon  { color: #4ade80; }
-.isw-rarity--rare      { color: #38bdf8; }
-.isw-rarity--epic      { color: #a78bfa; }
+.isw-rarity--common { color: #94a3b8; }
+.isw-rarity--uncommon { color: #4ade80; }
+.isw-rarity--rare { color: #38bdf8; }
+.isw-rarity--epic { color: #a78bfa; }
 .isw-rarity--legendary { color: var(--gold); text-shadow: 0 0 8px var(--gold-glow); }
 
 /* Item detail modal */
-.isw-inv__modal-backdrop {
-  position: fixed;
-  inset: 0;
-  z-index: 100;
-  background: rgba(0,0,0,.7);
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-}
-.isw-inv__modal {
-  width: min(380px, 100%);
-  border-radius: var(--r-xl) var(--r-xl) 0 0;
-  background: var(--bg-mid);
-  border: 1px solid var(--border-hi);
-  border-bottom: none;
-  overflow: hidden;
-  padding-bottom: env(safe-area-inset-bottom, 12px);
-}
+
+
 /* Rarity border tint per tier */
-.isw-inv__modal--uncommon  { border-top-color: rgba(74,222,128,.5); }
-.isw-inv__modal--rare      { border-top-color: rgba(56,189,248,.5); }
-.isw-inv__modal--epic      { border-top-color: rgba(167,139,250,.6); }
-.isw-inv__modal--legendary { border-top-color: rgba(245,200,66,.7); }
 
-.isw-inv__modal-tier {
-  padding: 6px 16px;
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: .12em;
-  text-align: center;
-  text-transform: uppercase;
-}
-.isw-inv__modal-tier--common    { background: rgba(148,163,184,.15); color: #94a3b8; }
-.isw-inv__modal-tier--uncommon  { background: rgba(74,222,128,.18);  color: #4ade80; }
-.isw-inv__modal-tier--rare      { background: rgba(56,189,248,.18);  color: #38bdf8; }
-.isw-inv__modal-tier--epic      { background: rgba(167,139,250,.18); color: #a78bfa; }
-.isw-inv__modal-tier--legendary { background: rgba(245,200,66,.2);   color: var(--gold); }
 
-.isw-inv__modal-body {
-  display: flex;
-  gap: 14px;
-  padding: 14px 16px 10px;
-  align-items: center;
-}
-.isw-inv__modal-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: var(--r-md);
-  background: rgba(255,255,255,.06);
-  border: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-.isw-inv__modal-icon img { width: 100%; height: 100%; object-fit: contain; }
-.isw-inv__modal-name { font-size: 15px; font-weight: 800; color: var(--text-1); }
-.isw-inv__modal-type { font-size: 11px; color: var(--text-2); margin-top: 2px; }
-.isw-inv__modal-req  { font-size: 10px; color: var(--text-3); margin-top: 4px; }
-
-.isw-inv__modal-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 0 16px 10px;
-}
-.isw-inv__modal-stat {
-  display: flex;
-  justify-content: space-between;
-  font-size: 12px;
-  padding: 5px 8px;
-  border-radius: var(--r-sm);
-  background: rgba(255,255,255,.04);
-}
-.isw-inv__modal-stat span  { color: var(--text-2); }
-.isw-inv__modal-stat strong { color: var(--text-1); font-weight: 700; }
-
-.isw-inv__modal-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 8px;
-  padding: 6px 16px 16px;
-}
-.isw-inv__modal-btn {
-  padding: 10px 0;
-  border-radius: var(--r-md);
-  border: 1px solid var(--border-hi);
-  font: 700 12px var(--font-head);
-  cursor: pointer;
-  background: rgba(255,255,255,.07);
-  color: var(--text-1);
-  transition: background .15s;
-}
-.isw-inv__modal-btn--equip { background: linear-gradient(135deg, #166534, #16a34a); border-color: #16a34a; color: #fff; }
-.isw-inv__modal-btn--sell  { background: linear-gradient(135deg, #78350f, #d97706); border-color: #d97706; color: #fff; }
+/* ══════════════════════════════════════════════════════════════════════════
+   HEROES PANEL
+   ══════════════════════════════════════════════════════════════════════════ */
 
 /* ══════════════════════════════════════════════════════════════════════════
    HEROES PANEL
@@ -2101,7 +1904,7 @@
   font: inherit;
   transition: border-color .2s, box-shadow .2s;
 }
-.isw-heroes__party-avatar.is-active   { box-shadow: 0 0 10px currentColor; }
+.isw-heroes__party-avatar.is-active { box-shadow: 0 0 10px currentColor; }
 .isw-heroes__party-avatar.is-selected { box-shadow: 0 0 0 2px var(--crystal), 0 0 12px var(--crystal-glow); }
 .isw-heroes__party-icon { font-size: 20px; line-height: 1; }
 .isw-heroes__party-lv {
@@ -2131,7 +1934,7 @@
   transition: border-color .2s;
 }
 .isw-hero-card.is-recruited { border-color: rgba(255,255,255,.18); }
-.isw-hero-card.is-expanded  { border-color: var(--crystal); }
+.isw-hero-card.is-expanded { border-color: var(--crystal); }
 
 .isw-hero-card__header {
   display: flex;
@@ -2201,7 +2004,7 @@
   border-bottom: 1px solid rgba(255,255,255,.04);
 }
 .isw-hero-card__detail-row:last-child { border-bottom: none; }
-.isw-hero-card__detail-row span  { color: var(--text-2); }
+.isw-hero-card__detail-row span { color: var(--text-2); }
 .isw-hero-card__detail-row strong { color: var(--text-1); font-weight: 700; }
 
 /* Upgrade button */
@@ -2222,6 +2025,12 @@
   color: var(--gold);
 }
 .isw-hero-card__upgrade.can-afford:active { background: rgba(245,200,66,.28); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   POWER SPIKE SYSTEM
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── HUD power rating chip ────────────────────────────────────────────────── */
 
 /* ═══════════════════════════════════════════════════════════════════════════
    POWER SPIKE SYSTEM
@@ -2274,6 +2083,8 @@
 
 /* ── Boss surge arena badge ───────────────────────────────────────────────── */
 
+/* ── Boss surge arena badge ───────────────────────────────────────────────── */
+
 .isw-surge-badge {
   position: absolute;
   top: 56px;
@@ -2298,6 +2109,8 @@
   font: 700 10px var(--font-head);
   color: #fb923c;
 }
+
+/* ── Power spike overlay (milestone + boss surge) ─────────────────────────── */
 
 /* ── Power spike overlay (milestone + boss surge) ─────────────────────────── */
 
@@ -2375,6 +2188,8 @@
 
 /* ── Power Rating card (Combat tab) ───────────────────────────────────────── */
 
+/* ── Power Rating card (Combat tab) ───────────────────────────────────────── */
+
 .isw-power-card {
   background: linear-gradient(135deg, rgba(99,102,241,.12), rgba(139,92,246,.08));
   border: 1px solid rgba(99,102,241,.28);
@@ -2423,8 +2238,8 @@
   flex: 1;
   min-width: 54px;
 }
-.isw-power-card__stat span  { font: 400 10px var(--font-head); color: var(--text-2); }
-.isw-power-card__stat strong{ font: 700 13px var(--font-head); color: var(--text-1); }
+.isw-power-card__stat span { font: 400 10px var(--font-head); color: var(--text-2); }
+.isw-power-card__stat strong { font: 700 13px var(--font-head); color: var(--text-1); }
 
 /* Boss surge timer inside card */
 .isw-power-card__surge {
@@ -2503,6 +2318,12 @@
 
 /* ── Tutorial pulsing highlight ring (shared class) ──────────────────────── */
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   TUTORIAL / NEW-PLAYER EXPERIENCE
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Tutorial pulsing highlight ring (shared class) ──────────────────────── */
+
 .isw-tutorial-glow {
   position: relative;
 }
@@ -2542,6 +2363,8 @@
 
 /* ── Tutorial hint bar (between arena and tabs) ───────────────────────────── */
 
+/* ── Tutorial hint bar (between arena and tabs) ───────────────────────────── */
+
 .isw-tutorial-hint {
   display: flex;
   align-items: center;
@@ -2553,9 +2376,7 @@
   overflow: hidden;
   flex-shrink: 0;
 }
-.isw-tutorial-hint--actionable {
-  background: linear-gradient(90deg, rgba(250,204,21,.18), rgba(251,146,60,.12));
-}
+
 .isw-tutorial-hint__icon {
   font-size: 16px;
   flex-shrink: 0;
@@ -2586,6 +2407,8 @@
   flex-shrink: 0;
   animation: tutorial-bounce 0.7s ease-in-out infinite;
 }
+
+/* ── WOW moment overlay ──────────────────────────────────────────────────── */
 
 /* ── WOW moment overlay ──────────────────────────────────────────────────── */
 
@@ -2643,6 +2466,8 @@
 
 /* ── First loot drop ─────────────────────────────────────────────────────── */
 
+/* ── First loot drop ─────────────────────────────────────────────────────── */
+
 .isw-loot-drop {
   position: absolute;
   left: 50%;
@@ -2658,6 +2483,8 @@
 
 /* ── ELITE STAGE BADGE ────────────────────────────────────────────────────── */
 
+/* ── ELITE STAGE BADGE ────────────────────────────────────────────────────── */
+
 .isw-arena__stage-badge.is-elite {
   background: linear-gradient(135deg, rgba(250,204,21,.22), rgba(251,146,60,.18));
   border-color: rgba(250,204,21,.55);
@@ -2669,6 +2496,8 @@
   0%, 100% { box-shadow: 0 0 0 0 rgba(250,204,21,.0); }
   50%       { box-shadow: 0 0 12px 2px rgba(250,204,21,.28); }
 }
+
+/* ── POWER PILL (inline badge on stage row) ───────────────────────────────── */
 
 /* ── POWER PILL (inline badge on stage row) ───────────────────────────────── */
 
@@ -2693,6 +2522,8 @@
   border: 1px solid rgba(239,68,68,.45);
   color: #fca5a5;
 }
+
+/* ── POWER GATE INDICATOR ─────────────────────────────────────────────────── */
 
 /* ── POWER GATE INDICATOR ─────────────────────────────────────────────────── */
 
@@ -2777,11 +2608,17 @@
    TALENT TREE
    ══════════════════════════════════════════════════════════════════════════ */
 
+/* ══════════════════════════════════════════════════════════════════════════
+   TALENT TREE
+   ══════════════════════════════════════════════════════════════════════════ */
+
 .isw-talent-panel {
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
 
 /* ── Header ─────────────────────────────────────────────────────────────── */
 
@@ -2825,6 +2662,8 @@
 
 /* ── Earn hint ──────────────────────────────────────────────────────────── */
 
+/* ── Earn hint ──────────────────────────────────────────────────────────── */
+
 .isw-talent-earn-hint {
   display: flex;
   align-items: center;
@@ -2838,6 +2677,8 @@
 .isw-talent-earn-hint__sep {
   opacity: 0.4;
 }
+
+/* ── Stats summary ──────────────────────────────────────────────────────── */
 
 /* ── Stats summary ──────────────────────────────────────────────────────── */
 
@@ -2871,6 +2712,8 @@
   font: 700 11px var(--font-head);
   color: #c084fc;
 }
+
+/* ── Branches ───────────────────────────────────────────────────────────── */
 
 /* ── Branches ───────────────────────────────────────────────────────────── */
 
@@ -2909,6 +2752,8 @@
 
 /* Branch locked state (Mastery before prestige) */
 
+/* Branch locked state (Mastery before prestige) */
+
 .isw-talent-branch__locked {
   display: flex;
   flex-direction: column;
@@ -2929,6 +2774,8 @@
   color: var(--text-3);
   text-align: center;
 }
+
+/* ── Node connector line ────────────────────────────────────────────────── */
 
 /* ── Node connector line ────────────────────────────────────────────────── */
 
@@ -2961,6 +2808,8 @@
 
 /* ── Talent node card ───────────────────────────────────────────────────── */
 
+/* ── Talent node card ───────────────────────────────────────────────────── */
+
 .isw-talent-node {
   position: relative;
   display: flex;
@@ -2980,6 +2829,8 @@
 .isw-talent-node:hover:not(:disabled) {
   background: var(--bg-card-hover);
 }
+
+/* States */
 
 /* States */
 
@@ -3058,6 +2909,8 @@
 
 /* Requirement tooltip shown on locked nodes */
 
+/* Requirement tooltip shown on locked nodes */
+
 .isw-talent-node__req {
   position: absolute;
   bottom: calc(100% + 4px);
@@ -3084,6 +2937,8 @@
 
 /* ── Footer ─────────────────────────────────────────────────────────────── */
 
+/* ── Footer ─────────────────────────────────────────────────────────────── */
+
 .isw-talent-footer {
   font: 400 10px var(--font-head);
   color: var(--text-3);
@@ -3095,6 +2950,8 @@
 .isw-talent-footer strong {
   color: #c084fc;
 }
+
+/* ── RESPONSIVE ───────────────────────────────────────────────────────────── */
 
 /* ── RESPONSIVE ───────────────────────────────────────────────────────────── */
 
@@ -3131,56 +2988,6 @@
 
 /* isw-hud is displayed via its original rule above */
 
-.isw-hud__player {
-  display: grid;
-  grid-template-columns: 42px minmax(0, 1fr) 42px;
-  align-items: center;
-  gap: 10px;
-}
-
-.isw-hud__avatar {
-  width: 42px;
-  height: 42px;
-  display: grid;
-  place-items: center;
-  border-radius: 16px;
-  color: #1b1209;
-  font-weight: 950;
-  letter-spacing: 0.05em;
-  background: linear-gradient(135deg, #ffd977, #ff6b6b);
-  box-shadow: 0 10px 24px rgba(255, 119, 76, 0.26), inset 0 1px 0 rgba(255, 255, 255, 0.7);
-}
-
-.isw-hud__player-copy {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  line-height: 1.1;
-}
-
-.isw-hud__player-copy strong {
-  color: var(--isw-ink);
-  font-size: 14px;
-  font-weight: 950;
-}
-
-.isw-hud__player-copy span {
-  color: rgba(255, 248, 223, 0.62);
-  font-size: 11px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.isw-hud__menu {
-  width: 42px;
-  height: 42px;
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: 15px;
-  color: var(--isw-ink);
-  background: rgba(255, 255, 255, 0.07);
-  font-weight: 900;
-}
 
 .isw-hud__chip {
   min-height: 26px;
@@ -3697,6 +3504,13 @@
    ══════════════════════════════════════════════════════════════════════════ */
 
 /* ── Root layout: tighter grid ───────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════════════════
+   MOBILE POLISH — 360–430px phones
+   All rules here fine-tune spacing, typography, and layout for the smallest
+   supported viewports. The game must feel like a shipped RPG on a phone.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Root layout: tighter grid ───────────────────────────────────────────── */
 @media (max-width: 430px) {
   .isw {
     /* HUD / arena / tabs — give each row tighter natural sizes */
@@ -3837,14 +3651,6 @@
     gap: 6px;
   }
 
-  /* ── Boss panel ──────────────────────────────────────────────────────────── */
-  .isw-arena__boss-banner {
-    margin: 0 8px 6px;
-    padding: 6px 10px;
-  }
-
-  .isw-arena__boss-banner-text strong { font-size: 11px; }
-  .isw-arena__boss-banner-text p { font-size: 10px; }
 }
 
 /* ── Very small screens (< 360px) ────────────────────────────────────────── */
@@ -3875,6 +3681,11 @@
   }
 }
 
+/* ═══════════════════════════════════════════════════════════════════════════
+   UX POLISH PASS — game feel, micro-interactions, reward feedback
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Currency chip bump — brief scale pop when value increases ─────────── */
 /* ═══════════════════════════════════════════════════════════════════════════
    UX POLISH PASS — game feel, micro-interactions, reward feedback
    ═══════════════════════════════════════════════════════════════════════════ */
@@ -4031,34 +3842,19 @@
 }
 
 /* Rarity text classes (used in InventoryPanel) */
-.isw-rarity--common    { color: var(--rarity-common);    }
-.isw-rarity--uncommon  { color: var(--rarity-uncommon);  }
-.isw-rarity--rare      { color: var(--rarity-rare);      }
-.isw-rarity--epic      { color: var(--rarity-epic);      }
+.isw-rarity--common { color: var(--rarity-common);    }
+.isw-rarity--uncommon { color: var(--rarity-uncommon);  }
+.isw-rarity--rare { color: var(--rarity-rare);      }
+.isw-rarity--epic { color: var(--rarity-epic);      }
 .isw-rarity--legendary { color: var(--rarity-legendary); }
-.isw-rarity--mythic    { color: var(--rarity-mythic);    }
+.isw-rarity--mythic { color: var(--rarity-mythic);    }
 
 /* Rarity card borders */
-.isw-loot-item[data-rarity="uncommon"] {
-  border-color: rgba(74,222,128,0.4);
-}
-.isw-loot-item[data-rarity="rare"] {
-  border-color: rgba(96,165,250,0.45);
-  box-shadow: 0 0 8px rgba(96,165,250,0.15);
-}
-.isw-loot-item[data-rarity="epic"] {
-  border-color: rgba(167,139,250,0.5);
-  box-shadow: 0 0 12px rgba(167,139,250,0.2);
-}
-.isw-loot-item[data-rarity="legendary"] {
-  border-color: rgba(251,191,36,0.55);
-  box-shadow: 0 0 16px rgba(251,191,36,0.28);
-  background: rgba(251,191,36,0.04);
-}
+
 
 /* Equip slot rarity glow when item is equipped */
-.isw-equip-slot.has-item[data-rarity="rare"]      { border-color: rgba(96,165,250,0.4); }
-.isw-equip-slot.has-item[data-rarity="epic"]      { border-color: rgba(167,139,250,0.5); }
+.isw-equip-slot.has-item[data-rarity="rare"] { border-color: rgba(96,165,250,0.4); }
+.isw-equip-slot.has-item[data-rarity="epic"] { border-color: rgba(167,139,250,0.5); }
 .isw-equip-slot.has-item[data-rarity="legendary"] { border-color: rgba(251,191,36,0.55); }
 
 /* ── 11. Shop card is-ready glow ─────────────────────────────────────────── */
@@ -4086,26 +3882,7 @@
 }
 
 /* ── 13. Boss voice line styling ─────────────────────────────────────────── */
-.isw-boss-voice-line {
-  position: absolute;
-  bottom: 14%;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 26;
-  padding: 7px 18px;
-  background: rgba(8, 3, 16, 0.92);
-  border: 1px solid rgba(255,69,0,0.5);
-  border-radius: 999px;
-  font-size: 13px;
-  font-weight: 800;
-  color: #fff;
-  white-space: nowrap;
-  pointer-events: none;
-  text-shadow: 0 0 10px rgba(255,100,35,0.75);
-  box-shadow:
-    0 0 20px rgba(255,69,0,0.25),
-    0 4px 16px rgba(0,0,0,0.6);
-}
+
 
 /* ── 14. Stage-clear green flash ─────────────────────────────────────────── */
 @keyframes isw-stage-clear {
@@ -4150,11 +3927,7 @@
 }
 
 /* ── 17. Hero class identity — role color accents ────────────────────────── */
-.isw-hero-card--warrior { --hero-accent: #ef4444; }
-.isw-hero-card--mage    { --hero-accent: #818cf8; }
-.isw-hero-card--archer  { --hero-accent: #4ade80; }
-.isw-hero-card--rogue   { --hero-accent: #f59e0b; }
-.isw-hero-card--support { --hero-accent: #38bdf8; }
+
 
 /* ── 18. Prestige/Rebirth button — enhanced is-boss-btn state ────────────── */
 .isw-action-btn.is-boss-btn {
@@ -4281,33 +4054,6 @@
   box-shadow: 0 12px 34px rgba(0, 0, 0, 0.2);
 }
 
-.isw-hud__player {
-  grid-template-columns: 36px minmax(0, 1fr) 34px;
-  gap: 8px;
-}
-
-.isw-hud__avatar {
-  width: 36px;
-  height: 36px;
-  border-radius: 13px;
-  font-size: 12px;
-}
-
-.isw-hud__player-copy strong {
-  font-size: 12px;
-}
-
-.isw-hud__player-copy span {
-  font-size: 10px;
-}
-
-.isw-hud__menu {
-  width: 34px;
-  height: 34px;
-  min-height: 34px;
-  border-radius: 12px;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
-}
 
 .isw-hud__currencies {
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -4412,7 +4158,6 @@
 }
 
 .isw-power-gate,
-.isw-arena__boss-banner,
 .isw-toast {
   border-radius: 14px;
   padding: 7px 10px;
@@ -4441,8 +4186,7 @@
 .isw-class-panel,
 .isw-economy,
 .isw-zones,
-.isw-inv,
-.isw-talents {
+.isw-inv {
   border-radius: 17px !important;
   border-color: rgba(255, 239, 188, 0.12) !important;
   background:
@@ -4678,9 +4422,7 @@
 }
 
 .isw-rarity-card--epic,
-.isw-rarity-card--legendary,
-.isw-loot-item[data-rarity="epic"],
-.isw-loot-item[data-rarity="legendary"] {
+.isw-rarity-card--legendary {
   animation: isw-loot-glow 2.8s ease-in-out infinite;
 }
 
@@ -4777,16 +4519,9 @@
     font-size: 11px;
   }
 
-  .isw-hud__player {
-    grid-template-columns: 32px minmax(0, 1fr) 32px;
-  }
+  
 
-  .isw-hud__avatar,
-  .isw-hud__menu {
-    width: 32px;
-    height: 32px;
-    min-height: 32px;
-  }
+  
 
   .isw-hud__currencies {
     gap: 4px;
@@ -4864,6 +4599,14 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 /* ── 1. Root grid: arena is truly 1fr, never forced past available space ─── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   PORTRAIT FIT REDESIGN — definitive compact override (applied last).
+   Fixes layout overflow, heavy sizing, and button proportions so the game
+   sits cleanly inside any portrait viewport ≥ 560px tall without scrolling
+   outside the tab panel.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Root grid: arena is truly 1fr, never forced past available space ─── */
 .isw {
   grid-template-rows: auto minmax(0, 1fr) auto !important;
 }
@@ -4880,7 +4623,7 @@
 }
 
 /* The player row replicates the GameShell header — hide to save ~42px */
-.isw-hud__player { display: none !important; }
+
 
 .isw-hud__currencies {
   display: grid !important;
@@ -4906,7 +4649,7 @@
   grid-column: unset !important;
 }
 
-.isw-hud__xp    { height: 4px !important; }
+.isw-hud__xp { height: 4px !important; }
 .isw-hud__level { font-size: 9.5px !important; padding: 2px 6px !important; }
 .isw-hud__dps,
 .isw-hud__power { font-size: 9.5px !important; }
@@ -4933,8 +4676,8 @@
 }
 
 .isw-arena__enemy-name { font-size: 13px !important; }
-.isw-arena__hp-track   { height: 7px !important; }
-.isw-arena__hp-label   { font-size: 9px !important; }
+.isw-arena__hp-track { height: 7px !important; }
+.isw-arena__hp-label { font-size: 9px !important; }
 
 /* ── 4. Tab panel: taller cap so more content is above the fold ─────────── */
 .isw-tab-panel {
@@ -4988,16 +4731,16 @@
   font-size: clamp(18px, 2.2vw, 23px) !important;
 }
 
-.isw-power-card__tier  { font-size: 10px !important; }
+.isw-power-card__tier { font-size: 10px !important; }
 .isw-power-card__stats { gap: 6px !important; }
-.isw-power-card__stat  { min-width: 0 !important; }
+.isw-power-card__stat { min-width: 0 !important; }
 .isw-power-card__stat strong { font-size: 11px !important; }
-.isw-power-card__stat span   { font-size: 9.5px !important; }
+.isw-power-card__stat span { font-size: 9.5px !important; }
 
 .isw-power-card__milestone { gap: 3px !important; }
 .isw-power-card__milestone-label { font-size: 10px !important; }
 .isw-power-card__milestone-track { height: 4px !important; }
-.isw-power-card__milestone-lvs   { font-size: 9px !important; }
+.isw-power-card__milestone-lvs { font-size: 9px !important; }
 
 /* ── 7. Tab nav: slim premium dock ─────────────────────────────────────── */
 .isw-tab-nav {
@@ -5023,7 +4766,7 @@
   line-height: 1 !important;
 }
 
-.isw-boss__hp-track   { height: 7px !important; }
+.isw-boss__hp-track { height: 7px !important; }
 .isw-boss__enrage-track { height: 5px !important; }
 
 .isw-boss__sprite-wrap {
@@ -5042,146 +4785,6 @@
   box-shadow: none !important;
 }
 
-.isw-monster-silhouette {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-  min-width: 64px;
-  min-height: 64px;
-  animation: isw-monster-bob 2.4s ease-in-out infinite;
-  filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.5));
-}
-
-.isw-monster-silhouette::before {
-  content: "";
-  position: absolute;
-  left: 16%;
-  right: 16%;
-  bottom: 13%;
-  height: 56%;
-  border-radius: 46% 46% 38% 38%;
-  background:
-    radial-gradient(circle at 42% 34%, rgba(255,255,255,.7) 0 5%, transparent 6%),
-    radial-gradient(circle at 62% 34%, rgba(255,255,255,.7) 0 5%, transparent 6%),
-    linear-gradient(145deg, #8ff16e, #1f9d55 58%, #0d5d38);
-  box-shadow: inset -10px -14px 22px rgba(0,0,0,.22), inset 10px 10px 20px rgba(255,255,255,.2);
-}
-
-.isw-monster-silhouette::after {
-  content: "";
-  position: absolute;
-  left: 20%;
-  right: 20%;
-  bottom: 7%;
-  height: 10%;
-  border-radius: 999px;
-  background: rgba(0, 0, 0, 0.34);
-  filter: blur(5px);
-}
-
-.isw-monster-silhouette__face {
-  position: absolute;
-  inset: 0;
-  color: transparent;
-}
-
-.isw-monster-silhouette__face::before,
-.isw-monster-silhouette__face::after {
-  content: "";
-  position: absolute;
-  z-index: 2;
-  top: 42%;
-  width: 8%;
-  height: 8%;
-  border-radius: 50%;
-  background: #111827;
-  box-shadow: 0 2px 0 rgba(255,255,255,.2);
-}
-
-.isw-monster-silhouette__face::before { left: 40%; }
-.isw-monster-silhouette__face::after { right: 40%; }
-
-.isw-monster-silhouette--mushroom::before {
-  left: 9%;
-  right: 9%;
-  bottom: 36%;
-  height: 42%;
-  border-radius: 52% 52% 30% 30%;
-  background:
-    radial-gradient(circle at 30% 30%, rgba(255,255,255,.85) 0 8%, transparent 9%),
-    radial-gradient(circle at 58% 23%, rgba(255,255,255,.75) 0 7%, transparent 8%),
-    linear-gradient(145deg, #ff8e68, #d84545 66%, #7c1d2f);
-}
-
-.isw-monster-silhouette--mushroom .isw-monster-silhouette__face {
-  inset: 43% 26% 10%;
-  border-radius: 34% 34% 45% 45%;
-  background: linear-gradient(180deg, #f8d7a3, #b98245);
-}
-
-.isw-monster-silhouette--beast::before {
-  left: 18%;
-  right: 18%;
-  bottom: 14%;
-  height: 58%;
-  border-radius: 44% 50% 36% 42%;
-  background: linear-gradient(145deg, #f8c76a, #b56a25 58%, #5b341a);
-}
-
-.isw-monster-silhouette--beast .isw-monster-silhouette__face::before,
-.isw-monster-silhouette--beast .isw-monster-silhouette__face::after {
-  top: 38%;
-}
-
-.isw-monster-silhouette--golem::before {
-  left: 18%;
-  right: 18%;
-  bottom: 12%;
-  height: 62%;
-  border-radius: 24%;
-  background:
-    linear-gradient(90deg, transparent 45%, rgba(0,0,0,.18) 46% 54%, transparent 55%),
-    linear-gradient(145deg, #a7b0bc, #59616d 60%, #262b33);
-}
-
-.isw-monster-silhouette--spirit::before {
-  left: 15%;
-  right: 15%;
-  bottom: 14%;
-  height: 66%;
-  border-radius: 48% 48% 30% 30%;
-  background: radial-gradient(circle at 42% 32%, rgba(255,255,255,.88), rgba(129, 140, 248, .8) 42%, rgba(88, 28, 135, .9));
-  box-shadow: 0 0 24px rgba(129,140,248,.45), inset 0 0 26px rgba(255,255,255,.18);
-}
-
-.isw-monster-silhouette--dragon::before,
-.isw-monster-silhouette--boss::before {
-  left: 12%;
-  right: 12%;
-  bottom: 13%;
-  height: 62%;
-  border-radius: 42% 54% 34% 44%;
-  background:
-    linear-gradient(135deg, transparent 0 18%, rgba(255,214,102,.9) 19% 26%, transparent 27%),
-    linear-gradient(145deg, #ff6b55, #9f1239 56%, #3b0a20);
-  box-shadow: 0 0 24px rgba(248, 113, 113, .45), inset -12px -16px 22px rgba(0,0,0,.28);
-}
-
-.isw-monster-silhouette--robot::before {
-  left: 18%;
-  right: 18%;
-  bottom: 14%;
-  height: 58%;
-  border-radius: 18%;
-  background:
-    linear-gradient(90deg, transparent 12%, rgba(96,165,250,.9) 13% 19%, transparent 20% 80%, rgba(96,165,250,.9) 81% 87%, transparent 88%),
-    linear-gradient(145deg, #cbd5e1, #64748b 58%, #1f2937);
-}
-
-.isw-monster-silhouette--default::before {
-  background: linear-gradient(145deg, #c4b5fd, #7c3aed 58%, #3b0764);
-}
 
 @keyframes isw-monster-bob {
   0%, 100% { transform: translateY(0) scale(1); }
@@ -5189,9 +4792,7 @@
 }
 
 /* Hide the temporary generated monster placeholder when real sprites are missing. */
-.isw-monster-silhouette {
-  display: none !important;
-}
+
 
 .isw-boss__strike-btn,
 .isw-boss__auto-btn {
@@ -5211,8 +4812,8 @@
 
 /* ── 10. Sections: reduce noise ─────────────────────────────────────────── */
 .isw-upgrade-section { gap: 5px !important; }
-.isw-section-head    { min-height: 20px !important; padding: 0 !important; }
-.isw-section-label   { font-size: 9px !important; }
+.isw-section-head { min-height: 20px !important; padding: 0 !important; }
+.isw-section-label { font-size: 9px !important; }
 
 /* ── 11. Cards + rows: tighter inner padding ─────────────────────────────── */
 .isw-card {
@@ -5220,9 +4821,9 @@
   gap: 3px !important;
 }
 
-.isw-card__name   { font-size: 11px !important; }
-.isw-card__sub    { font-size: 9.5px !important; }
-.isw-card__level  { font-size: 9px !important; }
+.isw-card__name { font-size: 11px !important; }
+.isw-card__sub { font-size: 9.5px !important; }
+.isw-card__level { font-size: 9px !important; }
 
 .isw-card__buy-btn {
   height: 26px !important;
@@ -5236,7 +4837,7 @@
 }
 
 .isw-hero-card__portrait { font-size: 28px !important; }
-.isw-hero-card__name     { font-size: 13px !important; }
+.isw-hero-card__name { font-size: 13px !important; }
 
 .isw-hero-card__stat {
   padding: 6px 4px !important;
@@ -5627,66 +5228,6 @@
   animation: isw-map-breathe 14s ease-in-out infinite alternate;
 }
 
-.isw-map-identity {
-  position: relative;
-  z-index: 16;
-  width: calc(100% - 18px);
-  margin: 0 auto 6px;
-  padding: 7px 8px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  border: 1px solid rgba(255, 255, 255, 0.13);
-  border-radius: 14px;
-  background:
-    linear-gradient(135deg, rgba(8, 13, 24, 0.78), rgba(8, 17, 22, 0.48)),
-    radial-gradient(circle at 0 0, rgba(255, 214, 120, 0.12), transparent 48%);
-  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.24);
-  backdrop-filter: blur(10px);
-}
-
-.isw-map-identity strong {
-  display: block;
-  margin-top: 1px;
-  font-size: clamp(12px, 2.7vw, 15px);
-  line-height: 1.05;
-  letter-spacing: 0.01em;
-  color: rgba(255, 255, 255, 0.96);
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.55);
-}
-
-.isw-map-identity p {
-  max-width: 62ch;
-  margin: 3px 0 0;
-  font-size: clamp(9.5px, 2.2vw, 11px);
-  line-height: 1.25;
-  color: rgba(236, 244, 255, 0.76);
-}
-
-.isw-map-identity__eyebrow,
-.isw-map-identity__role {
-  display: inline-flex;
-  align-items: center;
-  width: fit-content;
-  border-radius: 999px;
-  font-size: 8px;
-  font-weight: 900;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-}
-
-.isw-map-identity__eyebrow {
-  color: rgba(255, 225, 148, 0.96);
-}
-
-.isw-map-identity__role {
-  flex-shrink: 0;
-  padding: 5px 8px;
-  color: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  background: rgba(255, 255, 255, 0.08);
-}
 
 .isw-arena__enemy-hint {
   display: flex;
@@ -5718,70 +5259,12 @@
   letter-spacing: 0.08em;
 }
 
-.isw-arena.is-theme-meadow .isw-map-identity,
-.isw-arena.is-theme-forest .isw-map-identity,
-.isw-arena.is-theme-dragon_forest .isw-map-identity {
-  border-color: rgba(125, 249, 168, 0.2);
-  box-shadow: 0 12px 28px rgba(16, 185, 129, 0.13), 0 10px 26px rgba(0, 0, 0, 0.22);
-}
-
-.isw-arena.is-theme-frozen .isw-map-identity,
-.isw-arena.is-theme-ice_cave .isw-map-identity,
-.isw-arena.is-theme-underwater .isw-map-identity,
-.isw-arena.is-theme-sky .isw-map-identity {
-  border-color: rgba(125, 211, 252, 0.24);
-  box-shadow: 0 12px 28px rgba(56, 189, 248, 0.13), 0 10px 26px rgba(0, 0, 0, 0.22);
-}
-
-.isw-arena.is-theme-wasteland .isw-map-identity,
-.isw-arena.is-theme-desert .isw-map-identity,
-.isw-arena.is-theme-lava .isw-map-identity {
-  border-color: rgba(251, 146, 60, 0.26);
-  box-shadow: 0 12px 28px rgba(249, 115, 22, 0.14), 0 10px 26px rgba(0, 0, 0, 0.22);
-}
-
-.isw-arena.is-theme-dungeon .isw-map-identity,
-.isw-arena.is-theme-shadow_city .isw-map-identity,
-.isw-arena.is-theme-fortress .isw-map-identity,
-.isw-arena.is-theme-abyss .isw-map-identity,
-.isw-arena.is-theme-time .isw-map-identity {
-  border-color: rgba(216, 180, 254, 0.24);
-  box-shadow: 0 12px 30px rgba(147, 51, 234, 0.15), 0 10px 26px rgba(0, 0, 0, 0.24);
-}
-
-.isw-arena.is-theme-sci-fi .isw-map-identity,
-.isw-arena.is-theme-clocktower .isw-map-identity,
-.isw-arena.is-theme-alchemy .isw-map-identity,
-.isw-arena.is-theme-urban .isw-map-identity {
-  border-color: rgba(96, 165, 250, 0.22);
-  box-shadow: 0 12px 28px rgba(59, 130, 246, 0.13), 0 10px 26px rgba(0, 0, 0, 0.22);
-}
 
 @keyframes isw-map-breathe {
   from { transform: scale(1.035) translate3d(-0.5%, -0.4%, 0); }
   to   { transform: scale(1.075) translate3d(0.5%, 0.35%, 0); }
 }
 
-@media (max-width: 560px) {
-  .isw-map-identity {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 5px;
-    padding: 7px;
-  }
-
-  .isw-map-identity p {
-    display: -webkit-box;
-    overflow: hidden;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-  }
-
-  .isw-map-identity__role {
-    padding: 4px 7px;
-    font-size: 7.5px;
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {
   .isw-arena__map-img {
@@ -5820,68 +5303,6 @@
   box-shadow: 0 10px 28px rgba(0, 0, 0, 0.22);
 }
 
-.isw-hud__player {
-  display: flex !important;
-  grid-row: 1 / 3;
-  min-width: 0;
-  align-items: center;
-  gap: 8px;
-}
-
-.isw-hud__avatar {
-  width: 34px !important;
-  height: 34px !important;
-  flex: 0 0 34px;
-  display: grid;
-  place-items: center;
-  border-radius: 13px !important;
-  color: #2a1207;
-  font-size: 11px !important;
-  font-weight: 950;
-  letter-spacing: 0.08em;
-  background: linear-gradient(145deg, #ffe18b, #ff884d 64%, #f05269) !important;
-  box-shadow: 0 8px 18px rgba(255, 105, 72, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.48);
-}
-
-.isw-hud__player-copy {
-  min-width: 0;
-  display: grid;
-  gap: 1px;
-}
-
-.isw-hud__player-copy strong {
-  overflow: hidden;
-  color: #fff8df;
-  font-size: 12px !important;
-  line-height: 1.05;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.isw-hud__player-copy span {
-  overflow: hidden;
-  color: rgba(255, 248, 223, 0.62);
-  font-size: 9px !important;
-  line-height: 1.15;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.isw-hud__menu {
-  width: 30px !important;
-  height: 30px !important;
-  min-width: 30px !important;
-  margin-left: auto;
-  border-radius: 12px !important;
-  border: 1px solid rgba(255, 255, 255, 0.12) !important;
-  color: rgba(255, 248, 223, 0.85) !important;
-  background: rgba(255, 255, 255, 0.06) !important;
-  transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
-}
-
-.isw-hud__menu:active {
-  transform: scale(0.94);
-}
 
 .isw-hud__currencies {
   display: grid !important;
@@ -5966,30 +5387,6 @@
   backdrop-filter: blur(12px);
 }
 
-.isw-map-identity {
-  width: calc(100% - 22px) !important;
-  margin-bottom: 4px !important;
-  padding: 6px 8px !important;
-  border-radius: 15px !important;
-  background:
-    linear-gradient(135deg, rgba(11, 14, 27, 0.72), rgba(11, 20, 25, 0.42)),
-    radial-gradient(circle at 0 0, rgba(255, 216, 121, 0.1), transparent 46%) !important;
-}
-
-.isw-map-identity strong {
-  font-size: clamp(11px, 2.1vw, 14px) !important;
-}
-
-.isw-map-identity p {
-  max-width: 48ch;
-  font-size: clamp(8.5px, 1.8vw, 10px) !important;
-  line-height: 1.22 !important;
-}
-
-.isw-map-identity__role {
-  padding: 4px 7px !important;
-  font-size: 7px !important;
-}
 
 .isw-arena__enemy {
   min-height: clamp(116px, 23vh, 270px) !important;
@@ -6156,7 +5553,6 @@
 
 .isw-power-card,
 .isw-upgrade-section,
-.isw-income-card,
 .isw-rebirth-row,
 .isw-shop-card,
 .isw-card,
@@ -6297,9 +5693,7 @@
     grid-template-columns: 1fr !important;
   }
 
-  .isw-hud__player {
-    grid-row: auto;
-  }
+  
 
   .isw-hud__meta {
     grid-column: auto;
@@ -6330,12 +5724,7 @@
     gap: 5px !important;
   }
 
-  .isw-hud__avatar {
-    width: 30px !important;
-    height: 30px !important;
-    flex-basis: 30px;
-    border-radius: 12px !important;
-  }
+  
 
   .isw-hud__currencies {
     gap: 4px !important;
@@ -6361,14 +5750,9 @@
     border-radius: 19px;
   }
 
-  .isw-map-identity {
-    width: calc(100% - 16px) !important;
-    gap: 5px !important;
-  }
+  
 
-  .isw-map-identity p {
-    -webkit-line-clamp: 1;
-  }
+  
 
   .isw-arena__enemy-info {
     width: calc(100% - 16px);
@@ -6435,7 +5819,6 @@
 }
 
 /* Remove temporary center placeholders/effects when a real monster sprite is unavailable. */
-.isw-monster-silhouette,
 .isw-arena__impact-ring,
 .isw-power-spike__shockwave {
   display: none !important;
@@ -6452,16 +5835,23 @@
   background: transparent !important;
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   PREMIUM IDLE RPG â€” Final Design System
+/* ═══════════════════════════════════════════════════════════════════════════
+   PREMIUM IDLE RPG — Final Design System
    Single authoritative pass applied last. Wins all prior conflicts.
    Design: warm-gold primary, glass secondaries, compact 4px rhythm.
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ═══════════════════════════════════════════════════════════════════════════ */
 
-/* â”€â”€ Root grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Root grid ───────────────────────────────────────────────────────────── */
+/* ═══════════════════════════════════════════════════════════════════════════
+   PREMIUM IDLE RPG — Final Design System
+   Single authoritative pass applied last. Wins all prior conflicts.
+   Design: warm-gold primary, glass secondaries, compact 4px rhythm.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── Root grid ───────────────────────────────────────────────────────────── */
 .isw { grid-template-rows: auto minmax(0, 1fr) auto !important; }
 
-/* â”€â”€ HUD: ultra-compact single flex column â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── HUD: ultra-compact single flex column ──────────────────────────────── */
 .isw-hud {
   display: flex !important;
   flex-direction: column !important;
@@ -6471,7 +5861,7 @@
   grid-template-columns: unset !important;
   background: linear-gradient(180deg, rgba(0,0,0,.78) 0%, transparent 100%) !important;
 }
-.isw-hud__player { display: none !important; }
+
 .isw-hud__currencies {
   display: grid !important;
   grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
@@ -6485,7 +5875,7 @@
   border-radius: 999px !important;
 }
 .isw-hud__chip-icon { font-size: 11px !important; }
-.isw-hud__chip-val  { font-size: 9px !important; }
+.isw-hud__chip-val { font-size: 9px !important; }
 .isw-hud__meta {
   display: flex !important;
   align-items: center !important;
@@ -6494,10 +5884,10 @@
   grid-column: unset !important;
 }
 .isw-hud__level { font-size: 9px !important; padding: 2px 7px !important; border-radius: 999px !important; flex-shrink: 0 !important; }
-.isw-hud__xp    { height: 4px !important; }
+.isw-hud__xp { height: 4px !important; }
 .isw-hud__dps, .isw-hud__power { font-size: 9px !important; }
 
-/* â”€â”€ Arena: compact but cinematic â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Arena: compact but cinematic ─────────────────────────────────────────── */
 .isw-arena {
   min-height: clamp(136px, 23vh, 205px) !important;
   margin: 4px 8px 0 !important;
@@ -6513,16 +5903,20 @@
 }
 .isw-arena__enemy-info { margin: 0 8px 7px !important; padding: 6px 10px !important; gap: 3px !important; }
 .isw-arena__enemy-name { font-size: 12.5px !important; }
-.isw-arena__hp-track   { height: 6px !important; }
-.isw-arena__hp-label   { font-size: 8.5px !important; }
+.isw-arena__hp-track { height: 6px !important; }
+.isw-arena__hp-label { font-size: 8.5px !important; }
 
-/* â”€â”€ Combat grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Combat grid ─────────────────────────────────────────────────────────── */
 .isw-combat { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 5px !important; }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ══════════════════════════════════════════════════════════════════════════
    PRIMARY HUNT BUTTON
    Warm golden-orange. Supercell-style raised 3D press. Surge glow.
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ══════════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════════
+   PRIMARY HUNT BUTTON
+   Warm golden-orange. Supercell-style raised 3D press. Surge glow.
+   ══════════════════════════════════════════════════════════════════════════ */
 .isw-hunt-btn {
   grid-column: 1 / -1 !important;
   height: 40px !important;
@@ -6553,9 +5947,12 @@
   to   { filter: brightness(1.07); }
 }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+/* ══════════════════════════════════════════════════════════════════════════
    SECONDARY ACTION BUTTONS
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+   ══════════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════════
+   SECONDARY ACTION BUTTONS
+   ══════════════════════════════════════════════════════════════════════════ */
 .isw-action-btn,
 .isw-rebirth-btn {
   height: 31px !important;
@@ -6591,7 +5988,7 @@
   color: #ff9090 !important;
 }
 
-/* â”€â”€ Boss strike button â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Boss strike button ───────────────────────────────────────────────────── */
 .isw-boss__strike-btn {
   font-size: 11.5px !important;
   font-weight: 800 !important;
@@ -6607,9 +6004,12 @@
 }
 .isw-boss__auto-btn { font-size: 10.5px !important; padding: 9px 0 !important; border-radius: 12px !important; }
 
-/* â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-   TAB NAV â€” premium pill dock with warm active state
-   â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• */
+/* ══════════════════════════════════════════════════════════════════════════
+   TAB NAV — premium pill dock with warm active state
+   ══════════════════════════════════════════════════════════════════════════ */
+/* ══════════════════════════════════════════════════════════════════════════
+   TAB NAV — premium pill dock with warm active state
+   ══════════════════════════════════════════════════════════════════════════ */
 .isw-tab-nav {
   min-height: 50px !important;
   height: 50px !important;
@@ -6639,7 +6039,7 @@
   transition: background .14s, color .14s, transform .08s !important;
 }
 .isw-tab-nav__btn:active { transform: scale(0.93) !important; }
-.isw-tab-nav__btn-icon   { font-size: 15px !important; }
+.isw-tab-nav__btn-icon { font-size: 15px !important; }
 .isw-tab-nav__btn.is-active {
   background: linear-gradient(180deg, #ffe99a 0%, #ff9c40 58%, #f06054 100%) !important;
   color: #1c0600 !important;
@@ -6647,20 +6047,20 @@
 }
 .isw-tab-nav__btn.is-active::after { display: none !important; }
 
-/* â”€â”€ Tab panel + inner panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Tab panel + inner panel ─────────────────────────────────────────────── */
 .isw-tab-panel { max-height: min(40vh, 340px) !important; padding: 5px 6px 0 !important; }
-.isw-panel     { padding: 2px 2px 6px !important; gap: 6px !important; }
+.isw-panel { padding: 2px 2px 6px !important; gap: 6px !important; }
 
-/* â”€â”€ Section headers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-.isw-section-head    { min-height: 18px !important; padding: 0 !important; }
-.isw-section-label   { font-size: 8.5px !important; letter-spacing: .10em !important; }
-.isw-section-sub     { font-size: 8.5px !important; }
+/* ── Section headers ─────────────────────────────────────────────────────── */
+.isw-section-head { min-height: 18px !important; padding: 0 !important; }
+.isw-section-label { font-size: 8.5px !important; letter-spacing: .10em !important; }
+.isw-section-sub { font-size: 8.5px !important; }
 .isw-upgrade-section { gap: 5px !important; }
 
-/* â”€â”€ Upgrade / gear cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Upgrade / gear cards ────────────────────────────────────────────────── */
 .isw-card { padding: 7px 9px !important; gap: 3px !important; border-radius: 12px !important; }
-.isw-card__name  { font-size: 11px !important; }
-.isw-card__sub   { font-size: 9px !important; }
+.isw-card__name { font-size: 11px !important; }
+.isw-card__sub { font-size: 9px !important; }
 .isw-card__level { font-size: 8.5px !important; }
 .isw-card__buy-btn {
   height: 24px !important;
@@ -6680,24 +6080,24 @@
   box-shadow: 0 0 0 #0d3b20 !important;
 }
 
-/* â”€â”€ Shop / AI cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Shop / AI cards ─────────────────────────────────────────────────────── */
 .isw-shop-card { padding: 7px 9px !important; gap: 3px !important; border-radius: 12px !important; }
 .isw-shop-card__name { font-size: 10.5px !important; }
 .isw-shop-card__desc, .isw-shop-card__cost { font-size: 9px !important; }
 
-/* â”€â”€ Power card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Power card ──────────────────────────────────────────────────────────── */
 .isw-power-card { padding: 8px 10px !important; gap: 5px !important; margin-bottom: 0 !important; border-radius: 14px !important; }
 .isw-power-card__value { font-size: clamp(17px, 2.2vw, 22px) !important; }
-.isw-power-card__tier  { font-size: 9px !important; }
+.isw-power-card__tier { font-size: 9px !important; }
 .isw-power-card__stats { gap: 5px !important; }
-.isw-power-card__stat  { padding: 5px 4px !important; min-width: 0 !important; border-radius: 10px !important; }
+.isw-power-card__stat { padding: 5px 4px !important; min-width: 0 !important; border-radius: 10px !important; }
 .isw-power-card__stat strong { font-size: 11px !important; }
-.isw-power-card__stat span   { font-size: 8.5px !important; }
+.isw-power-card__stat span { font-size: 8.5px !important; }
 .isw-power-card__milestone-track { height: 4px !important; }
 .isw-power-card__milestone-label,
-.isw-power-card__milestone-lvs  { font-size: 8.5px !important; }
+.isw-power-card__milestone-lvs { font-size: 8.5px !important; }
 
-/* â”€â”€ Mult cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Mult cards ──────────────────────────────────────────────────────────── */
 .isw-mult-card { padding: 7px 8px !important; gap: 2px !important; border-radius: 12px !important; }
 .isw-mult-card__name { font-size: 10.5px !important; }
 .isw-mult-card__desc { font-size: 9px !important; }
@@ -6717,54 +6117,54 @@
   box-shadow: 0 2px 0 #014e7a !important;
 }
 
-/* â”€â”€ Boss panel â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Boss panel ──────────────────────────────────────────────────────────── */
 .isw-boss { padding: 9px 9px 11px !important; border-radius: 18px !important; gap: 8px !important; }
 .isw-boss__name { font-size: clamp(13px, 3.2vw, 18px) !important; line-height: 1.05 !important; }
 .isw-boss__sprite-wrap { min-height: clamp(58px, 11vh, 88px) !important; }
 .isw-boss__sprite { width: clamp(56px, 11vw, 84px) !important; height: clamp(56px, 11vw, 84px) !important; }
-.isw-boss__emoji  { font-size: clamp(36px, 9vw, 50px) !important; }
+
 .isw-boss__hp-track { height: 7px !important; }
 .isw-boss__enrage-track { height: 5px !important; }
 .isw-boss__mechanic { padding: 7px 9px !important; border-radius: 12px !important; }
 .isw-boss__mechanic strong { font-size: 10.5px !important; }
-.isw-boss__mechanic p      { font-size: 9.5px !important; }
-.isw-boss__reward-chip     { font-size: 9.5px !important; padding: 2px 8px !important; }
+.isw-boss__mechanic p { font-size: 9.5px !important; }
+.isw-boss__reward-chip { font-size: 9.5px !important; padding: 2px 8px !important; }
 
-/* â”€â”€ Hero cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Hero cards ──────────────────────────────────────────────────────────── */
 .isw-hero-card__header { padding: 8px 10px !important; gap: 8px !important; }
 .isw-hero-card__portrait { font-size: 25px !important; }
-.isw-hero-card__name     { font-size: 12px !important; }
+.isw-hero-card__name { font-size: 12px !important; }
 .isw-hero-card__stat { padding: 5px 3px !important; font-size: 8.5px !important; border-radius: 9px !important; }
 .isw-hero-card__stat strong { font-size: 10.5px !important; }
 
-/* â”€â”€ Zone buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Zone buttons ────────────────────────────────────────────────────────── */
 .isw-zone-btn { padding: 7px 10px !important; gap: 8px !important; border-radius: 12px !important; }
 .isw-zone-btn__icon { font-size: 16px !important; width: 22px !important; }
 .isw-zone-btn__name { font-size: 10.5px !important; }
 .isw-zone-btn__meta { font-size: 9px !important; }
 
-/* â”€â”€ Rebirth rows â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Rebirth rows ────────────────────────────────────────────────────────── */
 .isw-rebirth-row { padding: 7px 10px !important; border-radius: 12px !important; gap: 8px !important; }
-.isw-rebirth-row__title  { font-size: 11px !important; }
+.isw-rebirth-row__title { font-size: 11px !important; }
 .isw-rebirth-row__reason { font-size: 9px !important; }
 .isw-rebirth-btn { height: 30px !important; min-height: 30px !important; font-size: 10px !important; border-radius: 10px !important; padding: 0 12px !important; }
 
-/* â”€â”€ Skill cards â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Skill cards ─────────────────────────────────────────────────────────── */
 .isw-skill-card { padding: 6px !important; border-radius: 10px !important; }
 .isw-skill-card__icon { font-size: 18px !important; }
 .isw-skill-card__name { font-size: 9px !important; }
 
-/* â”€â”€ Mini / utility buttons â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
-.isw-mini-btn    { min-height: 26px !important; font-size: 9px !important; border-radius: 999px !important; }
+/* ── Mini / utility buttons ──────────────────────────────────────────────── */
+.isw-mini-btn { min-height: 26px !important; font-size: 9px !important; border-radius: 999px !important; }
 .isw-section-best { font-size: 9.5px !important; padding: 3px 7px !important; }
 
-/* â”€â”€ Responsive: desktop â‰¥ 900px â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Responsive: desktop â‰¥ 900px ─────────────────────────────────────────── */
 @media (min-width: 900px) {
   .isw-hud { display: flex !important; flex-direction: column !important; grid-template-columns: unset !important; min-height: 0 !important; }
   .isw-tab-panel { max-height: min(40vh, 340px) !important; }
 }
 
-/* â”€â”€ Responsive: tablet â‰¤ 760px â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Responsive: tablet â‰¤ 760px ─────────────────────────────────────────── */
 @media (max-width: 760px) {
   .isw { grid-template-rows: auto minmax(0, 1fr) auto !important; }
   .isw-hud { display: flex !important; flex-direction: column !important; grid-template-columns: unset !important; padding: 6px 8px 5px !important; }
@@ -6773,7 +6173,7 @@
   .isw-tab-panel { max-height: min(40vh, 340px) !important; }
 }
 
-/* â”€â”€ Responsive: small phones â‰¤ 430px â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Responsive: small phones â‰¤ 430px ────────────────────────────────────── */
 @media (max-width: 430px) {
   .isw-arena        { min-height: clamp(125px, 22vh, 195px) !important; }
   .isw-tab-panel    { max-height: 36vh !important; }
@@ -6785,7 +6185,7 @@
   .isw-tab-nav__btn-icon { font-size: 14px !important; }
 }
 
-/* â”€â”€ Responsive: very small phones â‰¤ 360px â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */
+/* ── Responsive: very small phones â‰¤ 360px ───────────────────────────────── */
 @media (max-width: 360px) {
   .isw-hunt-btn          { height: 33px !important; font-size: 11.5px !important; }
   .isw-tab-nav__btn      { font-size: 5.8px !important; }
@@ -6821,3 +6221,57 @@
   white-space: nowrap;
 }
 
+/* ── Save data bar ──────────────────────────────────────────────────────────── */
+.isw-save-bar {
+  padding: 4px 8px;
+  background: rgba(0,0,0,0.3);
+  border-top: 1px solid rgba(255,255,255,0.06);
+}
+.isw-save-bar__toggle {
+  background: none;
+  border: none;
+  color: rgba(200,230,210,0.55);
+  font-size: 11px;
+  cursor: pointer;
+  padding: 2px 4px;
+  font-family: var(--font-head, system-ui, sans-serif);
+  letter-spacing: 0.01em;
+}
+.isw-save-bar__toggle:hover { color: rgba(200,230,210,0.85); }
+.isw-save-bar__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 0 2px;
+}
+.isw-save-bar__import-row {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.isw-save-bar__btn {
+  background: rgba(120,200,150,0.15);
+  border: 1px solid rgba(120,200,150,0.3);
+  border-radius: 8px;
+  color: rgba(180,240,200,0.9);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: var(--font-head, system-ui, sans-serif);
+}
+.isw-save-bar__btn:hover { background: rgba(120,200,150,0.25); }
+.isw-save-bar__btn:disabled { opacity: 0.4; cursor: default; }
+.isw-save-bar__input {
+  flex: 1;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(120,200,150,0.25);
+  border-radius: 6px;
+  color: rgba(200,230,210,0.85);
+  font-family: monospace;
+  font-size: 10px;
+  padding: 4px 7px;
+  min-width: 0;
+}
+.isw-save-bar__input:focus { outline: none; border-color: rgba(120,200,150,0.5); }

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { NewsItem } from "../../data/newsHub";
 import { formatNewsMetaDate } from "../../lib/newsHub";
+import { safeFetchJson } from "../../lib/safeJsonFetch";
 import { useI18n } from "../../i18n/I18nProvider";
 import { getArticlePendingText } from "../../i18n/articlePendingText";
 import { useTranslatedArticleState } from "../../i18n/useTranslatedContent";
@@ -58,74 +59,75 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
   const translatedArticle = useTranslatedArticleState(data, { scope: "full" });
   const translatedData = translatedArticle.data;
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [openTopics, setOpenTopics] = useState<string[]>([]);
+  const [retryVersion, setRetryVersion] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const bodyRef = useRef<HTMLDivElement | null>(null);
   const sectionRefs = useMemo(() => new Map<string, HTMLElement>(), []);
 
   useEffect(() => {
-    let active = true;
+    const controller = new AbortController();
 
     async function loadArticle() {
       if (!item?.sourceUrl) {
         setData(null);
+        setError(null);
         return;
       }
 
-      if (import.meta.env.DEV) {
-        console.log("[KMS Modal] open", {
-          url: item.sourceUrl,
-          hasBreakdown: Boolean(item.kmsBreakdown)
-        });
-      }
-
       setLoading(true);
+      setError(null);
+      const cacheBust = `${Date.now()}`;
+      const fallbackPayload: KmsPayload = {
+        title: item.title,
+        sourceName: item.sourceName,
+        sourceUrl: item.sourceUrl,
+        date: item.publishedAt,
+        summary: item.summary,
+        tags: [],
+        highlights: item.summary ? [item.summary] : [],
+        keyChanges: [],
+        audience: "Showing cached article summary.",
+        sections: [],
+        categories: [],
+        heroImage: item.image
+      };
       try {
-        const cacheBust = `${Date.now()}`;
-        const response = await fetch(
+        const result = await safeFetchJson<KmsPayload>(
           `/api/kms?url=${encodeURIComponent(item.sourceUrl)}&force=1&ts=${cacheBust}`,
-          { cache: "no-store" }
+          {
+            cache: "no-store",
+            fallback: fallbackPayload,
+            signal: controller.signal,
+            timeoutMs: 15000
+          }
         );
-        if (!response.ok) {
-          throw new Error("Failed to load KMS article.");
+        if (controller.signal.aborted) return;
+        if (import.meta.env.DEV && !result.ok) {
+          console.warn("[KMS Modal] fallback to summary", { url: item.sourceUrl, error: result.error });
         }
-        const payload = (await response.json()) as KmsPayload;
-        if (import.meta.env.DEV) {
-          const payloadDetails =
-            payload?.sections?.reduce((sum, section) => sum + (section.details?.length || 0), 0) ?? 0;
-          console.log("[KMS Modal] fetched payload", {
-            url: item.sourceUrl,
-            sectionCount: payload?.sections?.length || 0,
-            detailCount: payloadDetails,
-            fullTextLength: payload?.fullText?.length || 0,
-            summaryLength: payload?.summary?.length || 0,
-            debug: payload?.debug
-          });
-        }
-        if (active) {
-          setData(payload);
-          setOpenTopics([]);
-        }
+        setData(result.data);
+        setError(result.ok ? null : result.error);
+        setOpenTopics([]);
       } catch (error) {
-        if (import.meta.env.DEV) {
-          console.error("[KMS Modal] fallback to summary", { url: item.sourceUrl, error });
-        }
-        if (active) {
-          setData(null);
-        }
+        if (controller.signal.aborted) return;
+        const message = error instanceof Error ? error.message : "Failed to load article.";
+        setData(fallbackPayload);
+        setError(message);
       } finally {
-        if (active) {
+        if (!controller.signal.aborted) {
           setLoading(false);
         }
       }
     }
 
-    loadArticle();
+    void loadArticle();
 
     return () => {
-      active = false;
+      controller.abort();
     };
-  }, [item]);
+  }, [item, retryVersion]);
 
   const published = useMemo(() => formatNewsMetaDate(item?.publishedAt ?? ""), [item]);
   const renderData = translatedData ?? data;
@@ -173,6 +175,13 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
     const summary = (renderData?.summary || item?.summary || "").trim();
     return summary.replace(/\s+/g, " ").slice(0, 240);
   }, [renderData?.summary, item?.summary]);
+  const smartSummary = useMemo(
+    () =>
+      [renderData?.audience, ...(renderData?.highlights ?? []), ...(renderData?.keyChanges ?? [])]
+        .filter(Boolean)
+        .slice(0, 4) as string[],
+    [renderData?.audience, renderData?.highlights, renderData?.keyChanges]
+  );
   if (!item) return null;
 
   return (
@@ -233,6 +242,15 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
                   ))}
                 </div>
               )}
+              {error ? (
+                <div className="kms-modal__error" role="status">
+                  <strong>{t("Article fallback active")}</strong>
+                  <span>{t("Showing cached summary because live parsing failed.")}</span>
+                  <button onClick={() => setRetryVersion((current) => current + 1)} type="button">
+                    {t("Retry")}
+                  </button>
+                </div>
+              ) : null}
               {loading && (
                 <div className="kms-loading">
                   <span className="kms-loading__dot" />
@@ -241,6 +259,17 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
               )}
             </div>
           </div>
+
+          {!loading && !isTranslatingArticle && smartSummary.length ? (
+            <div className="kms-modal__block">
+              <h3 className="kms-modal__section-title">{t("What players should know")}</h3>
+              <div className="kms-modal__smart-summary card">
+                {smartSummary.map((point, index) => (
+                  <p key={`${point}-${index}`}>{dynamicText(point)}</p>
+                ))}
+              </div>
+            </div>
+          ) : null}
 
           {!isTranslatingArticle && (
           <div className="kms-modal__block">
@@ -414,7 +443,7 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
             }}
             aria-label={t("Scroll to top")}
           >
-            ↑
+            Top
           </button>
         ) : null}
       </div>

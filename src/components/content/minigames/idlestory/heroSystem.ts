@@ -49,7 +49,7 @@ export const HEROES: Record<HeroId, HeroDefinition> = {
     role: "Frontline explorer",
     baseCost: 120,
     baseDps: 4,
-    baseStats: { attack: 8, defense: 8, hp: 140, attackSpeed: 0.75 },
+    baseStats: { attack: 7, defense: 8, hp: 140, attackSpeed: 0.75 },
     passiveBonus: "+8% team defense while active",
     skillUnlockLevels: [1, 5, 10]
   },
@@ -129,7 +129,9 @@ export function getHeroStats(id: HeroId, level: number): HeroBaseStats {
   const hero = HEROES[id];
   const rarityMult = RARITY_MULT[hero.rarity];
   const classMult = hero.classType === "warrior" ? 1.14 : hero.classType === "mage" ? 1.22 : 1.18;
-  const levelScale = Math.pow(Math.max(1, level), hero.classType === "mage" ? 1.16 : 1.1);
+  // Balance: reduced exponent so each level-up gives ~42% DPS gain instead of ~71%.
+  // warrior/archer: 1.1 → 0.80; mage: 1.16 → 0.85
+  const levelScale = Math.pow(Math.max(1, level), hero.classType === "mage" ? 0.85 : 0.80);
 
   return {
     attack: Math.floor(hero.baseStats.attack * rarityMult * classMult * levelScale),

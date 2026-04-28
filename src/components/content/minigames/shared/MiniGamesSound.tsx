@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { useGameSettings } from "./gameSettings";
 
 type MiniGamesSoundContextValue = {
@@ -99,7 +99,7 @@ export function MiniGamesSoundProvider({ children }: { children: ReactNode }) {
     musicRef.current = { osc, lfo, gain };
   }, [muted, settings.music]);
 
-  function playTone(frequency: number, duration: number, type: OscillatorType, gainValue: number, delay = 0) {
+  const playTone = useCallback((frequency: number, duration: number, type: OscillatorType, gainValue: number, delay = 0) => {
     if (muted) {
       return;
     }
@@ -123,7 +123,7 @@ export function MiniGamesSoundProvider({ children }: { children: ReactNode }) {
     gain.connect(audioContext.destination);
     oscillator.start(now);
     oscillator.stop(now + duration + 0.03);
-  }
+  }, [muted]);
 
   const value = useMemo<MiniGamesSoundContextValue>(
     () => ({
@@ -156,8 +156,7 @@ export function MiniGamesSoundProvider({ children }: { children: ReactNode }) {
         playTone(980, 0.08, "sine", 0.012, 0.045);
       }
     }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [muted]
+    [muted, playTone]
   );
 
   return <MiniGamesSoundContext.Provider value={value}>{children}</MiniGamesSoundContext.Provider>;

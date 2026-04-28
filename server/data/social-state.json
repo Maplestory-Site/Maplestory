@@ -1,0 +1,252 @@
+{
+  "profiles": {
+    "bot-henesys": {
+      "userId": "bot-henesys",
+      "username": "Mushroom Ace",
+      "guildId": null,
+      "guildName": "Sprout Guard",
+      "level": 9,
+      "power": 180,
+      "stage": 45,
+      "bossKills": 25,
+      "goldEarned": 396000,
+      "weeklyStage": 36,
+      "weeklyBossClears": 10,
+      "updatedAt": "2026-04-27T17:25:14.487Z",
+      "pvp": {
+        "rating": 960,
+        "wins": 20,
+        "losses": 15
+      },
+      "shadow": {
+        "dps": 147,
+        "hp": 1152,
+        "defense": 27,
+        "attackSpeed": 1.05,
+        "critChance": 0.1,
+        "critDamage": 1.5
+      }
+    },
+    "bot-ellinia": {
+      "userId": "bot-ellinia",
+      "username": "Forest Nova",
+      "guildId": null,
+      "guildName": "Verdant Hex",
+      "level": 17,
+      "power": 340,
+      "stage": 85,
+      "bossKills": 48,
+      "goldEarned": 748000,
+      "weeklyStage": 68,
+      "weeklyBossClears": 18,
+      "updatedAt": "2026-04-27T17:25:14.487Z",
+      "pvp": {
+        "rating": 1013,
+        "wins": 37,
+        "losses": 28
+      },
+      "shadow": {
+        "dps": 278,
+        "hp": 2176,
+        "defense": 51,
+        "attackSpeed": 1.05,
+        "critChance": 0.1,
+        "critDamage": 1.5
+      }
+    },
+    "bot-perion": {
+      "userId": "bot-perion",
+      "username": "Stone Breaker",
+      "guildId": null,
+      "guildName": "Red Dust",
+      "level": 26,
+      "power": 520,
+      "stage": 130,
+      "bossKills": 74,
+      "goldEarned": 1144000,
+      "weeklyStage": 104,
+      "weeklyBossClears": 28,
+      "updatedAt": "2026-04-27T17:25:14.487Z",
+      "pvp": {
+        "rating": 1073,
+        "wins": 57,
+        "losses": 43
+      },
+      "shadow": {
+        "dps": 426,
+        "hp": 3328,
+        "defense": 78,
+        "attackSpeed": 1.05,
+        "critChance": 0.1,
+        "critDamage": 1.5
+      }
+    },
+    "bot-ludibrium": {
+      "userId": "bot-ludibrium",
+      "username": "Clock Duelist",
+      "guildId": null,
+      "guildName": "Timekeepers",
+      "level": 39,
+      "power": 780,
+      "stage": 195,
+      "bossKills": 111,
+      "goldEarned": 1716000,
+      "weeklyStage": 156,
+      "weeklyBossClears": 43,
+      "updatedAt": "2026-04-27T17:25:14.487Z",
+      "pvp": {
+        "rating": 1160,
+        "wins": 86,
+        "losses": 65
+      },
+      "shadow": {
+        "dps": 639,
+        "hp": 4992,
+        "defense": 117,
+        "attackSpeed": 1.05,
+        "critChance": 0.1,
+        "critDamage": 1.5
+      }
+    },
+    "bot-mirror": {
+      "userId": "bot-mirror",
+      "username": "Mirror Hunter",
+      "guildId": null,
+      "guildName": "Echo Raid",
+      "level": 51,
+      "power": 1020,
+      "stage": 255,
+      "bossKills": 145,
+      "goldEarned": 2244000,
+      "weeklyStage": 204,
+      "weeklyBossClears": 56,
+      "updatedAt": "2026-04-27T17:25:14.487Z",
+      "pvp": {
+        "rating": 1240,
+        "wins": 113,
+        "losses": 85
+      },
+      "shadow": {
+        "dps": 836,
+        "hp": 6528,
+        "defense": 153,
+        "attackSpeed": 1.05,
+        "critChance": 0.1,
+        "critDamage": 1.5
+      }
+    },
+    "bot-sky": {
+      "userId": "bot-sky",
+      "username": "Cloud Ranger",
+      "guildId": null,
+      "guildName": "Skyfall",
+      "level": 63,
+      "power": 1260,
+      "stage": 315,
+      "bossKills": 180,
+      "goldEarned": 2772000,
+      "weeklyStage": 252,
+      "weeklyBossClears": 70,
+      "updatedAt": "2026-04-27T17:25:14.487Z",
+      "pvp": {
+        "rating": 1320,
+        "wins": 140,
+        "losses": 105
+      },
+      "shadow": {
+        "dps": 1033,
+        "hp": 8064,
+        "defense": 189,
+        "attackSpeed": 1.05,
+        "critChance": 0.1,
+        "critDamage": 1.5
+      }
+    },
+    "guest-58jvrj04": {
+      "userId": "guest-58jvrj04",
+      "username": "Guest Hero",
+      "guildId": "snail-legends-1777237703790",
+      "guildName": "Snail Legends",
+      "level": 3,
+      "power": 385,
+      "stage": 60,
+      "bossKills": 5,
+      "goldEarned": 17857.458679564148,
+      "weeklyStage": 60,
+      "weeklyBossClears": 5,
+      "updatedAt": "2026-04-27T13:11:55.414Z",
+      "pvp": {
+        "rating": 1000,
+        "wins": 0,
+        "losses": 0
+      },
+      "shadow": {
+        "dps": 114.64469435425599,
+        "hp": 1008,
+        "defense": 38,
+        "attackSpeed": 1.036,
+        "critChance": 0.089,
+        "critDamage": 1.45
+      }
+    },
+    "guest-xulebkg0": {
+      "userId": "guest-xulebkg0",
+      "username": "Guest Hero",
+      "guildId": null,
+      "guildName": null,
+      "level": 4,
+      "power": 1147,
+      "stage": 33,
+      "bossKills": 19,
+      "goldEarned": 51256.58598715547,
+      "weeklyStage": 150,
+      "weeklyBossClears": 17,
+      "updatedAt": "2026-04-27T17:25:14.487Z",
+      "pvp": {
+        "rating": 1000,
+        "wins": 0,
+        "losses": 0
+      },
+      "shadow": {
+        "dps": 571.1103339572176,
+        "hp": 1248,
+        "defense": 42,
+        "attackSpeed": 1.048,
+        "critChance": 0.092,
+        "critDamage": 1.45
+      }
+    }
+  },
+  "guilds": [
+    {
+      "id": "snail-legends-1777237703790",
+      "name": "Snail Legends",
+      "icon": "Guild",
+      "level": 1,
+      "xp": 0,
+      "buffs": [
+        "battle-standard"
+      ],
+      "members": [
+        {
+          "userId": "guest-58jvrj04",
+          "username": "Guest Hero",
+          "role": "leader",
+          "power": 385,
+          "level": 3,
+          "contribution": 0
+        }
+      ],
+      "raid": {
+        "bossName": "Ancient Guild Slime",
+        "maxHp": 250000,
+        "hp": 250000,
+        "resetAt": "2026-04-27T21:08:23.790Z",
+        "contributors": []
+      }
+    }
+  ],
+  "weekly": {
+    "weekKey": "2026-04-27"
+  }
+}

@@ -1296,14 +1296,14 @@ export function scaleBossStats(
   prestigeCount = 0
 ): BossScaledStats {
   const zoneTier = Math.max(1, zoneRequirement);
-  const zoneMult = Math.pow(1.14, zoneTier / 10);
-  const prestigeMult = Math.pow(2.0, Math.max(0, prestigeCount));
-  const powerMult = playerPower > 0 ? Math.min(2.4, Math.max(1, Math.pow(playerPower / 120, 0.18))) : 1;
+  const zoneMult = Math.pow(1.11, zoneTier / 8);
+  const prestigeMult = Math.pow(1.2, Math.max(0, prestigeCount));
+  const powerMult = playerPower > 0 ? Math.min(1.5, Math.max(0.9, Math.pow(playerPower / 160, 0.1))) : 1;
 
   return {
     hp: Math.round(boss.baseHp * zoneMult * prestigeMult * powerMult),
-    attack: Math.round(boss.baseAttack * Math.pow(1.1, zoneTier / 10) * powerMult),
-    defense: Math.round(boss.baseDefense * Math.pow(1.08, zoneTier / 10) * prestigeMult)
+    attack: Math.round(boss.baseAttack * Math.pow(1.08, zoneTier / 10) * powerMult),
+    defense: Math.round(boss.baseDefense * Math.pow(1.06, zoneTier / 10) * (1 + Math.max(0, prestigeCount) * 0.08))
   };
 }
 

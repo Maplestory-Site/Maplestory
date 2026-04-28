@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { usePageMeta } from "../app/usePageMeta";
 import { GmsArticleModal } from "../components/content/GmsArticleModal";
 import { KmsArticleModal } from "../components/content/KmsArticleModal";
@@ -18,7 +18,58 @@ export function NewsPage() {
   const [activeRegion, setActiveRegion] = useState<NewsRegion>("gms");
   const [kmsArticle, setKmsArticle] = useState<NewsItem | null>(null);
   const [gmsArticle, setGmsArticle] = useState<NewsItem | null>(null);
-  const { categoryCounts, featuredItem, filteredItems, gridItems, meta } = useNewsFeed(activeCategory, query, activeRegion);
+  const {
+    categoryCounts,
+    error,
+    featuredItem,
+    filteredItems,
+    gridItems,
+    isLoading,
+    isRefreshing,
+    isStale,
+    isUsingFallback,
+    lastFetchedAt,
+    meta,
+    refresh
+  } = useNewsFeed(activeCategory, query, activeRegion);
+  const handleSelectNews = activeRegion === "kms" ? setKmsArticle : setGmsArticle;
+  const hasSearch = query.trim().length > 0;
+  const showGroupedLanes = activeCategory === "all" && !hasSearch && !isLoading;
+  const newsLanes = useMemo(() => {
+    const lanes = [
+      {
+        description: t("Newest official updates."),
+        items: gridItems.slice(0, 6),
+        key: "latest",
+        title: t("Latest News")
+      },
+      {
+        description: t("Version changes and patch details."),
+        items: gridItems.filter((item) => item.category === "patch-notes").slice(0, 6),
+        key: "patch",
+        title: t("Patch Notes")
+      },
+      {
+        description: t("Time-limited activities and rewards."),
+        items: gridItems.filter((item) => item.category === "events").slice(0, 6),
+        key: "events",
+        title: t("Events")
+      },
+      {
+        description: t("Shop updates, sales, and bundles."),
+        items: gridItems.filter((item) => item.category === "cash-shop").slice(0, 6),
+        key: "cash",
+        title: t("Cash Shop Updates")
+      },
+      {
+        description: t("KMS previews and future-facing updates."),
+        items: gridItems.filter((item) => item.region === "kms").slice(0, 6),
+        key: "kms",
+        title: t("KMS Preview")
+      }
+    ];
+    return lanes.filter((lane) => lane.items.length > 0);
+  }, [gridItems, t]);
 
   return (
     <>
@@ -31,9 +82,11 @@ export function NewsPage() {
           />
 
           <div className="news-meta-strip card">
-            <span>{t("Last synced")} {formatNewsMetaDate(meta.lastUpdated)}</span>
+            <span>{t("Last synced")} {formatNewsMetaDate(lastFetchedAt || meta.lastUpdated)}</span>
             <span>
-              {meta.sourceStatus === "fresh"
+              {isRefreshing
+                ? t("Refreshing latest news")
+                : meta.sourceStatus === "fresh"
                 ? t("Fresh official sync")
                 : meta.sourceStatus === "stale"
                   ? t("Showing last good cache")
@@ -41,7 +94,26 @@ export function NewsPage() {
                     ? t("Sync issue, cache active")
                     : t("Auto-sync ready")}
             </span>
+            {isStale || isUsingFallback ? <span>{t("Bundled fallback available")}</span> : null}
+            <button className="news-meta-strip__refresh" disabled={isRefreshing} onClick={refresh} type="button">
+              {isRefreshing ? t("Refreshing...") : t("Refresh")}
+            </button>
           </div>
+
+          {error ? (
+            <div className="news-status news-status--error card" role="status">
+              <strong>{t("Live news sync failed.")}</strong>
+              <span>{t("Showing cached news so the page stays usable.")}</span>
+              <button disabled={isRefreshing} onClick={refresh} type="button">
+                {t("Retry")}
+              </button>
+            </div>
+          ) : isStale || isUsingFallback ? (
+            <div className="news-status card" role="status">
+              <strong>{t("Cached news active.")}</strong>
+              <span>{t("The site will refresh automatically when the API is available.")}</span>
+            </div>
+          ) : null}
 
           <div className="news-region-tabs">
             {newsRegions.map((region) => (
@@ -94,20 +166,48 @@ export function NewsPage() {
               <NewsCard
                 featured
                 item={featuredItem}
-                onSelect={activeRegion === "kms" ? setKmsArticle : setGmsArticle}
+                onSelect={handleSelectNews}
               />
             </div>
           ) : null}
 
-          <div className="news-grid">
-            {gridItems.map((item) => (
-              <NewsCard
-                item={item}
-                key={item.id}
-                onSelect={activeRegion === "kms" ? setKmsArticle : setGmsArticle}
-              />
-            ))}
-          </div>
+          {isLoading ? (
+            <div className="news-skeleton-grid" aria-label={t("Loading news")}>
+              {Array.from({ length: 6 }).map((_, index) => (
+                <div className="news-skeleton-card card" key={index}>
+                  <span />
+                  <strong />
+                  <p />
+                  <p />
+                </div>
+              ))}
+            </div>
+          ) : showGroupedLanes && newsLanes.length ? (
+            <div className="news-lanes">
+              {newsLanes.map((lane) => (
+                <section className="news-lane" key={lane.key}>
+                  <div className="news-lane__header">
+                    <div>
+                      <span>{lane.description}</span>
+                      <h3>{lane.title}</h3>
+                    </div>
+                    <small>{lane.items.length} {t("updates")}</small>
+                  </div>
+                  <div className="news-lane__grid">
+                    {lane.items.map((item) => (
+                      <NewsCard item={item} key={item.id} onSelect={handleSelectNews} />
+                    ))}
+                  </div>
+                </section>
+              ))}
+            </div>
+          ) : (
+            <div className="news-grid">
+              {gridItems.map((item) => (
+                <NewsCard item={item} key={item.id} onSelect={handleSelectNews} />
+              ))}
+            </div>
+          )}
 
           {!filteredItems.length ? (
             <div className="content-empty-state card">

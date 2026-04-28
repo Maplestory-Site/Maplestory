@@ -3,6 +3,10 @@
     {
       "path": "/api/news/refresh",
       "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/youtube/refresh",
+      "schedule": "0,30 * * * *"
     }
   ],
   "rewrites": [
@@ -41,6 +45,10 @@
     {
       "source": "/api/youtube",
       "destination": "/api/content?resource=youtube-feed"
+    },
+    {
+      "source": "/api/youtube/refresh",
+      "destination": "/api/content?resource=youtube-refresh"
     },
     {
       "source": "/api/items",
@@ -93,6 +101,10 @@
     {
       "source": "/api/chat",
       "destination": "/api/game?resource=chat"
+    },
+    {
+      "source": "/api/social",
+      "destination": "/api/game?resource=social"
     },
     {
       "source": "/api/(.*)",

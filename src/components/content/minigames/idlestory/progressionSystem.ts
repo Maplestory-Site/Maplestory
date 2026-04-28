@@ -1,4 +1,4 @@
-﻿/**
+/**
  * IdleStory World — Progression System
  *
  * Hero and upgrade data, XP/leveling formulas, resource rates, prestige gate.
@@ -18,8 +18,12 @@ import {
 import { getTalentDpsMult, getTalentGoldMult } from "./talentSystem";
 import { calculateTotalEquipmentStats } from "./inventorySystem";
 import { calculateHeroTeamDps } from "./heroSystem";
+import { getGuildPassiveBonuses } from "./guildSystem";
+import { getSkillBuildBonuses } from "./skillBuildSystem";
+import { getReplayabilityBonuses } from "./replayabilitySystem";
 import {
   getMonstersByMap,
+  getStageMonsterByMap,
   toDatabaseMonster,
   type MapMonster
 } from "./monsterSystem";
@@ -46,7 +50,7 @@ export type UpgradeDefinition = {
   name: string;
   label: string;
   baseCost: number;
-  /** Fractional boost per level (e.g. 0.14 → +14 % per level) */
+/** Fractional boost per level (e.g. 0.14 -> +14% per level) */
   boost: number;
 };
 
@@ -127,9 +131,15 @@ export const BOSS_STAGE_IN_MAP = 10;
 
 export function getXpTarget(level: number): number {
   const safeLevel = Math.max(1, level);
-  // Steeper curve: ~3x harder at early levels, ~6x harder at level 50+
-  const postTenRamp = safeLevel > 10 ? 1 + (safeLevel - 10) * 0.09 : 1;
-  return Math.floor(220 * Math.pow(safeLevel, 1.95) * postTenRamp);
+  // Balance: early XP targets raised so a single kill spree can't jump 3 levels.
+  // Lv1→2: was 150, now 220.  Lv5→6: was 2631, now 3700.
+  if (safeLevel <= 10) {
+    return Math.floor(220 * Math.pow(safeLevel, 1.85));
+  }
+  if (safeLevel <= 40) {
+    return Math.floor(380 * Math.pow(safeLevel, 1.96));
+  }
+  return Math.floor(560 * Math.pow(safeLevel, 2.05));
 }
 
 export function getStageInMap(stage: number): number {
@@ -146,19 +156,18 @@ export function getEncounterTypeForStage(stage: number): EncounterType {
 export function getMonsterHpForStage(stage: number, mapLevel: number, monster?: Pick<MapMonster, "hp" | "type">): number {
   const cycle = Math.floor((Math.max(1, stage) - 1) / MAP_STAGE_COUNT);
   if (monster) {
-    const repeatMapRamp = Math.pow(1.1 + Math.min(0.04, mapLevel * 0.0008), cycle);
+    const repeatMapRamp = Math.pow(1.09 + Math.min(0.03, mapLevel * 0.0005), cycle);
     return Math.max(1, Math.floor(monster.hp * repeatMapRamp));
   }
 
   const stageInMap = getStageInMap(stage);
-  // Increased base HP so monsters last 4-12 seconds at typical DPS values
-  const normalHp = Math.floor(350 * Math.pow(stageInMap, 1.7));
-  const mapMultiplier = 1 + Math.max(0, mapLevel - 1) * 0.22;
+  const normalHp = Math.floor(260 * Math.pow(stageInMap, 1.58));
+  const mapMultiplier = 1 + Math.max(0, mapLevel - 1) * 0.19;
   const scaledNormalHp = Math.floor(normalHp * mapMultiplier);
   const encounterType = getEncounterTypeForStage(stage);
 
-  if (encounterType === "boss") return Math.floor(scaledNormalHp * 10);
-  if (encounterType === "elite") return Math.floor(scaledNormalHp * 4);
+  if (encounterType === "boss") return Math.floor(scaledNormalHp * 8.8);
+  if (encounterType === "elite") return Math.floor(scaledNormalHp * 3.6);
   return scaledNormalHp;
 }
 
@@ -178,12 +187,15 @@ export function getMonsterXpReward(
     levelGap > 6  ? 0.40 :
     levelGap > 2  ? 0.70 : 1.0;
   if (monster) {
-    return Math.max(1, Math.floor(monster.xpReward * antiFarmMultiplier * Math.pow(1.03, cycle)));
+    return Math.max(1, Math.floor(monster.xpReward * antiFarmMultiplier * Math.pow(1.015, cycle)));
   }
 
   const stageInMap = getStageInMap(stage);
-  const lowBase = Math.max(2, Math.floor(3 + mapLevel * 0.35 + stageInMap * 0.45));
-  const multiplier = encounterType === "boss" ? 10 : encounterType === "elite" ? 3 : 1;
+  // Balance: base was (2 + map*0.28 + stage*0.34) = 2 XP at stage 1.
+  // Now (4 + map*0.40 + stage*0.55) = 5 XP at stage 1 — still slow enough to feel earned.
+  // Boss mult: 6.5→4.2; elite mult: 2.2→1.6 — spikes no longer carry full level-ups.
+  const lowBase = Math.max(1, Math.floor(4 + mapLevel * 0.40 + stageInMap * 0.55));
+  const multiplier = encounterType === "boss" ? 4.2 : encounterType === "elite" ? 1.6 : 1;
   return Math.max(1, Math.floor(lowBase * multiplier * antiFarmMultiplier));
 }
 
@@ -228,29 +240,45 @@ export function applyXpGain(currentLevel: number, currentXp: number, xpGain: num
 export function calculateDPS(state: IdleGameState): number {
   // ── Base damage from heroes and gear ─────────────────────────────────────
   // Softened multipliers to prevent snowballing too fast
-  const forgeBoost = 1 + state.upgrades.forge * UPGRADES.forge.boost * 0.6;
-  const prestigeBonus = 1 + state.prestigeCount * 0.03;
+  const forgeBoost = 1 + state.upgrades.forge * UPGRADES.forge.boost * 0.4;
+  const prestigeBonus = 1 + state.prestigeCount * 0.02;
 
   const heroDps = calculateHeroTeamDps(state.heroLevels);
   const gearDps = (Object.entries(state.gearLevels) as [GearId, number][]).reduce(
     (sum, [id, level]) => sum + GEAR[id].flatDps * level,
     0
   );
-  const equipmentStats = calculateTotalEquipmentStats(state.equipment);
-  const equipmentDps = equipmentStats.attack * (1 + equipmentStats.attackSpeed)
-    * (1 + equipmentStats.critChance * equipmentStats.critDamage);
+  const equipmentStats = calculateTotalEquipmentStats(state.equipment, {
+    buildFocus: state.buildFocus,
+    talentNodes: state.talentNodes
+  });
+  const effectiveCritChance = Math.min(0.85, Math.max(0, equipmentStats.critChance));
+  const equipmentDamageMult = 1 + Math.min(0.42, Math.max(0, equipmentStats.damageMultiplier));
+  const equipmentDps = equipmentStats.attack
+    * (1 + equipmentStats.attackSpeed)
+    * (1 + effectiveCritChance * equipmentStats.critDamage)
+    * equipmentDamageMult;
   // Training skills add a fractional multiplier (stacking additively in the sum, then applied)
   const trainingBoost = (Object.entries(state.skillLevels) as [SkillId, number][]).reduce(
     (sum, [id, level]) => sum + SKILLS[id].dpsMultiplier * level,
     1
   );
 
-  const baseDps = (heroDps + gearDps + equipmentDps) * forgeBoost * trainingBoost * prestigeBonus;
+  const levelForDamage = Math.max(1, state.level);
+  const levelDpsMult =
+    levelForDamage <= 20
+      ? 1 + (levelForDamage - 1) * 0.017
+      : levelForDamage <= 60
+        ? 1.32 + (levelForDamage - 20) * 0.009
+        : 1.68 + Math.min(0.4, (levelForDamage - 60) * 0.0038);
+
+  const baseDps = (heroDps + gearDps + equipmentDps) * forgeBoost * trainingBoost * prestigeBonus * levelDpsMult;
 
   // ── Class, passive, active buff multipliers ───────────────────────────────
   const classMult   = getClassDpsMult(state);
   const passiveMult = getResolvedPassiveDpsMult(state);
   const buffMult    = getActiveBuffDpsMult(state.activeBuffs);
+  const buildMults  = getSkillBuildBonuses(state);
 
   // ── Global & permanent (economy / relic) multipliers ─────────────────────
   const globalDpsMult   = getDpsAmpMult(state.globalMults);      // crystal-tier, resets on rebirth
@@ -259,18 +287,28 @@ export function calculateDPS(state: IdleGameState): number {
   // ── Power spike multipliers ───────────────────────────────────────────────
   // Milestone: cumulative permanent bonus every 5 levels
   const milestoneMult  = getMilestoneDpsMult(state.level);
-  // Boss surge: +100% DPS for 30s after every boss kill
+  // Boss surge: temporary DPS spike after every boss kill
   const bossurgeMult   = (state.bossSurgeSecondsLeft ?? 0) > 0 ? BOSS_SURGE_DPS_MULT : 1.0;
 
   // ── Talent tree (permanent) ───────────────────────────────────────────────
   const talentDpsMult  = getTalentDpsMult(state.talentNodes ?? {});
+  const guildDpsMult   = getGuildPassiveBonuses(state.guildState).damageMult;
+  const replayabilityBonuses = getReplayabilityBonuses(
+    state.replayability,
+    state.prestigeCount,
+    state.rebirthCount
+  );
 
   return Math.max(1,
     baseDps
     * classMult * passiveMult * buffMult
+    * buildMults.passiveDpsMult
+    * buildMults.attackSpeedMult
     * globalDpsMult * relicDpsMult
     * milestoneMult * bossurgeMult
     * talentDpsMult
+    * guildDpsMult
+    * replayabilityBonuses.dpsMult
   );
 }
 
@@ -286,6 +324,11 @@ export function getMesosPerSecond(
   lootCount: number
 ): number {
   const dps = calculateDPS(state);
+  const equipmentStats = calculateTotalEquipmentStats(state.equipment, {
+    buildFocus: state.buildFocus,
+    talentNodes: state.talentNodes
+  });
+  const equipmentGoldMult = 1 + Math.min(0.35, Math.max(0, equipmentStats.goldMultiplier));
   const farmBoost    = monster ? 1 + (monster.farmingScore ?? monster.level) / 140 : 1;
   const lootBoost    = 1 + lootCount * 0.035;
   const marketBoost  = 1 + state.upgrades.market * UPGRADES.market.boost;
@@ -293,8 +336,14 @@ export function getMesosPerSecond(
   const relicGoldMult    = getRelicGoldBonus(state.relicUpgrades); // permanent
   const milestoneMesosMult = getMilestoneMesosMult(state.level);  // permanent level bonus
   const talentGoldMult   = getTalentGoldMult(state.talentNodes ?? {}); // talent tree permanent
-  return (7 + dps * 0.9) * zone.rewardBoost * farmBoost * lootBoost * marketBoost
-    * globalGoldMult * relicGoldMult * milestoneMesosMult * talentGoldMult;
+  // Balance pass 2: early-game still too hot.
+  //   Original: (7 + dps*0.9)        DPS 10 → 16/s, DPS 100 → 97/s
+  //   Pass 1:   (9 + dps*0.32)       DPS 10 → 12/s, DPS 100 → 41/s
+  //   Pass 2:   (3 + dps*0.18)       DPS 10 → 4.8/s, DPS 100 → 21/s
+  // The flat base is now small enough that very-early DPS (~9) yields ~4.6 mps,
+  // which (combined with reduced tutorial mult) puts first-upgrade at 25–30 s.
+  return (2.45 + dps * 0.14) * zone.rewardBoost * farmBoost * lootBoost * marketBoost
+    * globalGoldMult * relicGoldMult * milestoneMesosMult * talentGoldMult * equipmentGoldMult;
 }
 
 /**
@@ -317,80 +366,237 @@ export function canPrestige(state: IdleGameState): boolean {
 
 // ─── Zone-relative monster / loot helpers ────────────────────────────────────
 
-/** Enrich an authored monster with a real image from the API database by name match. */
-function enrichWithApiImage(
-  monster: DatabaseMonster,
-  apiMonsters: DatabaseMonster[]
-): DatabaseMonster {
-  if (monster.image) return monster;
-  if (!apiMonsters.length) return monster;
-  const needle = monster.name.toLowerCase();
-  const exact = apiMonsters.find(m => m.name.toLowerCase() === needle);
-  if (exact?.image) return { ...monster, image: exact.image };
-  const partial = apiMonsters.find(
-    m => m.name.toLowerCase().includes(needle) || needle.includes(m.name.toLowerCase())
-  );
-  if (partial?.image) return { ...monster, image: partial.image };
+
+// Zone index -> target monster level band (fallback when keyword match finds < 3 results)
+const ZONE_LEVEL_TARGETS: Record<string, [number, number]> = {
+  henesys:                  [10,  175],
+  ellinia:                  [10,   55],
+  kerning:                  [10,  140],
+  perion:                   [15,  140],
+  sleepywood:               [100, 225],
+  ludibrium:                [60,  175],
+  omega_sector:             [100, 190],
+  elnath:                   [50,  210],
+  ice_valley:               [140, 180],
+  aqua_road:                [75,  185],
+  minar_forest:             [90,  240],
+  dragon_nest:              [90,  240],
+  mu_lung:                  [100, 210],
+  nihal_desert:             [80,  165],
+  magatia:                  [80,  170],
+  singapore:                [180, 205],
+  masteria:                 [165, 220],
+  crimsonwood:              [180, 210],
+  zipangu:                  [60,  225],
+  leafre_sky:               [140, 245],
+  temple_of_time:           [155, 240],
+  black_mage_lair:          [160, 265],
+  arcane_river:             [195, 265],
+  moonbridge:               [245, 275],
+  labyrinth_of_suffering:   [250, 275],
+  limina:                   [120, 280],
+  // New zones (v2)
+  florina_beach:            [1,   30],
+  orbis:                    [30,  100],
+  ariant:                   [40,  120],
+  phantom_forest:           [50,  130],
+  golden_temple:            [60,  140],
+  edelstein:                [70,  155],
+  ghost_park:               [80,  165],
+  azwan:                    [95,  185],
+  mirror_world:             [105, 200],
+  future_henesys:           [130, 225],
+  kritias:                  [155, 250],
+  tynerum:                  [170, 255],
+  black_heaven:             [185, 260],
+  cernium:                  [220, 275],
+  hotel_arcus:              [240, 280],
+  odium:                    [260, 285],
+  reverse_city:             [280, 290],
+};
+
+// Zone id -> API location region/map keywords for direct matching.
+// These match the actual region names used in the monsters-feed API.
+const ZONE_API_KEYWORDS: Record<string, string[]> = {
+  henesys:                  ["henesys"],
+  ellinia:                  ["ellinia"],
+  kerning:                  ["kerning city", "kerning"],
+  perion:                   ["perion"],
+  sleepywood:               ["sleepywood"],
+  ludibrium:                ["ludibrium", "toy city"],
+  omega_sector:             ["omega sector"],
+  elnath:                   ["el nath", "orbis"],
+  ice_valley:               ["ice valley"],
+  aqua_road:                ["aquarium"],
+  minar_forest:             ["minar forest", "leafre"],
+  dragon_nest:              ["dragon nest", "leafre"],
+  mu_lung:                  ["mu lung garden", "mu lung"],
+  nihal_desert:             ["nihal desert", "ariant"],
+  magatia:                  ["magatia"],
+  singapore:                ["singapore", "boat quay"],
+  masteria:                 ["new leaf city", "masteria"],
+  crimsonwood:              ["crimsonwood"],
+  zipangu:                  ["mushroom shrine", "zipangu"],
+  leafre_sky:               ["leafre"],
+  temple_of_time:           ["temple of time"],
+  black_mage_lair:          ["black heaven", "black mage"],
+  arcane_river:             ["arcane river", "vanishing journey"],
+  moonbridge:               ["moonbridge", "tenebris"],
+  labyrinth_of_suffering:   ["labyrinth of suffering"],
+  limina:                   ["limina"],
+  // New zones (v2)
+  florina_beach:            ["florina beach", "florina"],
+  orbis:                    ["orbis", "cloud park"],
+  ariant:                   ["ariant"],
+  phantom_forest:           ["phantom forest"],
+  golden_temple:            ["golden temple"],
+  edelstein:                ["edelstein"],
+  ghost_park:               ["ghost park"],
+  azwan:                    ["azwan"],
+  mirror_world:             ["mirror world"],
+  future_henesys:           ["future henesys", "future victoria"],
+  kritias:                  ["kritias"],
+  tynerum:                  ["tynerum"],
+  black_heaven:             ["black heaven"],
+  cernium:                  ["cernium", "burning cernium"],
+  hotel_arcus:              ["hotel arcus"],
+  odium:                    ["odium"],
+  reverse_city:             ["reverse city", "tenebris"],
+};
+
+// Monster name keyword -> emoji portrait, used when the API monster has no image.
+const NAME_EMOJI_MAP: Array<[string, string]> = [
+  ["mushmom", "\u{1F344}"], ["mushroom", "\u{1F344}"], ["mushroom","\u{1F344}"],
+  ["snail", "\u{1F40C}"],
+  ["slime", "\u{1F7E2}"], ["boogie", "\u{1F7E2}"],
+  ["wyvern", "\u{1F409}"], ["dragon", "\u{1F409}"], ["drake", "\u{1F409}"],
+  ["bat", "\u{1F987}"],
+  ["zombie", "\u{1F9DF}"],
+  ["golem", "\u{1F5FF}"], ["stump", "\u{1FAB5}"],
+  ["boar", "\u{1F417}"], ["pig", "\u{1F437}"],
+  ["rat", "\u{1F400}"], ["mouse", "\u{1F401}"],
+  ["lizard", "\u{1F98E}"], ["reptile", "\u{1F98E}"],
+  ["balrog", "\u{1F608}"], ["demon", "\u{1F608}"], ["dark", "\u{1F311}"],
+  ["eye", "\u{1F441}\u{FE0F}"],
+  ["ghost", "\u{1F47B}"], ["specter", "\u{1F47B}"], ["spirit", "\u{1F47B}"],
+  ["cactus", "\u{1F335}"], ["sand", "\u{1F3DC}\u{FE0F}"],
+  ["panda", "\u{1F43C}"], ["bear", "\u{1F43B}"],
+  ["penguin", "\u{1F427}"],
+  ["yeti", "\u{1F9A3}"],
+  ["shark", "\u{1F988}"], ["fish", "\u{1F420}"],
+  ["fox", "\u{1F98A}"], ["crow", "\u{1F426}"], ["bird", "\u{1F985}"], ["harp", "\u{1F985}"],
+  ["robot", "\u{1F916}"], ["android", "\u{1F916}"], ["mech", "\u{1F916}"],
+  ["alien", "\u{1F47D}"], ["gray", "\u{1F47D}"],
+  ["fairy", "\u{2728}"], ["wisp", "\u{2728}"], ["sprite", "\u{2728}"],
+  ["scorpion", "\u{1F982}"], ["crab", "\u{1F980}"],
+  ["knight", "\u{2694}\u{FE0F}"], ["soldier", "\u{2694}\u{FE0F}"], ["warrior", "\u{2694}\u{FE0F}"],
+  ["skeleton", "\u{1F480}"], ["bone", "\u{1F480}"], ["skull", "\u{1F480}"],
+  ["ice", "\u{2744}\u{FE0F}"], ["snow", "\u{2744}\u{FE0F}"], ["frost", "\u{2744}\u{FE0F}"],
+  ["fire", "\u{1F525}"], ["flame", "\u{1F525}"], ["lava", "\u{1F30B}"],
+  ["void", "\u{2B1B}"], ["shadow", "\u{1F311}"], ["nightmare", "\u{1F311}"],
+  ["clock", "\u{1F570}\u{FE0F}"], ["time", "\u{23F3}"], ["chrono", "\u{23F3}"],
+  ["goat", "\u{1F410}"], ["tiger", "\u{1F405}"], ["wolf", "\u{1F43A}"],
+  ["pepe", "\u{1F427}"], ["hector", "\u{1F43A}"],
+  ["seal", "\u{1F9AD}"],
+  ["chimera", "\u{1F432}"], ["mutant", "\u{1F9EB}"],
+  ["pirate", "\u{1F3F4}\u{200D}\u{2620}\u{FE0F}"], ["bandit", "\u{1F977}"],
+  ["stone", "\u{1FA97}"],
+];
+
+function enrichApiPortrait(monster: DatabaseMonster): DatabaseMonster {
+  // If the portrait looks like a proper emoji (multi-char or single unicode emoji) keep it.
+  // API monsters have portraits like "Bl" (first 2 chars of name) — replace those.
+  const p = (monster.portrait ?? "").trim();
+  const isGoodPortrait = p.length === 0 || /\p{Emoji}/u.test(p);
+  if (isGoodPortrait && p.length > 0) return monster;
+  if (monster.isBoss) return { ...monster, portrait: "\u{1F451}" };
+  const nameLower = monster.name.toLowerCase();
+  for (const [keyword, emoji] of NAME_EMOJI_MAP) {
+    if (nameLower.includes(keyword)) return { ...monster, portrait: emoji };
+  }
+  return { ...monster, portrait: "\u{1F47E}" };
+}
+
+function selectFromPool(pool: DatabaseMonster[]): DatabaseMonster[] {
+  const sorted = pool.slice().sort((a, b) => a.level - b.level);
+  const bosses = sorted.filter((m) => m.isBoss).slice(0, 1);
+  const normals = sorted.filter((m) => !m.isBoss);
+  const step = Math.max(1, Math.floor(normals.length / 6));
+  const picked = normals.filter((_, i) => i % step === 0).slice(0, 6);
+  return [...picked, ...bosses].slice(0, 8).map(enrichApiPortrait);
+}
+
+// Enrich an authored monster with a real image URL from the API feed by name matching.
+function enrichWithApiImage(monster: DatabaseMonster, apiMonsters: DatabaseMonster[]): DatabaseMonster {
+  if (monster.image || !apiMonsters.length) return monster;
+  const nl = monster.name.toLowerCase();
+
+  // 1. Exact name match.
+  const exact = apiMonsters.find(m => m.image && m.name.toLowerCase() === nl);
+  if (exact) return { ...monster, image: exact.image };
+
+  // 2. Substring match (e.g. "Blue Snail" inside "Mutant Blue Snail" or vice-versa).
+  const sub = apiMonsters.find(m => {
+    if (!m.image) return false;
+    const ml = m.name.toLowerCase();
+    return ml.includes(nl) || nl.includes(ml);
+  });
+  if (sub) return { ...monster, image: sub.image };
+
+  // 3. Significant word overlap (e.g. "Angry Mushroom Guard" vs "Horny Mushroom").
+  const words = nl.split(/\s+/).filter(w => w.length >= 4);
+  if (words.length) {
+    const wordHit = apiMonsters.find(m => {
+      if (!m.image) return false;
+      const ml = m.name.toLowerCase();
+      return words.some(w => ml.includes(w));
+    });
+    if (wordHit) return { ...monster, image: wordHit.image };
+  }
+
   return monster;
 }
 
-// Zone index → target monster level band (matches MapleStory progression)
-const ZONE_LEVEL_TARGETS: Record<string, [number, number]> = {
-  henesys:        [1,   25],
-  ellinia:        [20,  45],
-  kerning:        [35,  60],
-  perion:         [50,  80],
-  sleepywood:     [70, 100],
-  ludibrium:      [90, 120],
-  omega_sector:   [100, 130],
-  elnath:         [120, 150],
-  ice_valley:     [140, 170],
-  aqua_road:      [150, 180],
-  minar_forest:   [160, 190],
-  dragon_nest:    [170, 200],
-  mu_lung:        [180, 210],
-  nihal_desert:   [190, 220],
-  magatia:        [200, 230],
-  singapore:      [210, 240],
-  masteria:       [220, 250],
-  crimsonwood:    [230, 260],
-  zipangu:        [240, 265],
-  leafre_sky:     [250, 270],
-  temple_of_time: [260, 280],
-  black_mage_lair:[270, 290],
-};
+// Enrich a pool of authored monsters with API images.
+function enrichPool(pool: DatabaseMonster[], apiMonsters: DatabaseMonster[]): DatabaseMonster[] {
+  if (!apiMonsters.length) return pool;
+  return pool.map(m => enrichWithApiImage(m, apiMonsters));
+}
 
 export function getZoneMonsters(zone: WorldZone, monsters: DatabaseMonster[]): DatabaseMonster[] {
+  // Always return the authored zone pool, enriched with API images where possible.
+  // This guarantees every zone has UNIQUE monsters designed for that zone.
+  const authored = getMonstersByMap(zone.id).map(toDatabaseMonster);
+  if (authored.length) return enrichPool(authored, monsters);
+
+  // Fallback for zones not in authored system: API keyword → level band → closest.
   if (monsters.length) {
-    // 1. Level band match using explicit per-zone ranges
+    const normalize = (v: string | undefined) => (v ?? "").toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+    const keywords = ZONE_API_KEYWORDS[zone.id];
+    if (keywords?.length) {
+      const kwMatched = monsters.filter((m) =>
+        (m.locations ?? []).some((loc) => {
+          const locRegion = normalize(loc.region);
+          const locMap    = normalize(loc.map);
+          return keywords.some((kw) => locRegion.includes(kw) || locMap.includes(kw));
+        })
+      );
+      if (kwMatched.length >= 3) return selectFromPool(kwMatched);
+    }
     const band = ZONE_LEVEL_TARGETS[zone.id];
     if (band) {
-      const [minLv, maxLv] = band;
-      const inBand = monsters
-        .filter((m) => m.level >= minLv && m.level <= maxLv && m.image)
-        .sort((a, b) => a.level - b.level);
-      if (inBand.length >= 3) {
-        // Spread picks: some from start, middle, end + any boss
-        const bossInBand = inBand.filter((m) => m.isBoss).slice(0, 1);
-        const normals = inBand.filter((m) => !m.isBoss);
-        const step = Math.max(1, Math.floor(normals.length / 6));
-        const picked = normals.filter((_, i) => i % step === 0).slice(0, 6);
-        return [...picked, ...bossInBand].slice(0, 8);
-      }
+      const inBand = monsters.filter((m) => m.level >= band[0] && m.level <= band[1]);
+      if (inBand.length >= 3) return selectFromPool(inBand);
     }
-
-    // 2. Closest-level fallback
-    const targetLevel = (band ? (band[0] + band[1]) / 2 : zone.requirement * 8);
-    const byLevel = monsters
-      .filter((m) => m.image)
+    const target = (ZONE_LEVEL_TARGETS[zone.id] ?? [zone.requirement * 4, zone.requirement * 8])
+      .reduce((a, b) => a + b, 0) / 2;
+    return monsters
       .slice()
-      .sort((a, b) => Math.abs(a.level - targetLevel) - Math.abs(b.level - targetLevel))
-      .slice(0, 8);
-    if (byLevel.length) return byLevel;
+      .sort((a, b) => Math.abs(a.level - target) - Math.abs(b.level - target))
+      .slice(0, 8)
+      .map(enrichApiPortrait);
   }
-
-  // Final fallback: authored emoji monsters
-  return getMonstersByMap(zone.id).map(toDatabaseMonster);
+  return [];
 }
 
 export function getCurrentMonster(
@@ -398,18 +604,25 @@ export function getCurrentMonster(
   zone: WorldZone,
   monsters: DatabaseMonster[]
 ): DatabaseMonster | null {
-  const zoneMonsters = getZoneMonsters(zone, monsters);
-  if (!zoneMonsters.length) return null;
+  // Use the stage-specific authored monster — guarantees a DIFFERENT monster per zone
+  // and distinct bosses / elites per map.  Enrich with API image where available.
+  const stageMonster = getStageMonsterByMap(zone.id, state.stage);
+  if (stageMonster) {
+    const base = toDatabaseMonster(stageMonster);
+    return monsters.length ? enrichWithApiImage(base, monsters) : base;
+  }
 
+  // Fallback: use getZoneMonsters pool (covers any unrecognised zone).
+  const pool = getZoneMonsters(zone, monsters);
+  if (!pool.length) return null;
   const encounterType = getEncounterTypeForStage(state.stage);
-  const boss = zoneMonsters.find((m) => m.isBoss);
-  const regulars = zoneMonsters.filter((m) => !m.isBoss);
-  const elite = regulars[regulars.length - 1] ?? boss ?? zoneMonsters[0] ?? null;
-  const normals = regulars.slice(0, Math.max(1, regulars.length - 1));
-
-  if (encounterType === "boss") return boss ?? elite;
+  const boss     = pool.find((m) => m.isBoss);
+  const regulars = pool.filter((m) => !m.isBoss);
+  const elite    = regulars[regulars.length - 1] ?? boss ?? pool[0] ?? null;
+  const normals  = regulars.slice(0, Math.max(1, regulars.length - 1));
+  if (encounterType === "boss")  return boss  ?? elite;
   if (encounterType === "elite") return elite;
-  return normals[(getStageInMap(state.stage) - 1) % normals.length] ?? elite;
+  return normals[(getStageInMap(state.stage) - 1) % Math.max(1, normals.length)] ?? elite;
 }
 
 export function getFeaturedLoot(
@@ -445,3 +658,4 @@ export function computeScore(
     mapCount + monsterCount + itemCount
   );
 }
+

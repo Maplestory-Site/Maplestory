@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { NewsItem } from "../../data/newsHub";
 import { formatNewsMetaDate } from "../../lib/newsHub";
+import { safeFetchJson } from "../../lib/safeJsonFetch";
 import { useI18n } from "../../i18n/I18nProvider";
 import { getArticlePendingText } from "../../i18n/articlePendingText";
 import { useTranslatedArticleState } from "../../i18n/useTranslatedContent";
@@ -56,52 +57,69 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
   const translatedArticle = useTranslatedArticleState(data, { scope: "full" });
   const translatedData = translatedArticle.data;
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [openTopics, setOpenTopics] = useState<string[]>([]);
+  const [retryVersion, setRetryVersion] = useState(0);
   const [showScrollTop, setShowScrollTop] = useState(false);
   const bodyRef = useRef<HTMLDivElement | null>(null);
   const sectionRefs = useMemo(() => new Map<string, HTMLElement>(), []);
 
   useEffect(() => {
-    let active = true;
+    const controller = new AbortController();
 
     async function loadArticle() {
       if (!item?.sourceUrl) {
         setData(null);
+        setError(null);
         return;
       }
 
       setLoading(true);
+      setError(null);
+      const cacheBust = `${Date.now()}`;
+      const fallbackPayload: GmsPayload = {
+        title: item.title,
+        sourceName: item.sourceName,
+        sourceUrl: item.sourceUrl,
+        summary: item.summary,
+        keyPoints: item.summary ? [item.summary] : [],
+        sections: [],
+        categories: [],
+        heroImage: item.image,
+        date: item.publishedAt
+      };
       try {
-        const cacheBust = `${Date.now()}`;
-        const response = await fetch(
+        const result = await safeFetchJson<GmsPayload>(
           `/api/gms?url=${encodeURIComponent(item.sourceUrl)}&force=1&ts=${cacheBust}`,
-          { cache: "no-store" }
+          {
+            cache: "no-store",
+            fallback: fallbackPayload,
+            signal: controller.signal,
+            timeoutMs: 15000
+          }
         );
-        if (!response.ok) {
-          throw new Error("Failed to load GMS article.");
-        }
-        const payload = (await response.json()) as GmsPayload;
-        if (active) {
-          setData(payload);
-          setOpenTopics([]);
-        }
-      } catch {
-        if (active) {
-          setData(null);
-        }
+        if (controller.signal.aborted) return;
+        setData(result.data);
+        setError(result.ok ? null : result.error);
+        setOpenTopics([]);
+      } catch (error) {
+        if (controller.signal.aborted) return;
+        const message = error instanceof Error ? error.message : "Failed to load article.";
+        setData(fallbackPayload);
+        setError(message);
       } finally {
-        if (active) {
+        if (!controller.signal.aborted) {
           setLoading(false);
         }
       }
     }
 
-    loadArticle();
+    void loadArticle();
 
     return () => {
-      active = false;
+      controller.abort();
     };
-  }, [item]);
+  }, [item, retryVersion]);
 
   const renderData = translatedData ?? data;
   const published = useMemo(() => formatNewsMetaDate(item?.publishedAt ?? ""), [item]);
@@ -139,6 +157,18 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
     const summary = (renderData?.summary || item?.summary || "").trim();
     return summary.replace(/\s+/g, " ").slice(0, 240);
   }, [renderData?.summary, item?.summary]);
+  const smartSummary = useMemo(
+    () =>
+      [
+        ...(renderData?.keyPoints ?? []),
+        ...(renderData?.highlights ?? []),
+        ...(renderData?.keyChanges ?? []),
+        renderData?.audience
+      ]
+        .filter(Boolean)
+        .slice(0, 4) as string[],
+    [renderData?.audience, renderData?.highlights, renderData?.keyChanges, renderData?.keyPoints]
+  );
   const breakdownSections = useMemo(() => {
     if (!normalizedSummary) return visibleSections;
     return visibleSections.filter((section, index) => {
@@ -212,8 +242,28 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
               ) : (
                 <p>{dynamicText(renderData?.summary, item.summary)}</p>
               )}
+              {error ? (
+                <div className="kms-modal__error" role="status">
+                  <strong>{t("Article fallback active")}</strong>
+                  <span>{t("Showing cached summary because live parsing failed.")}</span>
+                  <button onClick={() => setRetryVersion((current) => current + 1)} type="button">
+                    {t("Retry")}
+                  </button>
+                </div>
+              ) : null}
             </div>
           </div>
+
+          {!loading && !isTranslatingArticle && smartSummary.length ? (
+            <div className="kms-modal__block">
+              <h3 className="kms-modal__section-title">{t("What players should know")}</h3>
+              <div className="kms-modal__smart-summary card">
+                {smartSummary.map((point, index) => (
+                  <p key={`${point}-${index}`}>{dynamicText(point)}</p>
+                ))}
+              </div>
+            </div>
+          ) : null}
 
           {!isTranslatingArticle && (
           <div className="kms-modal__block">
@@ -377,7 +427,7 @@ export function GmsArticleModal({ item, onClose }: GmsArticleModalProps) {
             }}
             aria-label={t("Scroll to top")}
           >
-            ↑
+            Top
           </button>
         ) : null}
       </div>

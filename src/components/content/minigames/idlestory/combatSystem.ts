@@ -19,6 +19,7 @@ import {
 } from "./progressionSystem";
 import { getBossDefinition, scaleBossStats } from "./bossSystem";
 import { getStageMonsterByMap } from "./monsterSystem";
+import { getReplayabilityBonuses } from "./replayabilitySystem";
 
 // ─── Boss detection ───────────────────────────────────────────────────────────
 
@@ -55,15 +56,34 @@ export function getEnemyMaxHp(stage: number, zone: WorldZone): number {
   return getMonsterHpForStage(stage, zone.requirement, getStageMonsterByMap(zone.id, stage) ?? undefined);
 }
 
-function getCombatEnemyMaxHp(stage: number, zone: WorldZone, playerPower: number, prestigeCount: number): number {
-  if (!isBossStage(stage)) return getEnemyMaxHp(stage, zone);
+function getCombatEnemyMaxHp(
+  stage: number,
+  zone: WorldZone,
+  playerPower: number,
+  prestigeCount: number,
+  state: Pick<IdleGameState, "replayability" | "prestigeCount" | "rebirthCount" | "level">
+): number {
+  const replayabilityDifficulty = getReplayabilityBonuses(
+    state.replayability,
+    state.prestigeCount,
+    state.rebirthCount
+  ).difficultyMult;
+  const levelGap = state.level - zone.requirement;
+  const progressScale =
+    levelGap >= 0
+      ? 1 - Math.min(0.38, levelGap * 0.015)
+      : 1 + Math.min(0.55, Math.abs(levelGap) * 0.04);
+  const tunedDifficulty = replayabilityDifficulty * progressScale;
+  if (!isBossStage(stage)) {
+    return Math.floor(getEnemyMaxHp(stage, zone) * tunedDifficulty);
+  }
 
   const boss = getBossDefinition(zone.id);
-  if (!boss) return getEnemyMaxHp(stage, zone);
+  if (!boss) return Math.floor(getEnemyMaxHp(stage, zone) * tunedDifficulty);
 
   return Math.max(
-    getEnemyMaxHp(stage, zone),
-    scaleBossStats(boss, zone.requirement, playerPower, prestigeCount).hp
+    Math.floor(getEnemyMaxHp(stage, zone) * tunedDifficulty),
+    Math.floor(scaleBossStats(boss, zone.requirement, playerPower, prestigeCount).hp * tunedDifficulty)
   );
 }
 
@@ -108,15 +128,23 @@ export function computeCombatTick(
   const dps = calculateDPS(state) * Math.max(0, dpsMultiplier);
   const playerPower = Math.max(1, calculateDPS(state));
   let damage = dps * deltaSeconds;
-  let stage = state.stage;
-  let enemyHp = state.enemyHp > 0 ? state.enemyHp : getCombatEnemyMaxHp(stage, zone, playerPower, state.prestigeCount);
-  let enemyMaxHp = state.enemyMaxHp > 0 ? state.enemyMaxHp : enemyHp;
+  let stage = Math.max(1, Math.floor(state.stage));
+  let enemyMaxHp = state.enemyMaxHp > 0
+    ? Math.max(1, Math.floor(state.enemyMaxHp))
+    : getCombatEnemyMaxHp(stage, zone, playerPower, state.prestigeCount, state);
+  let enemyHp = state.enemyHp > 0
+    ? Math.min(enemyMaxHp, Math.max(1, Math.floor(state.enemyHp)))
+    : enemyMaxHp;
+  if (!Number.isFinite(enemyHp) || enemyHp <= 0) enemyHp = enemyMaxHp;
+  if (!Number.isFinite(enemyMaxHp) || enemyMaxHp <= 0) enemyMaxHp = Math.max(1, enemyHp);
   let kills = 0;
   let bossesKilled = 0;
   let eliteKills = 0;
 
   // Offline ticks can represent hours, so the cap scales with elapsed time.
-  const MAX_KILLS_PER_TICK = Math.min(5000, Math.max(50, Math.ceil(deltaSeconds * 25)));
+  // Balance: minimum was 30 (allows 30 stage skips per 1s online tick).
+  // Now 6 minimum — still generous for offline but prevents online stage-skip spam.
+  const MAX_KILLS_PER_TICK = Math.min(3000, Math.max(6, Math.ceil(deltaSeconds * 6)));
   while (damage > 0 && kills < MAX_KILLS_PER_TICK) {
     if (damage >= enemyHp) {
       // Enemy dies — carry over remaining damage
@@ -125,7 +153,7 @@ export function computeCombatTick(
       if (isEliteStage(stage)) eliteKills   += 1;
       kills += 1;
       stage += 1;
-      enemyMaxHp = getCombatEnemyMaxHp(stage, zone, playerPower, state.prestigeCount);
+      enemyMaxHp = getCombatEnemyMaxHp(stage, zone, playerPower, state.prestigeCount, state);
       enemyHp = enemyMaxHp;
     } else {
       enemyHp -= damage;
@@ -167,4 +195,53 @@ export function getEnemyProgress(state: IdleGameState): number {
 export function getEnemyHpPercent(state: IdleGameState): number {
   if (!state.enemyMaxHp) return 100;
   return Math.max(0, Math.min(100, (state.enemyHp / state.enemyMaxHp) * 100));
+}
+
+/**
+ * Lightweight enemy outgoing damage model for UI feedback.
+ * This does not affect core progression math or kill speed.
+ */
+export function getEnemyAttackPerSecond(
+  stage: number,
+  zone: WorldZone,
+  encounterType: "normal" | "elite" | "boss" = isBossStage(stage)
+    ? "boss"
+    : isEliteStage(stage)
+      ? "elite"
+      : "normal"
+): number {
+  const safeStage = Math.max(1, stage);
+  const zoneTier = Math.max(1, zone.requirement);
+  const base = 7 + zoneTier * 2.1 + Math.pow(safeStage, 1.14) * 1.45;
+  const typeMult =
+    encounterType === "boss"
+      ? 2.45
+      : encounterType === "elite"
+        ? 1.65
+        : 1;
+  return Math.max(1, Math.floor(base * typeMult));
+}
+
+/**
+ * Enemy attack cadence in milliseconds, used by the combat UI timer.
+ */
+export function getEnemyAttackIntervalMs(
+  stage: number,
+  zone: WorldZone,
+  encounterType: "normal" | "elite" | "boss" = isBossStage(stage)
+    ? "boss"
+    : isEliteStage(stage)
+      ? "elite"
+      : "normal"
+): number {
+  const safeStage = Math.max(1, stage);
+  const zoneTier = Math.max(1, zone.requirement);
+  const base = 1480 - safeStage * 8 - zoneTier * 22;
+  const typeFactor =
+    encounterType === "boss"
+      ? 0.9
+      : encounterType === "elite"
+        ? 0.94
+        : 1;
+  return Math.max(460, Math.floor(base * typeFactor));
 }

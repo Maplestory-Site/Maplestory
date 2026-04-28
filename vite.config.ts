@@ -6,12 +6,6 @@ import contentHandler from './api/content.js'
 import databaseHandler from './api/database.js'
 // @ts-expect-error local Vercel-style API handler
 import gameHandler from './api/game.js'
-// @ts-expect-error local Node-side mjs helper
-import { fetchKmsArticle } from './server/news/kmsArticle.mjs'
-// @ts-expect-error local Node-side mjs helper
-import { fetchGmsArticle } from './server/news/gmsArticle.mjs'
-// @ts-expect-error local Node-side mjs helper
-import { getKmsFeed } from './server/news/kmsFeed.mjs'
 
 async function readJsonBody(req: { on: (event: string, callback: (chunk?: Buffer) => void) => void }) {
   const chunks: Buffer[] = []
@@ -65,28 +59,41 @@ export default defineConfig({
         server.middlewares.use(async (req, res, next) => {
           try {
             if (!req.url) return next()
-            if (req.url.startsWith('/api/content?')) {
-              const url = new URL(req.url, 'http://localhost')
+            const requestUrl = new URL(req.url, 'http://localhost')
+            if (requestUrl.pathname === '/api/content') {
               const localReq = req as typeof req & {
                 query: Record<string, string>
                 body?: unknown
               }
-              localReq.query = Object.fromEntries(url.searchParams.entries())
+              localReq.query = Object.fromEntries(requestUrl.searchParams.entries())
               localReq.body = req.method === 'POST' ? await readJsonBody(req) : {}
               await contentHandler(localReq, createLocalApiResponse(res))
               return
             }
-            if (req.url.startsWith('/api/youtube')) {
-              const url = new URL(req.url, 'http://localhost')
+            const contentRoutes: Record<string, string> = {
+              '/api/youtube': 'youtube-feed',
+              '/api/kms/feed': 'kms-feed',
+              '/api/kms': 'kms-article',
+              '/api/gms': 'gms-article',
+              '/api/news': 'news-feed',
+              '/api/news/latest': 'news-latest',
+              '/api/news/refresh': 'news-refresh'
+            }
+            const newsItemMatch = /^\/api\/news\/([^/]+)$/.exec(requestUrl.pathname)
+            const contentResource = contentRoutes[requestUrl.pathname]
+            if (contentResource || newsItemMatch) {
               const localReq = req as typeof req & {
                 query: Record<string, string>
                 body?: unknown
               }
               localReq.query = {
-                resource: 'youtube-feed',
-                ...Object.fromEntries(url.searchParams.entries())
+                resource: contentResource || 'news-item',
+                ...Object.fromEntries(requestUrl.searchParams.entries())
               }
-              localReq.body = {}
+              if (newsItemMatch) {
+                localReq.query.id = decodeURIComponent(newsItemMatch[1])
+              }
+              localReq.body = req.method === 'POST' ? await readJsonBody(req) : {}
               await contentHandler(localReq, createLocalApiResponse(res))
               return
             }
@@ -95,8 +102,7 @@ export default defineConfig({
               '/api/maps': 'maps',
               '/api/monsters': 'monsters'
             }
-            const databaseUrl = new URL(req.url, 'http://localhost')
-            const databaseResource = databaseRoutes[databaseUrl.pathname]
+            const databaseResource = databaseRoutes[requestUrl.pathname]
             if (databaseResource) {
               const localReq = req as typeof req & {
                 query: Record<string, string>
@@ -104,7 +110,7 @@ export default defineConfig({
               }
               localReq.query = {
                 resource: databaseResource,
-                ...Object.fromEntries(databaseUrl.searchParams.entries())
+                ...Object.fromEntries(requestUrl.searchParams.entries())
               }
               localReq.body = {}
               await databaseHandler(localReq, createLocalApiResponse(res))
@@ -116,59 +122,36 @@ export default defineConfig({
               '/api/rooms': 'rooms',
               '/api/auth': 'auth',
               '/api/guilds': 'guilds',
-              '/api/chat': 'chat'
+              '/api/chat': 'chat',
+              '/api/social': 'social'
             }
-            const gameResource = gameRoutes[databaseUrl.pathname]
+            const gameResource = gameRoutes[requestUrl.pathname]
             if (gameResource) {
               const localReq = req as typeof req & {
                 query: Record<string, string>
                 body?: unknown
               }
               localReq.query = { resource: gameResource }
-              databaseUrl.searchParams.forEach((value, key) => {
+              requestUrl.searchParams.forEach((value, key) => {
                 localReq.query[key] = value
               })
               localReq.body = req.method === 'POST' ? await readJsonBody(req) : undefined
               await gameHandler(localReq, createLocalApiResponse(res))
               return
             }
-            if (req.url.startsWith('/api/kms?')) {
-              const url = new URL(req.url, 'http://localhost')
-              const target = url.searchParams.get('url')
-              const force = url.searchParams.get('force') === '1'
-              if (!target) {
-                res.statusCode = 400
-                res.setHeader('Content-Type', 'application/json')
-                res.end(JSON.stringify({ error: 'Missing url parameter.' }))
-                return
-              }
-              const payload = await fetchKmsArticle(target, { forceRefresh: force })
-              res.statusCode = 200
+            if (requestUrl.pathname.startsWith('/api/')) {
+              const knownRoutes = [
+                '/api/content',
+                ...Object.keys(contentRoutes),
+                '/api/news/:id',
+                ...Object.keys(databaseRoutes),
+                ...Object.keys(gameRoutes)
+              ]
+              const message = `No local API route configured for ${requestUrl.pathname}`
+              console.warn(`[local-api-proxy] ${message}`)
+              res.statusCode = 404
               res.setHeader('Content-Type', 'application/json')
-              res.end(JSON.stringify(payload))
-              return
-            }
-            if (req.url.startsWith('/api/kms/feed')) {
-              const feed = await getKmsFeed()
-              res.statusCode = 200
-              res.setHeader('Content-Type', 'application/json')
-              res.end(JSON.stringify(feed))
-              return
-            }
-            if (req.url.startsWith('/api/gms?')) {
-              const url = new URL(req.url, 'http://localhost')
-              const target = url.searchParams.get('url')
-              const force = url.searchParams.get('force') === '1'
-              if (!target) {
-                res.statusCode = 400
-                res.setHeader('Content-Type', 'application/json')
-                res.end(JSON.stringify({ error: 'Missing url parameter.' }))
-                return
-              }
-              const payload = await fetchGmsArticle(target, { forceRefresh: force })
-              res.statusCode = 200
-              res.setHeader('Content-Type', 'application/json')
-              res.end(JSON.stringify(payload))
+              res.end(JSON.stringify({ error: message, knownRoutes }))
               return
             }
           } catch (error) {

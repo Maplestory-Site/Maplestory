@@ -1,4 +1,4 @@
-﻿import type {
+import type {
   ClassSkillId,
   GearId,
   GlobalMultId,
@@ -6,9 +6,11 @@
   IdleGameState,
   SkillId,
   UpgradeId,
+  WorldZone,
 } from "./gameEngine";
 import { isBossStage } from "./combatSystem";
 import { getGlobalMultCost, GLOBAL_MULTIPLIERS } from "./economySystem";
+import { getPowerStatus, getZonePowerRequirement, type PowerStatus } from "./progressionGates";
 import {
   GEAR,
   getGearCost,
@@ -21,6 +23,7 @@ import {
 } from "./progressionSystem";
 import { CLASSES } from "./classSystem";
 import { SKILL_DEFINITIONS, SKILLS_BY_CLASS } from "./skillSystem";
+import { ALL_ZONES, getZoneUnlockStatus } from "./zoneSystem";
 
 export type PlayerActionType =
   | "hunt"
@@ -29,6 +32,7 @@ export type PlayerActionType =
   | "skill"
   | "class"
   | "gear"
+  | "claim"
   | "prestige"
   | "rebirth";
 
@@ -52,10 +56,22 @@ export type UpgradeRecommendation = {
 
 export type AiState = {
   autoSkillEnabled: boolean;
+  autoUpgradeEnabled: boolean;
+  autoMapEnabled: boolean;
   adaptiveDifficulty: number;
   lastAutoSkillAt: number;
   lastAutoSkillId: ClassSkillId | null;
+  lastAutoUpgradeAt: number;
+  lastAutoUpgradeLabel: string | null;
+  lastAutoMapAt: number;
+  lastAutoMapId: string | null;
   upgradeRecommendations: UpgradeRecommendation[];
+};
+
+export type AutoMapDecision = {
+  targetZoneId: string;
+  mode: "farm" | "hold" | "push";
+  reason: string;
 };
 
 export type PlayerBehaviorState = {
@@ -71,9 +87,15 @@ export type PlayerBehaviorState = {
 
 export const DEFAULT_AI_STATE: AiState = {
   autoSkillEnabled: true,
+  autoUpgradeEnabled: true,
+  autoMapEnabled: true,
   adaptiveDifficulty: 1,
   lastAutoSkillAt: 0,
   lastAutoSkillId: null,
+  lastAutoUpgradeAt: 0,
+  lastAutoUpgradeLabel: null,
+  lastAutoMapAt: 0,
+  lastAutoMapId: null,
   upgradeRecommendations: [],
 };
 
@@ -218,6 +240,89 @@ export function getUpgradeRecommendations(
     .slice(0, limit);
 }
 
+function getUnlockedZonesForAi(state: IdleGameState): WorldZone[] {
+  return ALL_ZONES.filter((zone) => getZoneUnlockStatus(zone, state).unlocked);
+}
+
+export function getAutoMapDecision(state: IdleGameState, playerPower: number): AutoMapDecision | null {
+  const unlockedZones = getUnlockedZonesForAi(state);
+  if (!unlockedZones.length) return null;
+
+  const currentZone = unlockedZones.find((zone) => zone.id === state.zone) ?? unlockedZones[0];
+  if (!currentZone) return null;
+
+  const currentStatus = getPowerStatus(playerPower, getZonePowerRequirement(currentZone));
+  if (currentStatus === "blocked" || currentStatus === "underpowered") {
+    const fallbackZone = [...unlockedZones]
+      .reverse()
+      .find((zone) => getPowerStatus(playerPower, getZonePowerRequirement(zone)) !== "blocked");
+
+    if (fallbackZone && fallbackZone.id !== currentZone.id) {
+      return {
+        targetZoneId: fallbackZone.id,
+        mode: "farm",
+        reason: `Too weak for ${currentZone.name}, farming ${fallbackZone.name}.`
+      };
+    }
+  }
+
+  const currentIndex = unlockedZones.findIndex((zone) => zone.id === currentZone.id);
+  const nextZone = currentIndex >= 0 ? unlockedZones[currentIndex + 1] : null;
+  if (nextZone) {
+    const nextStatus = getPowerStatus(playerPower, getZonePowerRequirement(nextZone));
+    if ((currentStatus === "overpowered" || state.stage >= 9) && (nextStatus === "overpowered" || nextStatus === "matched")) {
+      return {
+        targetZoneId: nextZone.id,
+        mode: "push",
+        reason: `Power is strong enough to push into ${nextZone.name}.`
+      };
+    }
+  }
+
+  return {
+    targetZoneId: currentZone.id,
+    mode: "hold",
+    reason: `Current route ${currentZone.name} is balanced for progress.`
+  };
+}
+
+export function getSmartUpgradeRecommendation(
+  state: IdleGameState,
+  playerPower: number,
+  currentZone?: WorldZone | null
+): UpgradeRecommendation | null {
+  const powerStatus: PowerStatus = currentZone
+    ? getPowerStatus(playerPower, getZonePowerRequirement(currentZone))
+    : "matched";
+  const recommendations = getUpgradeRecommendations(state, 12);
+  if (!recommendations.length) return null;
+
+  return recommendations
+    .map((entry) => {
+      let priority = entry.priority;
+
+      if (powerStatus === "blocked" || powerStatus === "underpowered") {
+        if (entry.kind === "gear") priority *= 1.5;
+        if (entry.kind === "hero") priority *= 1.35;
+        if (entry.kind === "upgrade") priority *= 1.3;
+        if (entry.kind === "skill") priority *= 0.92;
+        if (entry.kind === "global") priority *= 0.78;
+      } else if (powerStatus === "overpowered") {
+        if (entry.kind === "skill") priority *= 1.28;
+        if (entry.kind === "global") priority *= 1.12;
+        if (entry.kind === "hero") priority *= 1.08;
+      } else {
+        if (entry.kind === "upgrade") priority *= 1.18;
+        if (entry.kind === "gear") priority *= 1.12;
+      }
+
+      if (!entry.affordable) priority *= 0.18;
+
+      return { ...entry, priority };
+    })
+    .sort((a, b) => b.priority - a.priority)[0] ?? null;
+}
+
 export function getAdaptiveDifficultyMultiplier(state: IdleGameState): number {
   const actionPressure = Math.min(0.15, state.behavior.totalActions / 1200);
   const idleRelief = state.behavior.idleSeconds > 600 ? 0.08 : 0;
@@ -226,13 +331,19 @@ export function getAdaptiveDifficultyMultiplier(state: IdleGameState): number {
 }
 
 export function refreshAiState(state: IdleGameState): IdleGameState {
+  const currentZone = ALL_ZONES.find((zone) => zone.id === state.zone) ?? null;
+  const playerPower = state.leaderboardState?.bestPower ?? 0;
+  const smartUpgrade = getSmartUpgradeRecommendation(state, playerPower, currentZone);
   return {
     ...state,
     ai: {
       ...DEFAULT_AI_STATE,
       ...state.ai,
       adaptiveDifficulty: getAdaptiveDifficultyMultiplier(state),
-      upgradeRecommendations: getUpgradeRecommendations(state),
+      upgradeRecommendations: [
+        ...(smartUpgrade ? [smartUpgrade] : []),
+        ...getUpgradeRecommendations(state, 3)
+      ].filter((entry, index, list) => list.findIndex((candidate) => candidate.kind === entry.kind && candidate.id === entry.id) === index).slice(0, 3),
     },
   };
 }

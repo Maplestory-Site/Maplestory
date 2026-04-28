@@ -3,7 +3,7 @@
  * Shows 3 class heroes (Snailguard, Mage, Archer) as character cards
  * with class identity, stats, and upgrade actions.
  */
-import { useState } from "react";
+import { memo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatNumber } from "../gameEngine";
 import { HEROES, getHeroCost, UPGRADES, getUpgradeCost, getUpgradeEffect, SKILLS, getSkillCost, getSkillEffect } from "../progressionSystem";
@@ -81,7 +81,7 @@ const HERO_VISUALS: Record<HeroId, {
   },
 };
 
-export function HeroesPanel({
+function HeroesPanelInner({
   state, onBuyHero, onBuyUpgrade, onTrainSkill,
   onBestHero, onBestUpgrade, onBestSkill,
   tutorialTarget
@@ -331,3 +331,5 @@ export function HeroesPanel({
     </div>
   );
 }
+
+export const HeroesPanel = memo(HeroesPanelInner);

@@ -12,6 +12,7 @@
  */
 
 import type { ClassId, ClassSkillId, IdleGameState } from "./gameEngine";
+import { getSkillBuildBonuses } from "./skillBuildSystem";
 
 // ─── Buff / effect types ──────────────────────────────────────────────────────
 
@@ -281,6 +282,9 @@ export function activateSkill(
   currentDps: number
 ): SkillActivationResult {
   const def = SKILL_DEFINITIONS[skillId];
+  const buildBonuses = getSkillBuildBonuses(state);
+  const resourceCost = Math.max(0, Math.floor(def.resourceCost * buildBonuses.resourceCostMult));
+  const cooldown = Math.max(4, Math.round(def.cooldown / buildBonuses.cooldownRecoveryMult));
 
   if (!state.classId) {
     return { state, instantDamage: 0, message: "Select a class first.", success: false };
@@ -305,11 +309,11 @@ export function activateSkill(
     };
   }
 
-  if (state.resource < def.resourceCost) {
+  if (state.resource < resourceCost) {
     const resName = state.classId === "mage" ? "mana" : "rage";
     return {
       state, instantDamage: 0,
-      message: `Need ${def.resourceCost} ${resName} for ${def.name} (have ${Math.floor(state.resource)}).`,
+      message: `Need ${resourceCost} ${resName} for ${def.name} (have ${Math.floor(state.resource)}).`,
       success: false
     };
   }
@@ -321,43 +325,46 @@ export function activateSkill(
 
   switch (def.effect.type) {
     case "burst_dps": {
-      instantDamage = currentDps * def.effect.value;
+      instantDamage = currentDps * def.effect.value * buildBonuses.skillDamageMult;
       nextEnemyHp = Math.max(0, state.enemyHp - instantDamage);
       break;
     }
 
     case "buff_dps": {
+      const buffDuration = Math.max(3, Math.round((def.effect.duration ?? 8) * buildBonuses.buffDurationMult));
       nextBuffs = nextBuffs.filter((b) => b.skillId !== skillId);
       nextBuffs.push({
         skillId,
         effectType: "buff_dps",
-        value: def.effect.value,
-        remainingSeconds: def.effect.duration ?? 8
+        value: def.effect.value * Math.max(1, buildBonuses.skillDamageMult * 0.92),
+        remainingSeconds: buffDuration
       });
       break;
     }
 
     case "buff_regen": {
+      const buffDuration = Math.max(4, Math.round((def.effect.duration ?? 10) * buildBonuses.buffDurationMult));
       nextBuffs = nextBuffs.filter((b) => b.skillId !== skillId);
       nextBuffs.push({
         skillId,
         effectType: "buff_regen",
-        value: def.effect.value,
-        remainingSeconds: def.effect.duration ?? 10
+        value: def.effect.value * buildBonuses.resourceRegenMult,
+        remainingSeconds: buffDuration
       });
       break;
     }
 
     case "instant_kill": {
       const threshold = def.effect.value; // e.g. 0.25 → 25 % HP
+      const executeThreshold = Math.min(0.5, threshold + buildBonuses.executeThresholdBonus);
       const hpPct = state.enemyMaxHp > 0 ? state.enemyHp / state.enemyMaxHp : 1;
-      if (hpPct <= threshold) {
+      if (hpPct <= executeThreshold) {
         instantDamage = state.enemyHp;
         nextEnemyHp = 0;
       } else {
         return {
           state, instantDamage: 0,
-          message: `Execute requires the enemy to be below ${Math.round(threshold * 100)} % HP (currently ${Math.round(hpPct * 100)} %).`,
+          message: `Execute requires the enemy to be below ${Math.round(executeThreshold * 100)} % HP (currently ${Math.round(hpPct * 100)} %).`,
           success: false
         };
       }
@@ -365,13 +372,14 @@ export function activateSkill(
     }
 
     case "buff_crit": {
+      const buffDuration = Math.max(10, Math.round((def.effect.duration ?? 60) * buildBonuses.buffDurationMult));
       nextBuffs = nextBuffs.filter((b) => b.skillId !== skillId);
       nextBuffs.push({
         skillId,
         effectType: "buff_crit",
         value: def.effect.value,
-        remainingSeconds: def.effect.duration ?? 60,
-        charges: def.effect.charges ?? 4
+        remainingSeconds: buffDuration,
+        charges: (def.effect.charges ?? 4) + buildBonuses.critChargeBonus
       });
       break;
     }
@@ -379,8 +387,8 @@ export function activateSkill(
 
   const nextState: IdleGameState = {
     ...state,
-    resource: state.resource - def.resourceCost,
-    skillCooldowns: { ...state.skillCooldowns, [skillId]: def.cooldown },
+    resource: state.resource - resourceCost,
+    skillCooldowns: { ...state.skillCooldowns, [skillId]: cooldown },
     activeBuffs: nextBuffs,
     enemyHp: nextEnemyHp
   };

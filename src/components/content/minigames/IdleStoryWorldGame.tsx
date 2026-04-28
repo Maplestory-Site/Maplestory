@@ -1,53 +1,69 @@
 import "./IdleStoryWorld.css";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { GameShell } from "./shared/GameShell";
 import { updateGameMeta } from "./shared/gameMeta";
 import { useMiniGamesSound } from "./shared/MiniGamesSound";
 import { useMockAuth } from "../../../features/profile/MockAuthContext";
 import {
-  buyGear,
+  activateClassSkill,
+  autoEquipBestLoot,
+  buildFreshState,
   buyBestGear,
   buyBestHero,
   buyBestUpgrade,
+  buyGear,
   buyGlobalMult,
   buyHero,
+  buyShopOffer,
+  buyTalent,
   buyUpgrade,
-  autoEquipBestLoot,
-  activateClassSkill,
-  calculateOfflineGains,
-  claimDailyReward,
-  claimMissionReward,
-  claimBossKillFreeUpgrade,
   changeZone,
+  claimComebackReward,
+  claimDailyReward,
+  claimMicroMissionReward,
+  claimSeasonPassTier,
+  claimWeeklyPveReward,
+  craftLootRecipe,
+  enhanceLootItem,
   equipLootItem,
   formatNumber,
-  gameTick,
   getRetentionSummary,
   huntBurst,
+  getLocalSaveStatus,
   loadGameState,
   markNotificationsRead,
-  MISSION_DEFINITIONS,
   prestigeWorld,
   raidBoss,
   rebirthWorld,
+  rerollLootItem,
+  resolveShadowBattle,
+  salvageLootItem,
+  exportSave,
+  importSave,
   saveGameState,
   selectClass,
+  setBuildFocus,
+  setSkillBranchChoice,
+  startDungeon,
+  syncGuildState,
+  syncMonetizationState,
   trainBestSkill,
   trainSkill,
   unequipLootItem,
   upgradeRelic,
-  buyTalent,
+  watchRewardedAd,
   type ClassId,
   type ClassSkillId,
-  type DatabaseItem,
-  type DatabaseMap,
+  type CraftRecipeId,
   type DatabaseMonster,
   type GlobalMultId,
   type IdleGameState,
   type IdleItemType,
-  type MissionId,
+  type LocalSaveStatus,
+  type RerollMode,
   type RelicUpgradeId,
+  type ShadowSnapshot,
   type TalentNodeId,
   type WorldZone
 } from "./idlestory/gameEngine";
@@ -55,603 +71,457 @@ import {
   calculateDPS,
   computeScore,
   GEAR,
-  getGearCost,
-  getGearEffect,
-  getSkillCost,
-  getSkillEffect,
   getCurrentMonster,
   getFeaturedLoot,
+  getGearCost,
   getHeroCost,
   getMesosPerSecond,
+  getSkillCost,
   getUpgradeCost,
-  getUpgradeEffect,
   getXpTarget,
   HEROES,
   SKILLS,
   UPGRADES
 } from "./idlestory/progressionSystem";
-import { getEnemyHpPercent, isBossStage } from "./idlestory/combatSystem";
 import {
-  getZonePowerRequirement,
+  getEnemyAttackIntervalMs,
+  getEnemyAttackPerSecond,
+  getEnemyHpPercent,
+  isBossStage
+} from "./idlestory/combatSystem";
+import {
+  DUNGEON_DEFINITIONS,
+  getDungeonDisplayMonster,
+  type DungeonType
+} from "./idlestory/dungeonSystem";
+import {
+  getProgressionHint,
   getProgressionMultiplier,
   getPowerStatus,
-  getProgressionHint,
+  getZonePowerRequirement,
   isEliteStage
 } from "./idlestory/progressionGates";
 import { CLASSES, getClassMaxHp } from "./idlestory/classSystem";
+import { getAllClassSkills, getActiveRegenMult } from "./idlestory/skillSystem";
+import { type BuildFocusId, type SkillBranchId } from "./idlestory/skillBuildSystem";
+import { getIncomeRates } from "./idlestory/economySystem";
 import {
-  getAllClassSkills,
-  getActiveRegenMult,
-  SKILL_DEFINITIONS,
-  type SkillDefinition as ClassSkillDefinition
-} from "./idlestory/skillSystem";
-import {
-  GLOBAL_MULTIPLIERS,
-  getGlobalMultCost,
-  getIncomeRates
-} from "./idlestory/economySystem";
-import {
-  RELIC_UPGRADES,
-  getRelicUpgradeCost,
-  getRebirthPreview,
-  type RebirthPreview,
-  type RelicUpgradeDef
-} from "./idlestory/rebirthSystem";
+  getAdCooldownRemaining,
+  getClaimableSeasonPassTiers,
+  type MonetizationOfferId,
+  type RewardedAdPlacement,
+  type SeasonPassTrack
+} from "./idlestory/shopSystem";
+import { getRebirthPreview } from "./idlestory/rebirthSystem";
 import {
   ALL_ZONES,
   getFullZoneOrFirst,
-  getZoneUnlockStatus,
+  getStageEnemy,
   getZoneBossEffect,
-  getZoneProgressSummary,
-  getStageEnemy
+  getZoneProgressSummary
 } from "./idlestory/zoneSystem";
 import { getThemeVisualIdentity, getZoneBackground } from "./idlestory/mapBackgrounds";
+import { defaultRng } from "./idlestory/seededRng";
 import {
-  createGuild,
-  fetchGlobalChat,
-  fetchGuilds,
-  joinGuild,
-  loadIdleCloudSave,
-  saveIdleCloudSave,
-  sendGlobalChat,
-  submitIdleLeaderboard,
-  type ChatMessage,
-  type Guild
+  contributeIdleGuildRaid,
+  createIdleGuild,
+  joinIdleGuild,
+  leaveIdleGuild,
+  submitIdleShadowBattle
 } from "./idlestory/onlineIdleService";
-import { BossPanel }        from "./idlestory/ui/BossPanel";
-import { InventoryPanel }   from "./idlestory/ui/InventoryPanel";
-import { HeroesPanel }      from "./idlestory/ui/HeroesPanel";
-import { TalentTreePanel }  from "./idlestory/ui/TalentTreePanel";
+import {
+  ClassPickTab,
+  ClassTab,
+  CombatTab,
+  EconomyTab,
+  ShopTab,
+  ZoneTab
+} from "./idlestory/ui/WorldTabsPanels";
 import { getBossDefinition } from "./idlestory/bossSystem";
 import {
   calculatePowerRating,
   formatPowerRating,
-  getPowerTier,
-  isMilestoneLevel,
-  getMilestoneAtLevel,
   getNextMilestone,
-  BOSS_SURGE_SECONDS,
-  type MilestoneBonus
+  getPowerTier
 } from "./idlestory/powerSpikeSystem";
+import { useBossFlow } from "./idlestory/hooks/useBossFlow";
+import { useCombatFeedbackUI } from "./idlestory/hooks/useCombatFeedbackUI";
+import { useCombatTimingLoops } from "./idlestory/hooks/useCombatTimingLoops";
+import { useIdleStoryDataLoader } from "./idlestory/hooks/useIdleStoryDataLoader";
+import { useSocialCloudSync } from "./idlestory/hooks/useSocialCloudSync";
+import { useTutorialPowerSpikeFlow } from "./idlestory/hooks/useTutorialPowerSpikeFlow";
+import type { TabId } from "./idlestory/worldTypes";
+import { sanitizeGameText, sanitizeMonsterPortrait } from "./idlestory/textSanitizer";
+import { IdleStoryStartScreen } from "./idlestory/ui/IdleStoryStartScreen";
 import {
-  type TutorialState,
-  type TutorialStepId,
-  DEFAULT_TUTORIAL,
-  getTutorialHint,
-  advanceTutorialOnKill,
-  advanceTutorialOnTabOpen,
-  advanceTutorialOnUpgrade,
-  checkTutorialComplete,
-  isTutorialActive,
-  isNewPlayer
-} from "./idlestory/tutorialSystem";
-import {
-  createBossFightState,
-  tickBossFight,
-  computeBossDpsMultiplier,
-  getMechanicTimeLeft,
-  type BossFightState
-} from "./idlestory/bossMechanics";
+  resolveStartAction,
+  type StartAction,
+  type StartScreenMode
+} from "./idlestory/startScreenFlow";
 
-// ─── Constants ────────────────────────────────────────────────────────────────
-
-const MAX_GAME_MONSTERS = 50;
-const MAX_GAME_ITEMS    = 50;
-const MAX_GAME_LEVEL    = 100;
-const MAX_GAME_MAPS     = 5;
-
-// ─── Types ────────────────────────────────────────────────────────────────────
-
-type DmgNumber = {
-  id: number;
-  value: number;
-  kind: "normal" | "crit" | "boss" | "kill";
-  x: number; // percent
-};
-
-type FeelBurst = {
-  id: number;
-  kind: "hit" | "crit" | "kill" | "level";
-};
-
-type TabId = "combat" | "heroes" | "inventory" | "class" | "economy" | "zones" | "talents" | "online";
-
-// ─── Database helpers ─────────────────────────────────────────────────────────
-
-async function fetchDatabase<T>(url: string): Promise<T[]> {
-  const res = await fetch(url);
-  if (!res.ok) throw new Error(`Failed ${url}`);
-  const payload = await res.json();
-  if (Array.isArray(payload)) return payload as T[];
-  const d = payload as { data?: T[]; items?: T[]; maps?: T[]; monsters?: T[] };
-  return d.items ?? d.data ?? d.maps ?? d.monsters ?? [];
+function getSafeMonsterPortrait(portrait: string | null | undefined, fallback: string) {
+  return sanitizeMonsterPortrait(portrait, fallback);
 }
 
-function limitMonsters(arr: DatabaseMonster[]) {
-  return arr.filter(m => m.level <= MAX_GAME_LEVEL).sort((a, b) => a.level - b.level).slice(0, MAX_GAME_MONSTERS);
+function isRenderableImageSource(source: string | null | undefined) {
+  const value = (source ?? "").trim();
+  if (!value) return false;
+  if (value.startsWith("data:image/")) return true;
+  if (/^https?:\/\/\S+$/i.test(value)) return true;
+  if (/^\/[^?#]+\.(png|jpe?g|webp|gif|avif|svg)(?:[?#].*)?$/i.test(value)) return true;
+  return false;
 }
 
-function limitItems(arr: DatabaseItem[]) {
-  return arr.filter(i => i.level === null || i.level <= MAX_GAME_LEVEL).sort((a, b) => (a.level ?? 0) - (b.level ?? 0)).slice(0, MAX_GAME_ITEMS);
-}
-
-// ─── Component ────────────────────────────────────────────────────────────────
+const BossPanel = lazy(() => import("./idlestory/ui/BossPanel").then((module) => ({ default: module.BossPanel })));
+const HeroesPanel = lazy(() => import("./idlestory/ui/HeroesPanel").then((module) => ({ default: module.HeroesPanel })));
+const InventoryPanel = lazy(() => import("./idlestory/ui/InventoryPanel").then((module) => ({ default: module.InventoryPanel })));
+const SocialPanel = lazy(() => import("./idlestory/ui/SocialPanel").then((module) => ({ default: module.SocialPanel })));
+const TalentTreePanel = lazy(() => import("./idlestory/ui/TalentTreePanel").then((module) => ({ default: module.TalentTreePanel })));
 
 export function IdleStoryWorldGame() {
+  const { user, openAuth } = useMockAuth();
+  const [saveStatus, setSaveStatus] = useState<LocalSaveStatus>(() => getLocalSaveStatus());
+  const [startScreenMode, setStartScreenMode] = useState<StartScreenMode>("menu");
+  const [selectedStartAction, setSelectedStartAction] = useState<StartAction | null>(null);
+  const [initialGameState, setInitialGameState] = useState<IdleGameState | null>(null);
+
+  const hasValidLocalSave = saveStatus.hasValidSave;
+
+  const startWithFreshState = () => {
+    const freshState = buildFreshState();
+    saveGameState(freshState);
+    setSaveStatus(getLocalSaveStatus());
+    setInitialGameState(freshState);
+  };
+
+  const handleStartAction = (action: StartAction) => {
+    setSelectedStartAction(action);
+    const resolution = resolveStartAction(action, hasValidLocalSave);
+    setStartScreenMode(resolution.mode);
+
+    if (resolution.shouldLoadSave) {
+      setInitialGameState(loadGameState());
+      return;
+    }
+
+    if (resolution.shouldCreateNewState) {
+      startWithFreshState();
+      return;
+    }
+
+    if (resolution.shouldOpenAuth) {
+      openAuth();
+    }
+  };
+
+  const handleConfirmNewGame = () => {
+    setSelectedStartAction("new");
+    setStartScreenMode("menu");
+    startWithFreshState();
+  };
+
+  const handleCancelStartModal = () => {
+    setStartScreenMode("menu");
+    setSelectedStartAction(null);
+    setSaveStatus(getLocalSaveStatus());
+  };
+
+  if (!initialGameState) {
+    return (
+      <GameShell title="IdleStory World" subtitle="Choose your adventure" icon="IW" aspectRatio="16 / 9">
+        <IdleStoryStartScreen
+          saveStatus={saveStatus}
+          startScreenMode={startScreenMode}
+          selectedStartAction={selectedStartAction}
+          isSignedIn={Boolean(user)}
+          onContinue={() => handleStartAction("continue")}
+          onStartNew={() => handleStartAction("new")}
+          onConfirmNewGame={handleConfirmNewGame}
+          onCancelModal={handleCancelStartModal}
+          onRegister={() => handleStartAction("register")}
+        />
+      </GameShell>
+    );
+  }
+
+  return <IdleStoryWorldGameContent initialState={initialGameState} />;
+}
+
+function IdleStoryWorldGameContent({ initialState }: { initialState: IdleGameState }) {
   const { playFailure, playSuccess, playHit, playCrit, playLevelUp, playReward } = useMiniGamesSound();
   const { user, openAuth } = useMockAuth();
 
-  // ── Database ───────────────────────────────────────────────────────────────
-  const [maps,     setMaps]     = useState<DatabaseMap[]>([]);
-  const [monsters, setMonsters] = useState<DatabaseMonster[]>([]);
-  const [items,    setItems]    = useState<DatabaseItem[]>([]);
-  const [toast, setToast] = useState("Loading Maple World…");
-
-  // ── Game state ─────────────────────────────────────────────────────────────
-  const [state, setState] = useState<IdleGameState>(() => loadGameState());
+  // Database + core state
+  const [toast, setToast] = useState("Loading Maple World...");
+  const [state, setState] = useState<IdleGameState>(() => initialState);
   const [tab, setTab] = useState<TabId>("combat");
-  const [dmgNums, setDmgNums] = useState<DmgNumber[]>([]);
-  const [feelBursts, setFeelBursts] = useState<FeelBurst[]>([]);
-  const [rewardText, setRewardText] = useState("");
-  const dmgIdRef = useRef(0);
-  const feelBurstIdRef = useRef(0);
-  const prevHpRef = useRef({ hp: state.enemyHp, stage: state.stage });
-  const prevLevelRef = useRef(state.level);
-  const hitRef = useRef(false);
-  const [isHit, setIsHit] = useState(false);
-  // ── Polish: feedback states ───────────────────────────────────────────────
-  const [isKillFlash, setIsKillFlash]       = useState(false);
-  const [isStageClear, setIsStageClear]     = useState(false);
-  const [isGoldBumping, setIsGoldBumping]   = useState(false);
-  const [isXpLevelup, setIsXpLevelup]       = useState(false);
-  const prevMesosRef = useRef(state.mesos);
-  const goldBumpTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [guilds, setGuilds] = useState<Guild[]>([]);
-  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([]);
-  const [chatInput, setChatInput] = useState("");
-  const [guildName, setGuildName] = useState("Snail Legends");
-  const [onlineStatus, setOnlineStatus] = useState("Local save active");
-  const stateRef = useRef(state);
-  const scoreRef = useRef(0);
+  const [saveMenuOpen, setSaveMenuOpen] = useState(false);
+  const [importText, setImportText] = useState("");
+  const [enemyImageBroken, setEnemyImageBroken] = useState(false);
+  const prevEventIdsRef = useRef<string[]>([]);
+  const isMountedRef = useRef(true);
+  const createGuildRequestRef = useRef(0);
+  const joinGuildRequestRef = useRef(0);
+  const leaveGuildRequestRef = useRef(0);
+  const raidGuildRequestRef = useRef(0);
+  const shadowSubmitRequestRef = useRef(0);
 
-  // ── Boss fight state ───────────────────────────────────────────────────────
-  const bossFightRef = useRef<BossFightState | null>(null);
-  const prevIsBossRef = useRef(false);
-  const [bossPhase, setBossPhase] = useState<1 | 2 | 3>(1);
-  const [activeMechanicId, setActiveMechanicId] = useState<string | null>(null);
-  const [mechanicTimeLeft, setMechanicTimeLeft] = useState(0);
-  const [enrageTimeLeft, setEnrageTimeLeft] = useState(0);
-  const [isBossEnraged, setIsBossEnraged] = useState(false);
-  const [bossVoiceLine, setBossVoiceLine] = useState<string | null>(null);
-  const bossDpsMultiplierRef = useRef(1.0);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
-  // ── Tutorial / new-player experience ─────────────────────────────────────
-  const [tutorial, setTutorial] = useState<TutorialState>(() =>
-    isNewPlayer(state.totalPlayTime) ? DEFAULT_TUTORIAL : { ...DEFAULT_TUTORIAL, step: "done" }
-  );
-  const tutorialStep: TutorialStepId = tutorial.step;
-  const tutorialHint = getTutorialHint(tutorialStep);
-  // WOW moment overlay (first kill + first level 2)
-  const [wowMoment, setWowMoment] = useState<{ emoji: string; text: string; sub: string } | null>(null);
-  // First loot drop (visual only)
-  const [lootDropVisible, setLootDropVisible] = useState(false);
-  // Track previous kill count to detect first kill
-  const prevLifetimeKillsRef = useRef(state.lifetimeKills);
-  // Track previous level to detect level 2 specifically
-  const prevTutorialLevelRef = useRef(state.level);
-
-  // ── Power spike system ─────────────────────────────────────────────────────
-  /** Full-screen power spike overlay (milestone hit / boss surge / free upgrade). */
-  const [powerSpike, setPowerSpike] = useState<{
-    icon: string; label: string; description: string; isWow: boolean; sub?: string;
-  } | null>(null);
-  /** Track boss kills to detect new kills. */
-  const prevBossKillsRef  = useRef(state.lifetimeBossKills);
-  /** Track level for milestone detection (separate from tutorial ref). */
-  const prevMilestoneLevelRef = useRef(state.level);
-
-  // ── Derived ────────────────────────────────────────────────────────────────
+  // Derived world context
   const zone = useMemo(() => getFullZoneOrFirst(state.zone), [state.zone]);
   const mapBg = useMemo(() => getZoneBackground(zone.id), [zone.id]);
   const visualIdentity = useMemo(() => getThemeVisualIdentity(zone.theme), [zone.theme]);
+
+  const { maps, monsters, items } = useIdleStoryDataLoader({
+    currentZoneName: zone.name,
+    setToast,
+    setState
+  });
+
+  const activeDungeonRun = state.dungeonState.activeRun;
+  const worldMonster = useMemo(() => getCurrentMonster(state, zone, monsters), [state, zone, monsters]);
   const currentMonster = useMemo(
-    () => getCurrentMonster(state, zone, monsters),
-    [state, zone, monsters]
+    () => (activeDungeonRun ? getDungeonDisplayMonster(zone, activeDungeonRun) : worldMonster),
+    [activeDungeonRun, worldMonster, zone]
   );
   const featuredLoot = useMemo(() => getFeaturedLoot(currentMonster, items), [currentMonster, items]);
   const dps = useMemo(() => calculateDPS(state), [state]);
-  const mesosPerSecond = useMemo(() => getMesosPerSecond(state, zone, currentMonster, featuredLoot.length), [state, zone, currentMonster, featuredLoot.length]);
+  const mesosPerSecond = useMemo(
+    () => getMesosPerSecond(state, zone, currentMonster, featuredLoot.length),
+    [state, zone, currentMonster, featuredLoot.length]
+  );
   const xpTarget = getXpTarget(state.level);
   const xpProgress = Math.min(100, (state.xp / xpTarget) * 100);
-  const enemyHpPct = getEnemyHpPercent(state);
-  const isBoss = isBossStage(state.stage);
-  const zoneBossEffect = useMemo(() => isBoss ? getZoneBossEffect(zone) : null, [isBoss, zone]);
+  const playerMaxHp = state.classId ? getClassMaxHp(state.classId, state.level) : 120 + state.level * 18;
+
+  const displayEnemyHp = activeDungeonRun?.enemyHp ?? state.enemyHp;
+  const displayEnemyMaxHp = activeDungeonRun?.enemyMaxHp ?? state.enemyMaxHp;
+  const enemyHpPct =
+    displayEnemyMaxHp > 0
+      ? Math.max(0, Math.min(100, (displayEnemyHp / displayEnemyMaxHp) * 100))
+      : getEnemyHpPercent(state);
+  const isBoss = activeDungeonRun ? activeDungeonRun.isBossWave : isBossStage(state.stage);
+  const zoneBossEffect = useMemo(() => (isBoss ? getZoneBossEffect(zone) : null), [isBoss, zone]);
   const zoneProgress = useMemo(() => getZoneProgressSummary(state, state.zone), [state]);
-  const stageEnemy = useMemo(() => getStageEnemy(zone, state.stage), [zone, state.stage]);
+  const stageEnemy = useMemo(
+    () => (activeDungeonRun ? getDungeonDisplayMonster(zone, activeDungeonRun) : getStageEnemy(zone, state.stage)),
+    [activeDungeonRun, zone, state.stage]
+  );
+
   const incomeRates = useMemo(() => getIncomeRates(state, mesosPerSecond), [state, mesosPerSecond]);
   const rebirthPreview = useMemo(() => getRebirthPreview(state), [state]);
   const activeClass = state.classId ? CLASSES[state.classId] : null;
   const maxResource = activeClass?.maxResource ?? 0;
   const resourcePct = maxResource > 0 ? Math.min(100, (state.resource / maxResource) * 100) : 0;
-  const classSkills = useMemo(() => state.classId ? getAllClassSkills(state.classId) : [], [state.classId]);
+  const classSkills = useMemo(() => (state.classId ? getAllClassSkills(state.classId) : []), [state.classId]);
   const score = useMemo(() => computeScore(state, dps, maps.length, monsters.length, items.length), [state, dps, maps.length, monsters.length, items.length]);
   const retentionSummary = useMemo(() => getRetentionSummary(state), [state]);
-  const bossDefinition = useMemo(() => isBoss ? getBossDefinition(state.zone) : null, [isBoss, state.zone]);
+  const bossDefinition = useMemo(() => (isBoss ? getBossDefinition(state.zone) : null), [isBoss, state.zone]);
 
-  // ── Power rating ──────────────────────────────────────────────────────────
-  const powerRating   = useMemo(() => calculatePowerRating(dps, state.level, state.prestigeCount), [dps, state.level, state.prestigeCount]);
-  const powerTier     = useMemo(() => getPowerTier(powerRating), [powerRating]);
+  const activeShopBoosts = state.shop.activeBoosts;
+  const claimableFreePassTiers = useMemo(() => getClaimableSeasonPassTiers(state.shop, "free"), [state.shop]);
+  const claimablePremiumPassTiers = useMemo(() => getClaimableSeasonPassTiers(state.shop, "premium"), [state.shop]);
+  const shopAttention = claimableFreePassTiers.length > 0 || claimablePremiumPassTiers.length > 0;
+  const rewardedAdCooldowns = useMemo(
+    () => ({
+      double_rewards: getAdCooldownRemaining(state.shop, "double_rewards"),
+      free_chest: getAdCooldownRemaining(state.shop, "free_chest"),
+      boost_trial: getAdCooldownRemaining(state.shop, "boost_trial")
+    }),
+    [state.shop]
+  );
+
+  const socialIdentity = useMemo(() => {
+    if (user) {
+      return { id: user.id, username: user.username };
+    }
+    if (typeof window === "undefined") {
+      return { id: "guest-idlestory", username: "Guest Hero" };
+    }
+    const storageKey = "idlestory-world:social-guest";
+    let guestId = window.localStorage.getItem(storageKey);
+    if (!guestId) {
+      guestId = `guest-${Math.floor(defaultRng() * 36 ** 8).toString(36).padStart(8, "0")}`;
+      window.localStorage.setItem(storageKey, guestId);
+    }
+    return { id: guestId, username: "Guest Hero" };
+  }, [user]);
+
+  const {
+    guildName,
+    setGuildName,
+    socialGuilds,
+    setSocialGuilds,
+    currentGuild,
+    setCurrentGuild,
+    leaderboards,
+    leaderboardCategory,
+    setLeaderboardCategory,
+    weeklyRanking,
+    weeklyRank,
+    shadowOpponents,
+    socialStatus,
+    setSocialStatus
+  } = useSocialCloudSync({
+    user,
+    socialIdentity,
+    state,
+    score,
+    setState
+  });
+
+  const canClaimWeeklyRewardNow = useMemo(() => {
+    const rankingState = state.weeklyRankingState;
+    if (!rankingState?.lastResolvedRank) return false;
+    return !rankingState.claimedWeeks.includes(rankingState.weekKey);
+  }, [state.weeklyRankingState]);
+
+  const powerRating = useMemo(
+    () => calculatePowerRating(dps, state.level, state.prestigeCount),
+    [dps, state.level, state.prestigeCount]
+  );
+  const powerTier = useMemo(() => getPowerTier(powerRating), [powerRating]);
   const nextMilestone = useMemo(() => getNextMilestone(state.level), [state.level]);
-  const surgeActive   = state.bossSurgeSecondsLeft > 0;
+  const surgeActive = state.bossSurgeSecondsLeft > 0;
 
-  // ── Power gate (progression wall) ─────────────────────────────────────────
-  const isElite       = isEliteStage(state.stage);
-  const zonePowerReq  = useMemo(() => getZonePowerRequirement(zone), [zone]);
-  const progMult      = useMemo(() => getProgressionMultiplier(dps, zonePowerReq), [dps, zonePowerReq]);
-  const powerStatus   = useMemo(() => getPowerStatus(dps, zonePowerReq), [dps, zonePowerReq]);
+  const isElite = activeDungeonRun
+    ? activeDungeonRun.wave === activeDungeonRun.totalWaves - 1 && !activeDungeonRun.isBossWave
+    : isEliteStage(state.stage);
+  const enemyEncounterType: "normal" | "elite" | "boss" = isBoss ? "boss" : isElite ? "elite" : "normal";
+  const enemyAttackPerSecond = useMemo(
+    () => getEnemyAttackPerSecond(state.stage, zone, enemyEncounterType),
+    [state.stage, zone, enemyEncounterType]
+  );
+  const enemyAttackIntervalMs = useMemo(
+    () => getEnemyAttackIntervalMs(state.stage, zone, enemyEncounterType),
+    [state.stage, zone, enemyEncounterType]
+  );
+
+  const {
+    bossPhase,
+    activeMechanicId,
+    mechanicTimeLeft,
+    enrageTimeLeft,
+    isBossEnraged,
+    bossVoiceLine,
+    bossIntro,
+    bossDpsMultiplierRef
+  } = useBossFlow({
+    isBoss,
+    bossDefinition,
+    state
+  });
+
+  const {
+    dmgNums,
+    feelBursts,
+    rewardText,
+    isHit,
+    isKillFlash,
+    isStageClear,
+    isGoldBumping,
+    isXpLevelup,
+    goldPops,
+    combatFeed,
+    isBossHitShake,
+    isLevelUpFlash,
+    spawnDmg,
+    pushCombatFeed
+  } = useCombatFeedbackUI({
+    state,
+    isBoss,
+    dps,
+    playCrit,
+    playHit,
+    playReward,
+    playLevelUp,
+    playSuccess,
+    setToast
+  });
+
+  const { playerHpDisplay, enemyAttackProgress, enemyHitPulse } = useCombatTimingLoops({
+    stage: state.stage,
+    playerMaxHp,
+    enemyAttackIntervalMs,
+    enemyAttackPerSecond,
+    spawnDmg,
+    pushCombatFeed,
+    setState,
+    monsters,
+    items,
+    bossDpsMultiplierRef
+  });
+
+  const playerHpPct = Math.max(0, Math.min(100, (playerHpDisplay / Math.max(1, playerMaxHp)) * 100));
+
+  const {
+    tutorialStep,
+    tutorialHint,
+    wowMoment,
+    lootDropVisible,
+    powerSpike,
+    advanceOnTabOpen,
+    advanceOnUpgrade
+  } = useTutorialPowerSpikeFlow({
+    state,
+    powerRating,
+    playLevelUp,
+    setState
+  });
+
+  const zonePowerReq = useMemo(() => getZonePowerRequirement(zone), [zone]);
+  const progMult = useMemo(() => getProgressionMultiplier(dps, zonePowerReq), [dps, zonePowerReq]);
+  const powerStatus = useMemo(() => getPowerStatus(dps, zonePowerReq), [dps, zonePowerReq]);
   const progressionHint = useMemo(() => getProgressionHint(dps, zonePowerReq), [dps, zonePowerReq]);
+  const momentumTier = Math.min(5, Math.floor(state.killStreak / 12));
+  const nextStreakMilestone = Math.min(60, (momentumTier + 1) * 12);
+  const streakToNext = Math.max(0, nextStreakMilestone - state.killStreak);
+  const objectivePct = Math.max(0, Math.min(100, (state.activeObjective.progress / Math.max(1, state.activeObjective.target)) * 100));
+  const nextZoneLabel = zoneProgress.nextLocked?.name ?? "All current maps unlocked";
+  const nextZoneHint = zoneProgress.nextLocked
+    ? zoneProgress.levelsToNext > 0
+      ? `Lv.${zoneProgress.nextLocked.requirement} unlock`
+      : zoneProgress.prestigesToNext > 0
+        ? `Need Prestige x${zoneProgress.nextLocked.prestigeRequired}`
+        : "Ready to unlock"
+    : "Push stage for better rewards";
 
   useEffect(() => {
-    stateRef.current = state;
-    scoreRef.current = score;
-  }, [state, score]);
-
-  // ── Floating damage numbers ────────────────────────────────────────────────
-  const spawnDmg = useCallback((value: number, kind: DmgNumber["kind"]) => {
-    const id = ++dmgIdRef.current;
-    const x = 30 + Math.random() * 40;
-    setDmgNums(prev => [...prev.slice(-10), { id, value, kind, x }]);
-    setTimeout(() => setDmgNums(prev => prev.filter(n => n.id !== id)), 1600);
-  }, []);
-
-  const spawnFeelBurst = useCallback((kind: FeelBurst["kind"], text = "") => {
-    const id = ++feelBurstIdRef.current;
-    setFeelBursts(prev => [...prev.slice(-4), { id, kind }]);
-    if (text) setRewardText(text);
-    setTimeout(() => {
-      setFeelBursts(prev => prev.filter(burst => burst.id !== id));
-      if (text) setRewardText("");
-    }, 950);
-  }, []);
-
-  useEffect(() => {
-    const prev = prevHpRef.current;
-    if (prev.stage === state.stage && state.enemyHp < prev.hp && prev.hp > 0) {
-      const dmg = Math.round(prev.hp - state.enemyHp);
-      if (dmg > 0) {
-        const kind = isBoss ? "boss" : dps > 200 && Math.random() < 0.15 ? "crit" : "normal";
-        spawnDmg(dmg, kind);
-        spawnFeelBurst(kind === "crit" ? "crit" : "hit");
-        if (kind === "crit") playCrit(); else playHit();
-        if (!hitRef.current) {
-          hitRef.current = true;
-          setIsHit(true);
-          setTimeout(() => { setIsHit(false); hitRef.current = false; }, 180);
-        }
-      }
-    } else if (prev.stage !== state.stage) {
-      spawnDmg(0, "kill"); // kill flash
-      spawnFeelBurst("kill", `Stage ${state.stage} cleared`);
-      playReward();
-      // White flash + green stage-clear flash
-      setIsKillFlash(true);
-      setIsStageClear(true);
-      setTimeout(() => setIsKillFlash(false), 500);
-      setTimeout(() => setIsStageClear(false), 600);
-    }
-    prevHpRef.current = { hp: state.enemyHp, stage: state.stage };
-  }, [state.enemyHp, state.stage, isBoss, dps, spawnDmg, spawnFeelBurst, playCrit, playHit, playReward]);
-
-  useEffect(() => {
-    if (state.level > prevLevelRef.current) {
-      spawnFeelBurst("level", `Level ${state.level}!`);
-      playLevelUp();
-      setIsXpLevelup(true);
-      setTimeout(() => setIsXpLevelup(false), 750);
-    }
-    prevLevelRef.current = state.level;
-  }, [state.level, spawnFeelBurst, playLevelUp]);
-
-  // ── Gold chip bump — bump animation when mesos increase noticeably ──────────
-  useEffect(() => {
-    const gained = state.mesos - prevMesosRef.current;
-    prevMesosRef.current = state.mesos;
-    if (gained >= 20 && !isGoldBumping) {
-      setIsGoldBumping(true);
-      if (goldBumpTimerRef.current) clearTimeout(goldBumpTimerRef.current);
-      goldBumpTimerRef.current = setTimeout(() => setIsGoldBumping(false), 450);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.mesos]);
-
-  // ── Tutorial: detect first kill → WOW moment ─────────────────────────────
-  useEffect(() => {
-    const prev = prevLifetimeKillsRef.current;
-    prevLifetimeKillsRef.current = state.lifetimeKills;
-    if (prev === 0 && state.lifetimeKills >= 1 && isTutorialActive(tutorial)) {
-      // Advance tutorial step
-      setTutorial(t => advanceTutorialOnKill(t));
-      // Trigger WOW overlay
-      setWowMoment({
-        emoji: "💀",
-        text: "FIRST KILL!",
-        sub: `+${formatNumber(state.mesos - 0)} Mesos · XP Bonus!`
-      });
-      // First loot drop visual
-      setLootDropVisible(true);
-      setTimeout(() => setLootDropVisible(false), 1400);
-      setTimeout(() => setWowMoment(null), 2600);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.lifetimeKills]);
-
-  // ── Tutorial: detect level 2 → second WOW moment ─────────────────────────
-  useEffect(() => {
-    const prev = prevTutorialLevelRef.current;
-    prevTutorialLevelRef.current = state.level;
-    if (prev < 2 && state.level >= 2 && isTutorialActive(tutorial)) {
-      setWowMoment({ emoji: "⭐", text: "LEVEL UP!", sub: `You're level ${state.level} — keep going!` });
-      setTimeout(() => setWowMoment(null), 2400);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.level]);
-
-  // ── Tutorial: check completion on every render ────────────────────────────
-  useEffect(() => {
-    if (tutorial.step !== "done") {
-      const next = checkTutorialComplete(tutorial, state.level);
-      if (next.step !== tutorial.step) setTutorial(next);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.level, tutorial.firstKillDone, tutorial.firstUpgradeDone]);
-
-  // ── Power spike: milestone level reached ─────────────────────────────────
-  useEffect(() => {
-    const prev = prevMilestoneLevelRef.current;
-    prevMilestoneLevelRef.current = state.level;
-    // Detect if we crossed one or more milestone levels
-    for (let lv = prev + 1; lv <= state.level; lv++) {
-      const m = getMilestoneAtLevel(lv);
-      if (m) {
-        setPowerSpike({
-          icon: m.icon,
-          label: m.label,
-          description: m.description,
-          isWow: m.isWow,
-          sub: `Power: ${formatPowerRating(powerRating)}`
-        });
-        if (m.isWow) playLevelUp();
-        setTimeout(() => setPowerSpike(null), m.isWow ? 3200 : 2400);
-        break; // show one at a time; next will fire next render cycle
-      }
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.level]);
-
-  // ── Power spike: boss killed → free upgrade + surge visual ───────────────
-  useEffect(() => {
-    const prev = prevBossKillsRef.current;
-    prevBossKillsRef.current = state.lifetimeBossKills;
-    if (state.lifetimeBossKills <= prev) return;
-
-    // Apply free hero upgrade
-    const result = claimBossKillFreeUpgrade(state);
-    if (result.success) {
-      setState(result.state);
-      saveGameState(result.state);
-    }
-
-    // Show power surge overlay
-    setPowerSpike({
-      icon: "💥",
-      label: "BOSS SURGE!",
-      description: `+100% DPS for ${BOSS_SURGE_SECONDS}s${result.success ? ` · ${result.message.split(":")[1]?.trim() ?? "Free upgrade!"}` : ""}`,
-      isWow: true
-    });
-    setTimeout(() => setPowerSpike(null), 3000);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.lifetimeBossKills]);
-
-  // ── Boss fight: initialize on stage entry ─────────────────────────────────
-  useEffect(() => {
-    const wasBoss = prevIsBossRef.current;
-    prevIsBossRef.current = isBoss;
-    if (isBoss && !wasBoss && bossDefinition) {
-      const fight = createBossFightState(bossDefinition.id, bossDefinition.enrageTimer);
-      bossFightRef.current = fight;
-      setBossPhase(1);
-      setActiveMechanicId(null);
-      setMechanicTimeLeft(0);
-      setEnrageTimeLeft(bossDefinition.enrageTimer);
-      setIsBossEnraged(false);
-      setBossVoiceLine(bossDefinition.voiceLines.intro);
-      bossDpsMultiplierRef.current = 1.0;
-      setTimeout(() => setBossVoiceLine(null), 4500);
-    }
-    if (!isBoss) {
-      bossFightRef.current = null;
-      setActiveMechanicId(null);
-      setIsBossEnraged(false);
-      setBossVoiceLine(null);
-      bossDpsMultiplierRef.current = 1.0;
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isBoss]);
-
-  // ── Boss fight: mechanic tick (every second while boss is active) ──────────
-  useEffect(() => {
-    if (!isBoss || !bossDefinition) return;
-    const t = window.setInterval(() => {
-      const fight = bossFightRef.current;
-      if (!fight) return;
-      const now = Date.now();
-      const hpPct = getEnemyHpPercent(stateRef.current);
-      const { fight: nextFight, triggered, phaseTransition } = tickBossFight(fight, bossDefinition, hpPct, now);
-      bossFightRef.current = nextFight;
-
-      setBossPhase(nextFight.currentPhase);
-      setEnrageTimeLeft(nextFight.enrageSecondsLeft);
-      setIsBossEnraged(nextFight.isEnraged);
-      setActiveMechanicId(nextFight.activeMechanicId);
-      setMechanicTimeLeft(getMechanicTimeLeft(nextFight, now));
-
-      // Update DPS multiplier ref so next game tick picks it up
-      bossDpsMultiplierRef.current = computeBossDpsMultiplier(
-        bossDefinition, nextFight.activeMechanicId, nextFight.isEnraged
+    const prevIds = prevEventIdsRef.current;
+    const activeEvents = state.activeEvents ?? [];
+    const newEvent = activeEvents.find((event) => !prevIds.includes(event.id));
+    if (newEvent) {
+      const safeEventIcon = sanitizeMonsterPortrait(newEvent.icon, "!");
+      const safeEventLabel = sanitizeGameText(newEvent.label, "World Event");
+      const safeEventDescription = sanitizeGameText(newEvent.description, "");
+      setToast(
+        `${safeEventIcon} ${safeEventLabel}${safeEventDescription ? ` - ${safeEventDescription}` : ""}`
       );
-
-      // Show voice lines
-      if (phaseTransition) {
-        setBossVoiceLine(phaseTransition.transitionLine);
-        setTimeout(() => setBossVoiceLine(null), 4200);
-      } else if (triggered && triggered.effect !== "aoe") {
-        setBossVoiceLine(`${triggered.icon} ${triggered.name}!`);
-        setTimeout(() => setBossVoiceLine(null), 3200);
-      } else if (nextFight.isEnraged && !fight.isEnraged) {
-        setBossVoiceLine(bossDefinition.voiceLines.enrage);
-        setTimeout(() => setBossVoiceLine(null), 4500);
-      }
-    }, 1000);
-    return () => window.clearInterval(t);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isBoss, bossDefinition]);
-
-  // ── Database loader ────────────────────────────────────────────────────────
-  useEffect(() => {
-    let alive = true;
-    (async () => {
-      try {
-        const nextMaps = await fetchDatabase<DatabaseMap>("/api/maps");
-        if (!alive) return;
-        const gameMaps = nextMaps.slice(0, MAX_GAME_MAPS);
-        setMaps(gameMaps);
-        setState(cur => gameMaps.some(m => m.id === cur.zone) ? cur : { ...cur, zone: gameMaps[0]?.id ?? cur.zone });
-        const nextMonsters = await fetchDatabase<DatabaseMonster>("/api/monsters");
-        if (!alive) return;
-        setMonsters(limitMonsters(nextMonsters));
-        const nextItems = await fetchDatabase<DatabaseItem>("/api/items");
-        if (!alive) return;
-        setItems(limitItems(nextItems));
-        setToast(`${zone.name} — ready to adventure!`);
-      } catch {
-        if (alive) setToast("Offline mode — zone data loaded from cache.");
-      }
-    })();
-    return () => { alive = false; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ── Offline gains ──────────────────────────────────────────────────────────
-  useEffect(() => {
-    setState(cur => {
-      const z = getFullZoneOrFirst(cur.zone);
-      const m = getCurrentMonster(cur, z, monsters);
-      const l = getFeaturedLoot(m, items);
-      const next = calculateOfflineGains(cur, { zone: z, monster: m, lootCount: l.length });
-      saveGameState(next);
-      return next;
-    });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // ── Tick loop ──────────────────────────────────────────────────────────────
-  useEffect(() => {
-    if (!user) return;
-    let alive = true;
-    void loadIdleCloudSave(user.id).then((cloudSave) => {
-      if (!alive || !cloudSave?.state) return;
-      setState((cur) => {
-        const shouldUseCloud = (cloudSave.state.lastSavedAt ?? 0) > (cur.lastSavedAt ?? 0);
-        const next = shouldUseCloud ? cloudSave.state : cur;
-        if (shouldUseCloud) {
-          saveGameState(next);
-          setOnlineStatus("Cloud save loaded");
-        }
-        return next;
-      });
-    });
-    return () => {
-      alive = false;
-    };
-  }, [user?.id]);
-
-  useEffect(() => {
-    if (!user) return;
-    const syncOnline = () => {
-      const snapshot = stateRef.current;
-      const currentScore = scoreRef.current;
-      void saveIdleCloudSave(user.id, snapshot, currentScore).then((ok) => {
-        setOnlineStatus(ok ? "Cloud save synced" : "Cloud save queued locally");
-      });
-      void submitIdleLeaderboard(user.id, user.username, currentScore);
-    };
-    syncOnline();
-    const timer = window.setInterval(syncOnline, 10000);
-    return () => window.clearInterval(timer);
-  }, [user?.id, user?.username]);
-
-  useEffect(() => {
-    let alive = true;
-    const refreshOnline = () => {
-      void fetchGuilds().then((nextGuilds) => {
-        if (alive) setGuilds(nextGuilds);
-      });
-      void fetchGlobalChat().then((messages) => {
-        if (alive) setChatMessages(messages);
-      });
-    };
-    refreshOnline();
-    const timer = window.setInterval(refreshOnline, 8000);
-    return () => {
-      alive = false;
-      window.clearInterval(timer);
-    };
-  }, []);
-
-  useEffect(() => {
-    const t = window.setInterval(() => {
-      setState(cur => {
-        const z = getFullZoneOrFirst(cur.zone);
-        const m = getCurrentMonster(cur, z, monsters);
-        const l = getFeaturedLoot(m, items);
-        const next = gameTick(cur, 1, { zone: z, monster: m, lootCount: l.length, bossDpsMultiplier: bossDpsMultiplierRef.current });
-        saveGameState(next);
-        return next;
-      });
-    }, 1000);
-    return () => window.clearInterval(t);
-  }, [items, monsters]);
-
+      playReward();
+    }
+    prevEventIdsRef.current = activeEvents.map((event) => event.id);
+  }, [state.activeEvents, playReward]);
   // ── Dispatcher ────────────────────────────────────────────────────────────
   function dispatch(result: { state: IdleGameState; message: string; success: boolean }) {
-    const stamped = { ...result.state, lastSavedAt: Date.now() };
+    const synced = syncMonetizationState(result.state);
+    const stamped = { ...synced, lastSavedAt: Date.now() };
     setState(stamped);
-    saveGameState(stamped);
-    setToast(result.message);
+    const saveResult = saveGameState(stamped);
+    // Surface quota errors without blocking the action's own feedback.
+    if (!saveResult.ok) {
+      setToast(`⚠ Save failed: ${saveResult.error ?? "storage full"}`);
+    } else {
+      setToast(result.message);
+    }
     if (result.success) {
       playSuccess();
-      // Advance tutorial on any successful purchase
-      setTutorial(t => advanceTutorialOnUpgrade(t));
+      advanceOnUpgrade();
     } else {
       playFailure();
     }
@@ -660,7 +530,7 @@ export function IdleStoryWorldGame() {
   // ── Tutorial-aware tab setter ─────────────────────────────────────────────
   function handleTabChange(newTab: TabId) {
     setTab(newTab);
-    setTutorial(t => advanceTutorialOnTabOpen(t, newTab));
+    advanceOnTabOpen(newTab);
   }
 
   // ── Action handlers ────────────────────────────────────────────────────────
@@ -672,41 +542,161 @@ export function IdleStoryWorldGame() {
   const handleEquipLoot = (itemId: string) => dispatch(equipLootItem(state, itemId));
   const handleUnequipLoot = (type: IdleItemType) => dispatch(unequipLootItem(state, type));
   const handleAutoEquipLoot = () => dispatch(autoEquipBestLoot(state));
+  const handleEnhanceLoot = (itemId: string) => dispatch(enhanceLootItem(state, itemId));
+  const handleRerollLoot = (itemId: string, mode: RerollMode) => dispatch(rerollLootItem(state, itemId, mode));
+  const handleSalvageLoot = (itemId: string) => dispatch(salvageLootItem(state, itemId));
+  const handleCraftLoot = (recipeId: CraftRecipeId) => dispatch(craftLootRecipe(state, recipeId, zone.requirement));
   const handleTrainSkill = (id: keyof typeof SKILLS) => dispatch(trainSkill(state, id, SKILLS[id].name, getSkillCost(id, state.skillLevels[id])));
   const handleBuyGlobalMult = (id: GlobalMultId) => dispatch(buyGlobalMult(state, id));
   const handleUpgradeRelic = (id: RelicUpgradeId) => dispatch(upgradeRelic(state, id));
   const handleBuyTalent    = (id: TalentNodeId) => dispatch(buyTalent(state, id));
   const handleSelectClass = (id: ClassId) => dispatch(selectClass(state, id));
   const handleActivateSkill = (id: ClassSkillId) => dispatch(activateClassSkill(state, id, dps));
+  const handleSetBuildFocus = (id: BuildFocusId) => dispatch(setBuildFocus(state, id));
+  const handleSetSkillBranch = (skillId: ClassSkillId, branchId: SkillBranchId) =>
+    dispatch(setSkillBranchChoice(state, skillId, branchId));
   const handleChangeZone = (z: WorldZone) => dispatch(changeZone(state, z));
   const handleClaimDailyReward = () => dispatch(claimDailyReward(state));
-  const handleClaimMissionReward = (id: MissionId) => dispatch(claimMissionReward(state, id));
+  const handleClaimComebackReward = () => dispatch(claimComebackReward(state));
+  const handleStartDungeon = (type: DungeonType) => dispatch(startDungeon(state, type, zone));
   const handleReadNotifications = () => dispatch(markNotificationsRead(state));
+  const handleBuyShopOffer = (offerId: MonetizationOfferId) => dispatch(buyShopOffer(state, offerId));
+  const handleWatchRewardedAd = (placement: RewardedAdPlacement) => dispatch(watchRewardedAd(state, placement));
+  const handleClaimSeasonPassTier = (tier: number, track: SeasonPassTrack) => dispatch(claimSeasonPassTier(state, tier, track));
   const handleCreateGuild = () => {
-    if (!user) return openAuth();
-    void createGuild(user.id, user.username, guildName).then((guild) => {
-      if (!guild) return;
-      setGuilds((cur) => cur.some((entry) => entry.id === guild.id) ? cur : [guild, ...cur]);
-      setOnlineStatus(`Guild ${guild.name} ready`);
+    const requestId = ++createGuildRequestRef.current;
+    void createIdleGuild(socialIdentity.id, socialIdentity.username, {
+      name: guildName,
+      icon: "Guild",
+      power: powerRating,
+      level: state.level
+    }).then((guild) => {
+      if (!guild || !isMountedRef.current || requestId !== createGuildRequestRef.current) return;
+      setSocialGuilds((cur) => cur.some((entry) => entry.id === guild.id) ? cur : [guild, ...cur]);
+      setCurrentGuild(guild);
+      let nextState: IdleGameState | null = null;
+      setState((cur) => {
+        nextState = {
+          ...cur,
+          guildState: syncGuildState(cur.guildState, {
+            guildId: guild.id,
+            guildName: guild.name,
+            guildIcon: guild.icon,
+            guildXp: guild.xp,
+            guildLevel: guild.level,
+            memberCount: guild.members.length
+          })
+        };
+        return nextState;
+      });
+      if (nextState) saveGameState(nextState);
+      setSocialStatus(`Guild ${guild.name} ready`);
     });
   };
   const handleJoinGuild = (guildId: string) => {
-    if (!user) return openAuth();
-    void joinGuild(user.id, user.username, guildId).then((guild) => {
-      if (!guild) return;
-      setGuilds((cur) => cur.map((entry) => entry.id === guild.id ? guild : entry));
-      setOnlineStatus(`Joined ${guild.name}`);
+    const requestId = ++joinGuildRequestRef.current;
+    void joinIdleGuild(socialIdentity.id, socialIdentity.username, {
+      guildId,
+      power: powerRating,
+      level: state.level
+    }).then((guild) => {
+      if (!guild || !isMountedRef.current || requestId !== joinGuildRequestRef.current) return;
+      setSocialGuilds((cur) => cur.map((entry) => entry.id === guild.id ? guild : entry));
+      setCurrentGuild(guild);
+      let nextState: IdleGameState | null = null;
+      setState((cur) => {
+        nextState = {
+          ...cur,
+          guildState: syncGuildState(cur.guildState, {
+            guildId: guild.id,
+            guildName: guild.name,
+            guildIcon: guild.icon,
+            guildXp: guild.xp,
+            guildLevel: guild.level,
+            memberCount: guild.members.length
+          })
+        };
+        return nextState;
+      });
+      if (nextState) saveGameState(nextState);
+      setSocialStatus(`Joined ${guild.name}`);
     });
   };
-  const handleSendChat = () => {
-    if (!user) return openAuth();
-    const message = chatInput.trim();
-    if (!message) return;
-    setChatInput("");
-    void sendGlobalChat(user.id, user.username, message).then((ok) => {
-      if (!ok) return;
-      void fetchGlobalChat().then(setChatMessages);
+  const handleLeaveGuild = () => {
+    const requestId = ++leaveGuildRequestRef.current;
+    void leaveIdleGuild(socialIdentity.id, socialIdentity.username).then((ok) => {
+      if (!ok || !isMountedRef.current || requestId !== leaveGuildRequestRef.current) return;
+      setCurrentGuild(null);
+      let nextState: IdleGameState | null = null;
+      setState((cur) => {
+        nextState = { ...cur, guildState: syncGuildState(cur.guildState, null) };
+        return nextState;
+      });
+      if (nextState) saveGameState(nextState);
+      setSocialStatus("Guild left");
     });
+  };
+  const handleGuildRaidBoss = () => {
+    if (!currentGuild) return;
+    const raidDamage = Math.max(1200, Math.floor(dps * 8));
+    const requestId = ++raidGuildRequestRef.current;
+    void contributeIdleGuildRaid(socialIdentity.id, socialIdentity.username, {
+      guildId: currentGuild.id,
+      damage: raidDamage
+    }).then((guild) => {
+      if (!guild || !isMountedRef.current || requestId !== raidGuildRequestRef.current) return;
+      setCurrentGuild(guild);
+      setSocialGuilds((cur) => cur.map((entry) => entry.id === guild.id ? guild : entry));
+      setSocialStatus(`Guild raid hit for ${formatNumber(raidDamage)}`);
+    });
+  };
+  const handleClaimWeeklyReward = () => {
+    dispatch(claimWeeklyPveReward(state));
+  };
+  const handleShadowBattle = (opponent: ShadowSnapshot) => {
+    const battle = resolveShadowBattle(state, opponent, socialIdentity.username, socialIdentity.id);
+    dispatch(battle);
+    if (battle.success) {
+      const requestId = ++shadowSubmitRequestRef.current;
+      void submitIdleShadowBattle(socialIdentity.id, socialIdentity.username, {
+        rating: battle.state.pvpState.rating,
+        wins: battle.state.pvpState.wins,
+        losses: battle.state.pvpState.losses
+      }).then(() => {
+        if (!isMountedRef.current || requestId !== shadowSubmitRequestRef.current) return;
+      });
+    }
+  };
+
+  const handleClaimMicroMission = (missionId: string) =>
+    dispatch(claimMicroMissionReward(state, missionId));
+
+  const handleExportSave = () => {
+    const encoded = exportSave(state);
+    try {
+      navigator.clipboard.writeText(encoded);
+      setToast("Save copied to clipboard!");
+    } catch {
+      // Clipboard not available — show the string in the import box so user can copy manually
+      setImportText(encoded);
+      setSaveMenuOpen(true);
+      setToast("Clipboard unavailable — copy from the box below.");
+    }
+  };
+
+  const handleImportSave = () => {
+    const trimmed = importText.trim();
+    if (!trimmed) return;
+    const restored = importSave(trimmed);
+    if (!restored) {
+      setToast("Import failed: invalid save string.");
+      return;
+    }
+    setState(restored);
+    saveGameState(restored);
+    setImportText("");
+    setSaveMenuOpen(false);
+    setToast("Save imported successfully!");
   };
 
   const handlePrestige = () => {
@@ -726,7 +716,13 @@ export function IdleStoryWorldGame() {
 
   // ── Render ─────────────────────────────────────────────────────────────────
   const hpTier = enemyHpPct > 60 ? "hi" : enemyHpPct > 25 ? "mid" : "lo";
-  const enemyName = currentMonster?.name ?? stageEnemy?.name ?? "Monster";
+  const enemyName = sanitizeGameText(currentMonster?.name ?? stageEnemy?.name ?? "Monster", "Monster");
+  const enemyImage = currentMonster?.image ?? stageEnemy?.image ?? null;
+  const renderableEnemyImage = isRenderableImageSource(enemyImage) ? enemyImage : null;
+  const safeEnemyPortrait = getSafeMonsterPortrait(
+    currentMonster?.portrait ?? stageEnemy?.portrait,
+    "\u{1F47E}"
+  );
   const monsterIdentity = currentMonster as (DatabaseMonster & Partial<{
     elementalType: string;
     specialTrait: string;
@@ -734,8 +730,7 @@ export function IdleStoryWorldGame() {
     title: string;
     variantLabel: string;
   }>) | null;
-  const mapLocationName = mapBg?.locationName ?? zone.name;
-  const mapFlavor = zone.flavorText || zone.description || visualIdentity.atmosphere;
+  const mapLocationName = sanitizeGameText(mapBg?.locationName ?? zone.name, zone.name);
   const arenaFxClass = [
     isBoss ? "is-boss-fx" : "",
     isElite ? "is-elite-fx" : "",
@@ -744,42 +739,40 @@ export function IdleStoryWorldGame() {
     isStageClear ? "is-clear-fx" : "",
     lootDropVisible ? "is-loot-fx" : "",
     surgeActive ? "is-surge-fx" : "",
+    isBossHitShake ? "is-boss-shake" : "",
+    isLevelUpFlash ? "is-levelup-fx" : "",
   ].filter(Boolean).join(" ");
+
+  useEffect(() => {
+    setEnemyImageBroken(false);
+  }, [renderableEnemyImage, state.zone, state.stage, enemyName]);
 
   return (
     <GameShell
       title="IdleStory World"
-      subtitle={`${zone.region} · Lv.${state.level}`}
-      icon="⚔"
+      subtitle={`${zone.region} - Lv.${state.level}`}
+      icon="IW"
       aspectRatio="9 / 16"
     >
       <div className="isw">
 
-        {/* ════ TOP HUD ════ */}
+        {/* ◆◆◆◆ TOP HUD ◆◆◆◆ */}
         <div className="isw-hud">
-          <div className="isw-hud__player">
-            <div className="isw-hud__avatar">IW</div>
-            <div className="isw-hud__player-copy">
-              <strong>IdleStory World</strong>
-              <span>{zone.name} · Wave {state.stage}</span>
-            </div>
-            <button className="isw-hud__menu" type="button" aria-label="Game menu">☰</button>
-          </div>
           <div className="isw-hud__currencies">
             <div className={`isw-hud__chip isw-hud__chip--gold${incomeRates.isCapped ? " isw-hud__chip--capped" : ""}${isGoldBumping ? " is-bumping" : ""}`}>
-              <span className="isw-hud__chip-icon">💰</span>
+              <span className="isw-hud__chip-icon">$</span>
               <span className="isw-hud__chip-val">{formatNumber(state.mesos)}</span>
             </div>
             <div className={`isw-hud__chip isw-hud__chip--crystal${state.crystals >= 500 ? " isw-hud__chip--capped" : ""}`}>
-              <span className="isw-hud__chip-icon">💎</span>
+              <span className="isw-hud__chip-icon">C</span>
               <span className="isw-hud__chip-val">{Math.floor(state.crystals)}/500</span>
             </div>
             <div className="isw-hud__chip isw-hud__chip--relic">
-              <span className="isw-hud__chip-icon">🔮</span>
+              <span className="isw-hud__chip-icon">R</span>
               <span className="isw-hud__chip-val">{formatNumber(state.relics)}</span>
             </div>
             <div className="isw-hud__chip isw-hud__chip--fame">
-              <span className="isw-hud__chip-icon">🏆</span>
+              <span className="isw-hud__chip-icon">F</span>
               <span className="isw-hud__chip-val">{formatNumber(state.fame)}</span>
             </div>
           </div>
@@ -796,7 +789,7 @@ export function IdleStoryWorldGame() {
               )}
             </div>
             <span className={`isw-hud__dps${surgeActive ? " is-surge" : ""}`}>
-              ⚡ {formatNumber(dps)}/s
+              DPS {formatNumber(dps)}/s
               {surgeActive && <span className="isw-hud__surge-tag">SURGE</span>}
             </span>
             <span
@@ -804,17 +797,18 @@ export function IdleStoryWorldGame() {
               style={{ color: powerTier.color }}
               title={`${powerTier.label} rank`}
             >
-              ✦ {formatPowerRating(powerRating)}
+              PR {formatPowerRating(powerRating)}
             </span>
           </div>
         </div>
 
-        {/* ════ COMBAT ARENA ════ */}
+        {/* ◆◆◆◆ COMBAT ARENA ◆◆◆◆ */}
         <div className={[
           "isw-arena",
           arenaFxClass,
           `is-theme-${zone.theme}`,
           isBossEnraged ? "is-enraged" : "",
+          isBoss && enemyHpPct <= 25 ? "is-boss-danger" : "",
           isKillFlash   ? "is-kill-flash" : "",
           isStageClear  ? "is-stage-clear" : "",
         ].filter(Boolean).join(" ")}>
@@ -870,13 +864,38 @@ export function IdleStoryWorldGame() {
                   exit={{ opacity: 0 }}
                   transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
                 >
-                  {n.kind === "crit" ? "✦ " : ""}{formatNumber(n.value)}
+                  {n.kind === "incoming" ? "-" : n.kind === "crit" ? "CRIT " : ""}{formatNumber(n.value)}
+                </motion.div>
+              ))}
+              {goldPops.map((entry) => (
+                <motion.div
+                  key={entry.id}
+                  className="isw-gold-pop"
+                  initial={{ opacity: 0, y: 8, scale: 0.88 }}
+                  animate={{ opacity: 1, y: -26, scale: 1 }}
+                  exit={{ opacity: 0, y: -52, scale: 1.04 }}
+                  transition={{ duration: 1.15, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  +{formatNumber(entry.value)} Mesos
                 </motion.div>
               ))}
             </AnimatePresence>
           </div>
 
           <AnimatePresence>
+            {bossIntro && (
+              <motion.div
+                className="isw-boss-intro"
+                initial={{ opacity: 0, y: -10, scale: 0.94 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -16, scale: 0.98 }}
+                transition={{ duration: 0.34, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <span className="isw-boss-intro__tag">Boss Encounter</span>
+                <strong className="isw-boss-intro__title">{bossIntro.title}</strong>
+                <span className="isw-boss-intro__sub">{bossIntro.subtitle}</span>
+              </motion.div>
+            )}
             {rewardText && (
               <motion.div
                 className="isw-reward-pop"
@@ -890,22 +909,100 @@ export function IdleStoryWorldGame() {
             )}
           </AnimatePresence>
 
+          {/* Active world event banner */}
+          <AnimatePresence>
+            {(state.activeEvents ?? []).length > 0 && (state.activeEvents ?? [])[0] && (
+              <motion.div
+                key={(state.activeEvents ?? [])[0].id}
+                className="isw-event-banner"
+                style={{ "--event-color": (state.activeEvents ?? [])[0].color } as React.CSSProperties}
+                initial={{ opacity: 0, y: -20, scale: 0.88 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: -10, scale: 0.94 }}
+                transition={{ type: "spring", stiffness: 380, damping: 26 }}
+              >
+                <span className="isw-event-banner__icon">
+                  {sanitizeGameText((state.activeEvents ?? [])[0].icon, "!")}
+                </span>
+                <div className="isw-event-banner__body">
+                  <span className="isw-event-banner__label">
+                    {sanitizeGameText((state.activeEvents ?? [])[0].label, "World Event")}
+                  </span>
+                  <span className="isw-event-banner__desc">
+                    {sanitizeGameText((state.activeEvents ?? [])[0].description, "Event active")}
+                  </span>
+                </div>
+                <span className="isw-event-banner__timer">
+                  {Math.ceil((state.activeEvents ?? [])[0].remainingSeconds)}s
+                </span>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {/* Stage badge */}
           <div className="isw-arena__stage">
             <span className={`isw-arena__stage-badge${isBoss ? " is-boss" : isElite ? " is-elite" : ""}`}>
-              {isBoss
-                ? `⚠ BOSS · Stage ${state.stage}`
-                : isElite
-                  ? `⚡ ELITE · Stage ${state.stage}`
-                  : `Stage ${state.stage} · ${zone.name}`}
+              {activeDungeonRun
+                ? `${DUNGEON_DEFINITIONS[activeDungeonRun.type].icon} ${DUNGEON_DEFINITIONS[activeDungeonRun.type].name} - Wave ${activeDungeonRun.wave}/${activeDungeonRun.totalWaves}${activeDungeonRun.isBossWave ? " - FINAL BOSS" : ""}`
+                : isBoss
+                  ? `BOSS - Stage ${state.stage}`
+                  : isElite
+                    ? `ELITE - Stage ${state.stage}`
+                    : `Stage ${state.stage} - ${zone.name}`}
             </span>
             <span className="isw-arena__location-tag">{mapLocationName}</span>
             {/* Power gate warning pill */}
             {(powerStatus === "underpowered" || powerStatus === "blocked") && !isBoss && (
               <span className={`isw-power-pill isw-power-pill--${powerStatus}`}>
-                {powerStatus === "blocked" ? "🚫 Blocked" : "⚠ Slowed"} {Math.round(progMult * 100)}%
+                {powerStatus === "blocked" ? "Blocked" : "Slowed"} {Math.round(progMult * 100)}%
               </span>
             )}
+          </div>
+
+          <div className="isw-engagement-strip">
+            <div className={`isw-engagement-chip${momentumTier > 0 ? " is-live" : ""}`}>
+              <span>Momentum</span>
+              <strong>Tier {momentumTier}</strong>
+              <small>{streakToNext > 0 ? `${streakToNext} kills to next` : "Max tier reached"}</small>
+            </div>
+            <div className={`isw-engagement-chip${objectivePct >= 100 ? " is-live" : ""}`}>
+              <span>Objective</span>
+              <strong>{state.activeObjective.label}</strong>
+              <small>{formatNumber(state.activeObjective.progress)} / {formatNumber(state.activeObjective.target)}</small>
+              <div className="isw-engagement-chip__bar">
+                <div style={{ width: `${objectivePct}%` }} />
+              </div>
+            </div>
+            <div className="isw-engagement-chip">
+              <span>Next unlock</span>
+              <strong>{nextZoneLabel}</strong>
+              <small>{nextZoneHint}</small>
+            </div>
+          </div>
+
+          <div className={`isw-combat-clarity${enemyHitPulse ? " is-player-hit" : ""}`}>
+            <div className="isw-combat-clarity__meta">
+              <span className="isw-combat-clarity__zone">{zone.name}</span>
+              <span className="isw-combat-clarity__stage">Stage {state.stage}</span>
+            </div>
+            <div className="isw-combat-clarity__row">
+              <span className="isw-combat-clarity__label">Player HP</span>
+              <span className="isw-combat-clarity__value">
+                {formatNumber(playerHpDisplay)} / {formatNumber(playerMaxHp)}
+              </span>
+            </div>
+            <div className="isw-combat-clarity__track">
+              <div className="isw-combat-clarity__fill is-player" style={{ width: `${playerHpPct}%` }} />
+            </div>
+            <div className="isw-combat-clarity__row">
+              <span className="isw-combat-clarity__label">Enemy Attack</span>
+              <span className="isw-combat-clarity__value">
+                {formatNumber(enemyAttackPerSecond)}/s
+              </span>
+            </div>
+            <div className="isw-combat-clarity__track">
+              <div className="isw-combat-clarity__fill is-enemy" style={{ width: `${enemyAttackProgress}%` }} />
+            </div>
           </div>
 
           {/* Enemy sprite — hidden during boss fights (BossPanel renders the sprite instead) */}
@@ -918,12 +1015,19 @@ export function IdleStoryWorldGame() {
                 animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
                 transition={{ type: "spring", stiffness: 340, damping: 20 }}
               >
-                {currentMonster?.image
-                  ? <img src={currentMonster.image} alt={enemyName} />
-                  : <span className="isw-arena__emoji" role="img" aria-label={enemyName}>
-                      {currentMonster?.portrait ?? stageEnemy?.portrait ?? "👾"}
-                    </span>
-                }
+                {renderableEnemyImage && !enemyImageBroken ? (
+                  <img
+                    src={renderableEnemyImage}
+                    alt={enemyName}
+                    loading="lazy"
+                    decoding="async"
+                    onError={() => setEnemyImageBroken(true)}
+                  />
+                ) : (
+                  <span className="isw-arena__emoji" role="img" aria-label={enemyName}>
+                    {safeEnemyPortrait}
+                  </span>
+                )}
               </motion.div>
             </div>
           )}
@@ -934,16 +1038,23 @@ export function IdleStoryWorldGame() {
               <div className="isw-arena__enemy-name">
                 {enemyName}
                 {state.prestigeCount > 0 && (
-                  <span className="isw-prestige-badge" style={{ marginLeft: 6 }}>×{state.prestigeCount}</span>
+                  <span className="isw-prestige-badge" style={{ marginLeft: 6 }}>x{state.prestigeCount}</span>
                 )}
               </div>
               <div className="isw-arena__enemy-hint">
-                <span>{monsterIdentity?.roleIdentity ?? monsterIdentity?.specialTrait ?? visualIdentity.monsterCue}</span>
-                {monsterIdentity?.elementalType && <span>{monsterIdentity.elementalType}</span>}
+                <span>
+                  {sanitizeGameText(
+                    monsterIdentity?.roleIdentity ?? monsterIdentity?.specialTrait ?? visualIdentity.monsterCue,
+                    "Wild encounter"
+                  )}
+                </span>
+                {monsterIdentity?.elementalType && (
+                  <span>{sanitizeGameText(monsterIdentity.elementalType, "neutral")}</span>
+                )}
               </div>
               <div className="isw-arena__hp-label">
                 <span>HP</span>
-                <span>{formatNumber(state.enemyHp)} / {formatNumber(state.enemyMaxHp)}</span>
+                <span>{formatNumber(displayEnemyHp)} / {formatNumber(displayEnemyMaxHp)}</span>
               </div>
               <div className="isw-arena__hp-track">
                 <div
@@ -990,13 +1101,32 @@ export function IdleStoryWorldGame() {
           )}
 
           {/* Toast inside arena */}
-          <div className="isw-toast">{toast}</div>
+          <div className="isw-toast">{sanitizeGameText(toast, "Ready")}</div>
+          {!!combatFeed.length && (
+            <div className="isw-combat-feed" aria-live="polite">
+              <AnimatePresence>
+                {combatFeed.map((entry) => (
+                  <motion.div
+                    key={entry.id}
+                    className={`isw-combat-feed__item is-${entry.tone}`}
+                    initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: -8, scale: 0.96 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    <span>{sanitizeGameText(entry.label, "Combat")}</span>
+                    <strong>{sanitizeGameText(entry.value, "--")}</strong>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          )}
 
           {/* Boss surge active indicator */}
           {surgeActive && !isBoss && (
             <div className="isw-surge-badge">
-              <span className="isw-surge-badge__icon">💥</span>
-              <span className="isw-surge-badge__text">SURGE ×2</span>
+              <span className="isw-surge-badge__icon">!</span>
+              <span className="isw-surge-badge__text">SURGE x2</span>
               <span className="isw-surge-badge__timer">{Math.ceil(state.bossSurgeSecondsLeft)}s</span>
             </div>
           )}
@@ -1033,7 +1163,7 @@ export function IdleStoryWorldGame() {
                 exit={{ opacity: 0 }}
                 transition={{ duration: 1.3, ease: [0.22, 1, 0.36, 1] }}
               >
-                💎 Lucky Drop!
+                Lucky Drop!
               </motion.div>
             )}
           </AnimatePresence>
@@ -1061,38 +1191,40 @@ export function IdleStoryWorldGame() {
             {isBoss && (
               <motion.div
                 key="boss-overlay"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.35 }}
+                initial={{ opacity: 0, scale: 1.05, y: -8 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.96, y: 6 }}
+                transition={{ type: "spring", stiffness: 260, damping: 22, mass: 0.9 }}
                 style={{ position: "absolute", inset: 0, zIndex: 10 }}
               >
-                <BossPanel
-                  zone={zone}
-                  monster={currentMonster}
-                  hpPct={enemyHpPct}
-                  enemyHp={state.enemyHp}
-                  enemyMaxHp={state.enemyMaxHp}
-                  stage={state.stage}
-                  isHit={isHit}
-                  onRaid={handleRaidBoss}
-                  onHunt={handleHunt}
-                  rewardMesos={Math.round(mesosPerSecond * 8)}
-                  rewardCrystals={state.prestigeCount + 1}
-                  bossDefinition={bossDefinition}
-                  currentPhase={bossPhase}
-                  activeMechanicId={activeMechanicId}
-                  mechanicTimeLeft={mechanicTimeLeft}
-                  enrageTimeLeft={enrageTimeLeft}
-                  isEnraged={isBossEnraged}
-                  voiceLine={bossVoiceLine}
-                />
+                <Suspense fallback={null}>
+                  <BossPanel
+                    zone={zone}
+                    monster={currentMonster}
+                    hpPct={enemyHpPct}
+                    enemyHp={displayEnemyHp}
+                    enemyMaxHp={displayEnemyMaxHp}
+                    stage={activeDungeonRun?.wave ?? state.stage}
+                    isHit={isHit}
+                    onRaid={handleRaidBoss}
+                    onHunt={handleHunt}
+                    rewardMesos={Math.round(mesosPerSecond * 8)}
+                    rewardCrystals={state.prestigeCount + 1}
+                    bossDefinition={bossDefinition}
+                    currentPhase={bossPhase}
+                    activeMechanicId={activeMechanicId}
+                    mechanicTimeLeft={mechanicTimeLeft}
+                    enrageTimeLeft={enrageTimeLeft}
+                    isEnraged={isBossEnraged}
+                    voiceLine={bossVoiceLine}
+                  />
+                </Suspense>
               </motion.div>
             )}
           </AnimatePresence>
         </div>
 
-        {/* ════ TUTORIAL HINT BAR ════ */}
+        {/* ◆◆◆◆ TUTORIAL HINT BAR ◆◆◆◆ */}
         <AnimatePresence>
           {tutorialHint && tutorialStep !== "done" && (
             <motion.div
@@ -1104,20 +1236,20 @@ export function IdleStoryWorldGame() {
               transition={{ duration: 0.25 }}
             >
               <span className="isw-tutorial-hint__icon">
-                {tutorialStep === "intro" ? "⚔" : tutorialStep === "heroes_tab" ? "🛡" : tutorialStep === "buy_hero" ? "💰" : "🎉"}
+                {tutorialStep === "intro" ? "!" : tutorialStep === "heroes_tab" ? "H" : tutorialStep === "buy_hero" ? "$" : "OK"}
               </span>
               <div className="isw-tutorial-hint__body">
                 <span className="isw-tutorial-hint__text">{tutorialHint.text}</span>
                 <span className="isw-tutorial-hint__sub">{tutorialHint.sub}</span>
               </div>
               {tutorialHint.target === "heroes_tab" && (
-                <span className="isw-tutorial-hint__arrow">↓ Heroes</span>
+                <span className="isw-tutorial-hint__arrow">-&gt; Heroes</span>
               )}
             </motion.div>
           )}
         </AnimatePresence>
 
-        {/* ════ BOTTOM TABS ════ */}
+        {/* ◆◆◆◆ BOTTOM TABS ◆◆◆◆ */}
         <div className="isw-tabs">
           {/* Tab panel */}
           <div className="isw-tab-panel">
@@ -1141,37 +1273,48 @@ export function IdleStoryWorldGame() {
                     onRebirth={handleRebirth}
                     retentionSummary={retentionSummary}
                     onClaimDaily={handleClaimDailyReward}
-                    onClaimMission={handleClaimMissionReward}
+                    onClaimComeback={handleClaimComebackReward}
                     onReadNotifications={handleReadNotifications}
                     powerRating={powerRating}
                     powerTier={powerTier}
                     nextMilestone={nextMilestone}
                     surgeSecondsLeft={state.bossSurgeSecondsLeft}
                     dps={dps}
+                    activeShopBoosts={activeShopBoosts}
+                    microMissions={state.microMissions ?? []}
+                    onClaimMicroMission={handleClaimMicroMission}
                   />
                 )}
                 {tab === "heroes" && (
-                  <HeroesPanel
-                    state={state}
-                    onBuyHero={handleBuyHero}
-                    onBuyUpgrade={handleBuyUpgrade}
-                    onTrainSkill={handleTrainSkill}
-                    onBestHero={() => dispatch(buyBestHero(state))}
-                    onBestUpgrade={() => dispatch(buyBestUpgrade(state))}
-                    onBestSkill={() => dispatch(trainBestSkill(state))}
-                    tutorialTarget={tutorialHint?.target ?? null}
-                  />
+                  <Suspense fallback={<TabPanelFallback label="Loading heroes..." />}>
+                    <HeroesPanel
+                      state={state}
+                      onBuyHero={handleBuyHero}
+                      onBuyUpgrade={handleBuyUpgrade}
+                      onTrainSkill={handleTrainSkill}
+                      onBestHero={() => dispatch(buyBestHero(state))}
+                      onBestUpgrade={() => dispatch(buyBestUpgrade(state))}
+                      onBestSkill={() => dispatch(trainBestSkill(state))}
+                      tutorialTarget={tutorialHint?.target ?? null}
+                    />
+                  </Suspense>
                 )}
                 {tab === "inventory" && (
-                  <InventoryPanel
-                    state={state}
-                    items={items}
-                    onBuyGear={handleBuyGear}
-                    onBestGear={() => dispatch(buyBestGear(state))}
-                    onEquipLoot={handleEquipLoot}
-                    onUnequipLoot={handleUnequipLoot}
-                    onAutoEquipLoot={handleAutoEquipLoot}
-                  />
+                  <Suspense fallback={<TabPanelFallback label="Loading inventory..." />}>
+                    <InventoryPanel
+                      state={state}
+                      items={items}
+                      onBuyGear={handleBuyGear}
+                      onBestGear={() => dispatch(buyBestGear(state))}
+                      onEquipLoot={handleEquipLoot}
+                      onUnequipLoot={handleUnequipLoot}
+                      onAutoEquipLoot={handleAutoEquipLoot}
+                      onEnhanceLoot={handleEnhanceLoot}
+                      onRerollLoot={handleRerollLoot}
+                      onSalvageLoot={handleSalvageLoot}
+                      onCraftLoot={handleCraftLoot}
+                    />
+                  </Suspense>
                 )}
                 {tab === "class" && (
                   !state.classId
@@ -1185,6 +1328,8 @@ export function IdleStoryWorldGame() {
                         level={state.level}
                         onActivate={handleActivateSkill}
                         onSwitch={handleSelectClass}
+                        onSetBuildFocus={handleSetBuildFocus}
+                        onSetSkillBranch={handleSetSkillBranch}
                       />
                 )}
                 {tab === "economy" && (
@@ -1199,50 +1344,114 @@ export function IdleStoryWorldGame() {
                     onRebirth={handleRebirth}
                   />
                 )}
+                {tab === "shop" && (
+                  <ShopTab
+                    state={state}
+                    rewardedAdCooldowns={rewardedAdCooldowns}
+                    claimableFreePassTiers={claimableFreePassTiers}
+                    claimablePremiumPassTiers={claimablePremiumPassTiers}
+                    onBuyShopOffer={handleBuyShopOffer}
+                    onWatchRewardedAd={handleWatchRewardedAd}
+                    onClaimSeasonPassTier={handleClaimSeasonPassTier}
+                  />
+                )}
                 {tab === "zones" && (
                   <ZoneTab
                     state={state}
                     progress={zoneProgress}
                     onChangeZone={handleChangeZone}
+                    onStartDungeon={handleStartDungeon}
                     setToast={setToast}
                   />
                 )}
                 {tab === "talents" && (
-                  <TalentTreePanel
-                    state={state}
-                    onBuyTalent={handleBuyTalent}
-                  />
+                  <Suspense fallback={<TabPanelFallback label="Loading talents..." />}>
+                    <TalentTreePanel
+                      state={state}
+                      onBuyTalent={handleBuyTalent}
+                    />
+                  </Suspense>
                 )}
-                {tab === "online" && (
-                  <OnlineTab
-                    user={user}
-                    status={onlineStatus}
-                    guilds={guilds}
-                    guildName={guildName}
-                    chatMessages={chatMessages}
-                    chatInput={chatInput}
-                    onLogin={openAuth}
-                    onGuildNameChange={setGuildName}
-                    onCreateGuild={handleCreateGuild}
-                    onJoinGuild={handleJoinGuild}
-                    onChatInputChange={setChatInput}
-                    onSendChat={handleSendChat}
-                  />
+                {tab === "social" && (
+                  <Suspense fallback={<TabPanelFallback label="Loading social..." />}>
+                    <SocialPanel
+                      user={user}
+                      guildState={state.guildState}
+                      guilds={socialGuilds}
+                      currentGuild={currentGuild}
+                      guildDraft={guildName}
+                      onGuildDraftChange={setGuildName}
+                      onLogin={openAuth}
+                      onCreateGuild={handleCreateGuild}
+                      onJoinGuild={handleJoinGuild}
+                      onLeaveGuild={handleLeaveGuild}
+                      onRaidGuildBoss={handleGuildRaidBoss}
+                      leaderboards={leaderboards}
+                      leaderboardCategory={leaderboardCategory}
+                      onLeaderboardCategoryChange={setLeaderboardCategory}
+                      currentRanks={state.leaderboardState.currentRanks}
+                      weeklyRanking={weeklyRanking}
+                      weeklyRank={weeklyRank}
+                      canClaimWeeklyReward={canClaimWeeklyRewardNow}
+                      onClaimWeeklyReward={handleClaimWeeklyReward}
+                      pvpState={state.pvpState}
+                      shadowOpponents={shadowOpponents}
+                      onShadowBattle={handleShadowBattle}
+                      status={socialStatus}
+                    />
+                  </Suspense>
                 )}
               </motion.div>
             </AnimatePresence>
           </div>
 
+          {/* Save data controls */}
+          <div className="isw-save-bar">
+            <button
+              className="isw-save-bar__toggle"
+              onClick={() => setSaveMenuOpen((v) => !v)}
+              aria-expanded={saveMenuOpen}
+              title="Export or import your save data"
+            >
+              {saveMenuOpen ? "▼ Save Data" : "▶ Save Data"}
+            </button>
+            {saveMenuOpen && (
+              <div className="isw-save-bar__panel">
+                <button className="isw-save-bar__btn" onClick={handleExportSave}>
+                  Export Save
+                </button>
+                <div className="isw-save-bar__import-row">
+                  <input
+                    className="isw-save-bar__input"
+                    type="text"
+                    value={importText}
+                    onChange={(e) => setImportText(e.target.value)}
+                    placeholder="Paste save string here…"
+                    aria-label="Import save string"
+                  />
+                  <button
+                    className="isw-save-bar__btn"
+                    onClick={handleImportSave}
+                    disabled={!importText.trim()}
+                  >
+                    Import Save
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Tab nav */}
           <nav className="isw-tab-nav">
             {([
-              { id: "combat",    icon: "⚔️",  label: "Combat"    },
-              { id: "heroes",    icon: "🛡️",  label: "Heroes"    },
-              { id: "inventory", icon: "🎒",  label: "Bag"       },
-              { id: "class",     icon: "✨",  label: "Class"     },
-              { id: "economy",   icon: "💰",  label: "Economy"   },
-              { id: "zones",     icon: "🗺️",  label: "Zones"     },
-              { id: "talents",   icon: "🌟",  label: "Talents"   },
+              { id: "combat",    icon: "ATK", label: "Combat"  },
+              { id: "heroes",    icon: "H",   label: "Heroes"  },
+              { id: "inventory", icon: "BAG", label: "Bag"     },
+              { id: "class",     icon: "CLS", label: "Class"   },
+              { id: "economy",   icon: "$",   label: "Economy" },
+              { id: "shop",      icon: "S",   label: "Shop"    },
+              { id: "zones",     icon: "Z",   label: "Zones"   },
+              { id: "talents",   icon: "T",   label: "Talents" },
             ] as const).map(({ id, icon, label }) => (
               <motion.button
                 key={id}
@@ -1268,21 +1477,26 @@ export function IdleStoryWorldGame() {
                 {id === "talents" && (state.talentPoints ?? 0) > 0 && (
                   <span className="isw-tab-nav__badge" />
                 )}
+                {id === "shop" && shopAttention && (
+                  <span className="isw-tab-nav__badge" />
+                )}
                 {/* Tutorial arrow badge on Heroes tab */}
                 {tutorialStep === "heroes_tab" && id === "heroes" && (
-                  <span className="isw-tutorial-arrow-badge">↑</span>
+                  <span className="isw-tutorial-arrow-badge">^</span>
                 )}
               </motion.button>
             ))}
             <motion.button
-              className={`isw-tab-nav__btn${tab === "online" ? " is-active" : ""}`}
-              onClick={() => handleTabChange("online")}
+              className={`isw-tab-nav__btn${tab === "social" ? " is-active" : ""}`}
+              onClick={() => handleTabChange("social")}
               whileTap={{ scale: 0.88 }}
               type="button"
             >
-              <span className="isw-tab-nav__btn-icon">🌐</span>
-              Online
-              {user && <span className="isw-tab-nav__badge" />}
+              <span className="isw-tab-nav__btn-icon">SOC</span>
+              Social
+              {(canClaimWeeklyRewardNow || shadowOpponents.length > 0 || Boolean(state.guildState.guildId)) && (
+                <span className="isw-tab-nav__badge" />
+              )}
             </motion.button>
           </nav>
         </div>
@@ -1292,693 +1506,13 @@ export function IdleStoryWorldGame() {
   );
 }
 
-// ─── COMBAT TAB ───────────────────────────────────────────────────────────────
-
-function OnlineTab({
-  user,
-  status,
-  guilds,
-  guildName,
-  chatMessages,
-  chatInput,
-  onLogin,
-  onGuildNameChange,
-  onCreateGuild,
-  onJoinGuild,
-  onChatInputChange,
-  onSendChat
-}: {
-  user: { id: string; username: string } | null;
-  status: string;
-  guilds: Guild[];
-  guildName: string;
-  chatMessages: ChatMessage[];
-  chatInput: string;
-  onLogin: () => void;
-  onGuildNameChange: (value: string) => void;
-  onCreateGuild: () => void;
-  onJoinGuild: (guildId: string) => void;
-  onChatInputChange: (value: string) => void;
-  onSendChat: () => void;
-}) {
+function TabPanelFallback({ label }: { label: string }) {
   return (
-    <div className="isw-panel">
-      <div className="isw-upgrade-section">
-        <div className="isw-section-head">
-          <span className="isw-section-label">Online Account</span>
-          <span className="isw-section-sub">{status}</span>
-        </div>
-        <div className="isw-shop-grid">
-          <div className="isw-shop-card">
-            <span className="isw-shop-card__name">{user ? user.username : "Guest"}</span>
-            <span className="isw-shop-card__desc">Cloud save, leaderboard, guilds and chat.</span>
-            <button className="isw-mini-btn" type="button" onClick={onLogin} disabled={Boolean(user)}>
-              {user ? "Connected" : "Login"}
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div className="isw-upgrade-section">
-        <div className="isw-section-head">
-          <span className="isw-section-label">Guilds</span>
-          <span className="isw-section-sub">{guilds.length} active</span>
-        </div>
-        <div className="isw-online-row">
-          <input value={guildName} onChange={(event) => onGuildNameChange(event.target.value)} placeholder="Guild name" />
-          <button className="isw-action-btn" type="button" onClick={onCreateGuild}>Create</button>
-        </div>
-        <div className="isw-shop-grid">
-          {guilds.slice(0, 4).map((guild) => (
-            <div className="isw-shop-card" key={guild.id}>
-              <span className="isw-shop-card__name">{guild.name}</span>
-              <span className="isw-shop-card__desc">{guild.members.length} members</span>
-              <button className="isw-mini-btn" type="button" onClick={() => onJoinGuild(guild.id)}>Join</button>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="isw-upgrade-section">
-        <div className="isw-section-head">
-          <span className="isw-section-label">Global Chat</span>
-          <span className="isw-section-sub">Live room</span>
-        </div>
-        <div className="isw-online-chat">
-          {chatMessages.slice(-6).map((entry) => (
-            <div className="isw-online-chat__msg" key={entry.id}>
-              <strong>{entry.username}</strong>
-              <span>{entry.message}</span>
-            </div>
-          ))}
-        </div>
-        <div className="isw-online-row">
-          <input
-            value={chatInput}
-            onChange={(event) => onChatInputChange(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") onSendChat();
-            }}
-            placeholder="Write to global chat"
-          />
-          <button className="isw-action-btn" type="button" onClick={onSendChat}>Send</button>
-        </div>
-      </div>
+    <div role="status" aria-live="polite" style={{ padding: "1rem 0", opacity: 0.72 }}>
+      {label}
     </div>
   );
 }
 
-function CombatTab({
-  state, isBoss, currentMonster, rebirthPreview,
-  retentionSummary,
-  onHunt, onRaid, onPrestige, onRebirth,
-  onClaimDaily, onClaimMission, onReadNotifications,
-  powerRating, powerTier, nextMilestone, surgeSecondsLeft, dps
-}: {
-  state: IdleGameState;
-  isBoss: boolean;
-  currentMonster: DatabaseMonster | null;
-  rebirthPreview: RebirthPreview;
-  retentionSummary: ReturnType<typeof getRetentionSummary>;
-  onHunt: () => void;
-  onRaid: () => void;
-  onPrestige: () => void;
-  onRebirth: () => void;
-  onClaimDaily: () => void;
-  onClaimMission: (id: MissionId) => void;
-  onReadNotifications: () => void;
-  powerRating: number;
-  powerTier: ReturnType<typeof getPowerTier>;
-  nextMilestone: MilestoneBonus | null;
-  surgeSecondsLeft: number;
-  dps: number;
-}) {
-  const dailyClaimed = !retentionSummary.dailyAvailable;
-  const unreadCount = retentionSummary.unreadNotifications;
-  const completedAchievements = retentionSummary.completedAchievements;
-  const aiRecommendation = state.ai.upgradeRecommendations[0];
-  const surgeActive = surgeSecondsLeft > 0;
-
-  return (
-    <div className="isw-panel">
-
-      {/* ── Power Rating card ─────────────────────────────────────────────── */}
-      <div className="isw-power-card">
-        <div className="isw-power-card__main">
-          <span className="isw-power-card__label">Power Rating</span>
-          <span className="isw-power-card__value" style={{ color: powerTier.color }}>
-            {formatPowerRating(powerRating)}
-          </span>
-          <span className="isw-power-card__tier" style={{ color: powerTier.color }}>
-            {powerTier.label}
-          </span>
-        </div>
-        <div className="isw-power-card__stats">
-          <div className="isw-power-card__stat">
-            <span>⚡ DPS</span>
-            <strong>{formatNumber(dps)}</strong>
-          </div>
-          <div className="isw-power-card__stat">
-            <span>📈 Level</span>
-            <strong>{state.level}</strong>
-          </div>
-          <div className="isw-power-card__stat">
-            <span>⭐ Prestige</span>
-            <strong>{state.prestigeCount > 0 ? `×${state.prestigeCount}` : "—"}</strong>
-          </div>
-        </div>
-        {/* Boss surge active bar */}
-        {surgeActive && (
-          <div className="isw-power-card__surge">
-            <span className="isw-power-card__surge-label">💥 BOSS SURGE  ×2 DPS</span>
-            <div className="isw-power-card__surge-track">
-              <motion.div
-                className="isw-power-card__surge-fill"
-                animate={{ width: `${(surgeSecondsLeft / BOSS_SURGE_SECONDS) * 100}%` }}
-                transition={{ duration: 0.5, ease: "linear" }}
-              />
-              <span className="isw-power-card__surge-time">{Math.ceil(surgeSecondsLeft)}s</span>
-            </div>
-          </div>
-        )}
-        {/* Next milestone progress */}
-        {nextMilestone && (
-          <div className="isw-power-card__milestone">
-            <span className="isw-power-card__milestone-label">
-              {nextMilestone.icon} Lv.{nextMilestone.level} — {nextMilestone.label}
-            </span>
-            <span className="isw-power-card__milestone-desc">{nextMilestone.description}</span>
-            <div className="isw-power-card__milestone-track">
-              <div
-                className="isw-power-card__milestone-fill"
-                style={{
-                  width: `${Math.min(100,
-                    ((state.level - (nextMilestone.level - 5)) / 5) * 100
-                  )}%`
-                }}
-              />
-            </div>
-            <span className="isw-power-card__milestone-lvs">
-              {nextMilestone.level - state.level} levels away
-            </span>
-          </div>
-        )}
-      </div>
-
-      <div className="isw-combat">
-        <motion.button
-          className={`isw-hunt-btn${surgeActive ? " is-surge" : ""}`}
-          onClick={onHunt}
-          whileTap={{ scale: 0.96 }}
-          type="button"
-        >
-          ⚔️ Hunt {currentMonster?.portrait ?? "🐾"}
-        </motion.button>
-        <motion.button
-          className={`isw-action-btn${isBoss ? " is-boss-btn" : ""}`}
-          onClick={onRaid}
-          whileTap={{ scale: 0.94 }}
-          type="button"
-        >
-          {isBoss ? "💥 Boss Strike" : "🎯 Raid Boss"}
-        </motion.button>
-        <motion.button
-          className={`isw-action-btn${rebirthPreview.canPrestige ? " is-ready" : ""}`}
-          onClick={onPrestige}
-          whileTap={{ scale: 0.94 }}
-          type="button"
-          title={rebirthPreview.prestigeReason}
-        >
-          ⭐ Prestige
-          {rebirthPreview.canPrestige ? " ✓" : ` (${Math.floor(state.crystals)}/8)`}
-        </motion.button>
-        <motion.button
-          className={`isw-action-btn${rebirthPreview.canRebirth ? " is-ready" : ""}`}
-          onClick={onRebirth}
-          whileTap={{ scale: 0.94 }}
-          type="button"
-          title={rebirthPreview.rebirthReason}
-        >
-          🌀 Rebirth
-          {rebirthPreview.canRebirth ? ` +${rebirthPreview.relicsOnRebirth}🔮` : ""}
-        </motion.button>
-      </div>
-
-      <div className="isw-upgrade-section">
-        <div className="isw-section-head">
-          <span className="isw-section-label">AI Assist</span>
-          <span className="isw-section-sub">Auto skill {state.ai.autoSkillEnabled ? "on" : "off"}</span>
-        </div>
-        <div className="isw-shop-grid">
-          <div className="isw-shop-card">
-            <span className="isw-shop-card__name">Recommended upgrade</span>
-            <span className="isw-shop-card__desc">
-              {aiRecommendation ? aiRecommendation.reason : "No recommendation yet."}
-            </span>
-            <span className="isw-shop-card__cost">
-              {aiRecommendation
-                ? `${aiRecommendation.label} · ${formatNumber(aiRecommendation.cost)} ${aiRecommendation.currency}`
-                : "Watching run"}
-            </span>
-          </div>
-          <div className="isw-shop-card">
-            <span className="isw-shop-card__name">Player behavior</span>
-            <span className="isw-shop-card__desc">
-              {state.behavior.totalActions} actions · {Math.floor(state.behavior.idleSeconds)}s idle
-            </span>
-            <span className="isw-shop-card__cost">Difficulty ×{state.ai.adaptiveDifficulty.toFixed(2)}</span>
-          </div>
-        </div>
-      </div>
-
-      <div className="isw-upgrade-section">
-        <div className="isw-section-head">
-          <span className="isw-section-label">Retention</span>
-          <span className="isw-section-sub">{completedAchievements}/{retentionSummary.totalAchievements} achievements</span>
-        </div>
-        <div className="isw-shop-grid">
-          <button
-            type="button"
-            className={`isw-shop-card${dailyClaimed ? " is-owned" : ""}`}
-            onClick={onClaimDaily}
-            disabled={dailyClaimed}
-          >
-            <span className="isw-shop-card__name">Daily Reward</span>
-            <span className="isw-shop-card__desc">Streak {state.dailyReward.streak} · Best {state.dailyReward.bestStreak}</span>
-            <span className="isw-shop-card__cost">{dailyClaimed ? "Claimed" : "Claim"}</span>
-          </button>
-
-          {(Object.keys(MISSION_DEFINITIONS) as MissionId[]).map((id) => {
-            const mission = state.missions[id];
-            const definition = MISSION_DEFINITIONS[id];
-            const canClaim = mission.completed && !mission.claimed;
-            return (
-              <button
-                key={id}
-                type="button"
-                className={`isw-shop-card${mission.claimed ? " is-owned" : ""}${canClaim ? " is-ready" : ""}`}
-                onClick={() => onClaimMission(id)}
-                disabled={!canClaim}
-              >
-                <span className="isw-shop-card__name">{definition.label}</span>
-                <span className="isw-shop-card__desc">{mission.progress}/{definition.target}</span>
-                <span className="isw-shop-card__cost">{mission.claimed ? "Claimed" : canClaim ? "Claim" : "Active"}</span>
-              </button>
-            );
-          })}
-
-          <button
-            type="button"
-            className={`isw-shop-card${unreadCount ? " is-ready" : ""}`}
-            onClick={onReadNotifications}
-            disabled={!unreadCount}
-          >
-            <span className="isw-shop-card__name">Notifications</span>
-            <span className="isw-shop-card__desc">Future-ready event inbox</span>
-            <span className="isw-shop-card__cost">{unreadCount} unread</span>
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── CLASS PICK TAB ───────────────────────────────────────────────────────────
-
-function ClassPickTab({ onSelect }: { onSelect: (id: ClassId) => void }) {
-  return (
-    <div className="isw-panel">
-      <div className="isw-class-pick">
-        <p className="isw-class-pick__hint">Choose your class</p>
-        <div className="isw-class-cards">
-          {Object.values(CLASSES).map(cls => (
-            <motion.button
-              key={cls.id}
-              className="isw-class-card"
-              onClick={() => onSelect(cls.id)}
-              style={{ borderColor: cls.color + "55" }}
-              whileTap={{ scale: 0.93 }}
-              type="button"
-            >
-              <span className="isw-class-card__icon">{cls.icon}</span>
-              <span className="isw-class-card__name" style={{ color: cls.color }}>{cls.name}</span>
-              <span className="isw-class-card__role">{cls.description}</span>
-            </motion.button>
-          ))}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── CLASS PANEL TAB ──────────────────────────────────────────────────────────
-
-function ClassTab({
-  state, skills, maxResource, resourcePct, regenMult, level, onActivate, onSwitch
-}: {
-  state: IdleGameState;
-  skills: ClassSkillDefinition[];
-  maxResource: number;
-  resourcePct: number;
-  regenMult: number;
-  level: number;
-  onActivate: (id: ClassSkillId) => void;
-  onSwitch: (id: ClassId) => void;
-}) {
-  if (!state.classId) return null;
-  const cls = CLASSES[state.classId];
-  const resName = cls.resource === "mana" ? "Mana" : "Rage";
-  const maxHp = getClassMaxHp(state.classId, level);
-
-  return (
-    <div className="isw-panel">
-      <div className="isw-class-panel">
-        {/* Header */}
-        <div className="isw-class-header">
-          <span className="isw-class-header__icon">{cls.icon}</span>
-          <div className="isw-class-header__info">
-            <span className="isw-class-header__name" style={{ color: cls.color }}>{cls.name}</span>
-            <span className="isw-class-header__passive">{cls.passive.name} · {cls.passive.description}</span>
-          </div>
-          <span className="isw-class-header__hp">HP {formatNumber(maxHp)}</span>
-          <motion.button
-            type="button"
-            className="isw-section-best"
-            style={{ marginLeft: 4 }}
-            onClick={() => onSwitch(state.classId === "warrior" ? "mage" : state.classId === "mage" ? "archer" : "warrior")}
-            whileTap={{ scale: 0.93 }}
-          >
-            Switch
-          </motion.button>
-        </div>
-
-        {/* Resource bar */}
-        <div>
-          <div className="isw-resource-label">
-            <span>{resName} {Math.floor(state.resource)} / {maxResource}</span>
-            {regenMult > 1 && <span>Regen ×{regenMult.toFixed(1)}</span>}
-          </div>
-          <div className="isw-resource-bar">
-            <div
-              className={`isw-resource-fill isw-resource-fill--${cls.resource}`}
-              style={{ width: `${resourcePct}%` }}
-            />
-          </div>
-        </div>
-
-        {/* Active buffs */}
-        {state.activeBuffs.length > 0 && (
-          <div className="isw-buffs">
-            <AnimatePresence>
-              {state.activeBuffs.map(buff => (
-                <motion.span
-                  key={buff.skillId}
-                  className="isw-buff-badge"
-                  initial={{ opacity: 0, scale: 0.7 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.7 }}
-                >
-                  {SKILL_DEFINITIONS[buff.skillId]?.icon ?? "✨"}{" "}
-                  {SKILL_DEFINITIONS[buff.skillId]?.name ?? buff.skillId}{" "}
-                  {buff.effectType === "buff_crit"
-                    ? `×${buff.charges}`
-                    : `${Math.ceil(buff.remainingSeconds)}s`}
-                </motion.span>
-              ))}
-            </AnimatePresence>
-          </div>
-        )}
-
-        {/* Skills */}
-        <div className="isw-skills">
-          {skills.map(skill => {
-            const locked = level < skill.unlockLevel;
-            const cd = state.skillCooldowns[skill.id] ?? 0;
-            const onCd = cd > 0;
-            const canAfford = state.resource >= skill.resourceCost;
-            const isReady = !locked && !onCd && canAfford;
-            const cdPct = onCd ? (1 - cd / SKILL_DEFINITIONS[skill.id].cooldown) * 100 : 0;
-            const resName2 = state.classId === "mage" ? "mana" : "rage";
-            const status = locked
-              ? `Lv.${skill.unlockLevel}`
-              : onCd ? `${Math.ceil(cd)}s`
-              : !canAfford ? `${skill.resourceCost} ${resName2}`
-              : "Ready";
-
-            return (
-              <motion.div
-                key={skill.id}
-                className={`isw-skill-card${locked ? " is-locked" : onCd ? " is-cooldown" : isReady ? " is-ready" : ""}`}
-                whileTap={!locked && !onCd && canAfford ? { scale: 0.93 } : {}}
-                onClick={() => !locked && !onCd && canAfford && onActivate(skill.id)}
-              >
-                <span className="isw-skill-card__icon">{skill.icon}</span>
-                <span className="isw-skill-card__name">{skill.name}</span>
-                <span className="isw-skill-card__status">{status}</span>
-                {onCd && (
-                  <div className="isw-skill-card__cd-track">
-                    <div className="isw-skill-card__cd-fill" style={{ width: `${cdPct}%` }} />
-                  </div>
-                )}
-              </motion.div>
-            );
-          })}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ─── ECONOMY TAB ──────────────────────────────────────────────────────────────
-
-function EconomyTab({
-  state, preview, incomePerSec, isCapped,
-  onBuyGlobalMult, onUpgradeRelic, onPrestige, onRebirth
-}: {
-  state: IdleGameState;
-  preview: RebirthPreview;
-  incomePerSec: number;
-  isCapped: boolean;
-  onBuyGlobalMult: (id: GlobalMultId) => void;
-  onUpgradeRelic: (id: RelicUpgradeId) => void;
-  onPrestige: () => void;
-  onRebirth: () => void;
-}) {
-  return (
-    <div className="isw-panel">
-      <div className="isw-economy">
-
-        {/* Income summary */}
-        <div className="isw-income-row">
-          <div className="isw-income-chip">
-            <span className="isw-income-chip__val" style={{ color: "var(--gold)" }}>
-              {formatNumber(incomePerSec)}/s{isCapped ? " ⚠" : ""}
-            </span>
-            <span className="isw-income-chip__lbl">Gold Income</span>
-          </div>
-          <div className="isw-income-chip">
-            <span className="isw-income-chip__val" style={{ color: "var(--crystal)" }}>
-              {Math.floor(state.crystals)}/500
-            </span>
-            <span className="isw-income-chip__lbl">Crystals</span>
-          </div>
-          <div className="isw-income-chip">
-            <span className="isw-income-chip__val" style={{ color: "var(--relic)" }}>
-              {formatNumber(state.relics)}
-            </span>
-            <span className="isw-income-chip__lbl">Relics</span>
-          </div>
-        </div>
-
-        {/* Global Multipliers */}
-        <div className="isw-upgrade-section">
-          <div className="isw-section-head">
-            <span className="isw-section-label">Global Multipliers</span>
-            <span style={{ fontSize: 10, color: "var(--crystal)" }}>💎 Crystals</span>
-          </div>
-          <div className="isw-mult-grid">
-            {(Object.keys(GLOBAL_MULTIPLIERS) as GlobalMultId[]).map(id => {
-              const def = GLOBAL_MULTIPLIERS[id];
-              const lv = state.globalMults[id];
-              const cost = getGlobalMultCost(id, lv);
-              const ok = state.crystals >= cost;
-              const maxed = lv >= def.maxLevel;
-              return (
-                <div key={id} className="isw-mult-card">
-                  <span className="isw-mult-card__icon">{def.icon}</span>
-                  <span className="isw-mult-card__name">{def.name}</span>
-                  <span className="isw-mult-card__desc">{def.description}</span>
-                  <span className="isw-mult-card__lv">Lv.{lv}/{def.maxLevel}</span>
-                  <motion.button
-                    type="button"
-                    className={`isw-mult-card__btn${maxed ? " maxed" : ok ? " can-afford" : ""}`}
-                    onClick={() => !maxed && onBuyGlobalMult(id)}
-                    whileTap={!maxed ? { scale: 0.93 } : {}}
-                  >
-                    {maxed ? "Max" : `${formatNumber(cost)} 💎`}
-                  </motion.button>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Relic Upgrades */}
-        <div className="isw-upgrade-section">
-          <div className="isw-section-head">
-            <span className="isw-section-label">Relic Upgrades</span>
-            <span style={{ fontSize: 10, color: "var(--relic)" }}>🔮 Permanent</span>
-          </div>
-          <div className="isw-mult-grid">
-            {(Object.values(RELIC_UPGRADES) as RelicUpgradeDef[]).map(def => {
-              const lv = state.relicUpgrades[def.id];
-              const cost = getRelicUpgradeCost(def.id, lv);
-              const ok = state.relics >= cost;
-              const maxed = lv >= def.maxLevel;
-              return (
-                <div key={def.id} className="isw-mult-card">
-                  <span className="isw-mult-card__icon">{def.icon}</span>
-                  <span className="isw-mult-card__name">{def.name}</span>
-                  <span className="isw-mult-card__desc">{def.description}</span>
-                  <span className="isw-mult-card__lv">Lv.{lv}/{def.maxLevel}</span>
-                  <motion.button
-                    type="button"
-                    className={`isw-mult-card__btn${maxed ? " maxed" : ok ? " can-afford" : ""}`}
-                    onClick={() => !maxed && onUpgradeRelic(def.id)}
-                    whileTap={!maxed ? { scale: 0.93 } : {}}
-                  >
-                    {maxed ? "Max" : `${cost} 🔮`}
-                  </motion.button>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Prestige / Rebirth */}
-        <div className="isw-rebirth-section">
-          <div className="isw-rebirth-row">
-            <div className="isw-rebirth-row__info">
-              <div className="isw-rebirth-row__title">⭐ Prestige ×{state.prestigeCount + 1}</div>
-              <div className="isw-rebirth-row__reason">{preview.prestigeReason}</div>
-              <div className="isw-rebirth-row__hint">Keeps: crystals (50 %), fame, class, global mults</div>
-            </div>
-            <motion.button
-              type="button"
-              className={`isw-rebirth-btn${preview.canPrestige ? " is-ready" : ""}`}
-              onClick={onPrestige}
-              whileTap={{ scale: 0.93 }}
-            >
-              Prestige
-            </motion.button>
-          </div>
-          <div className="isw-rebirth-row">
-            <div className="isw-rebirth-row__info">
-              <div className="isw-rebirth-row__title">🌀 Rebirth ×{state.rebirthCount + 1}</div>
-              <div className="isw-rebirth-row__reason">{preview.rebirthReason}</div>
-              <div className="isw-rebirth-row__hint">Resets everything — relics are permanent</div>
-            </div>
-            <motion.button
-              type="button"
-              className={`isw-rebirth-btn is-rebirth${preview.canRebirth ? " is-ready" : ""}`}
-              onClick={onRebirth}
-              whileTap={{ scale: 0.93 }}
-            >
-              Rebirth
-            </motion.button>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  );
-}
-
-// ─── ZONE TAB ─────────────────────────────────────────────────────────────────
-
-function ZoneTab({
-  state, progress, onChangeZone, setToast
-}: {
-  state: IdleGameState;
-  progress: ReturnType<typeof getZoneProgressSummary>;
-  onChangeZone: (z: WorldZone) => void;
-  setToast: (msg: string) => void;
-}) {
-  const [showAll, setShowAll] = useState(false);
-  const visibleZones = showAll ? ALL_ZONES : ALL_ZONES.slice(0, 8);
-
-  return (
-    <div className="isw-panel">
-      <div className="isw-zones">
-        {/* Progress */}
-        <div className="isw-zones__progress">
-          <div className="isw-zones__progress-bar">
-            <div className="isw-zones__progress-fill" style={{ width: `${progress.progressPct}%` }} />
-          </div>
-          <span className="isw-zones__progress-text">{progress.unlockedCount}/{progress.totalZones}</span>
-        </div>
-        {progress.nextLocked && (
-          <div className="isw-zones__hint">
-            Next: {progress.nextLocked.name}
-            {progress.levelsToNext > 0 ? ` — ${progress.levelsToNext} levels away` : ""}
-            {progress.prestigesToNext > 0 ? ` — Prestige ×${progress.nextLocked.prestigeRequired}` : ""}
-          </div>
-        )}
-        {/* Zone list */}
-        <div className="isw-zones__list">
-          <AnimatePresence>
-            {visibleZones.map((z, i) => {
-              const status = getZoneUnlockStatus(z, state);
-              const isActive = z.id === state.zone;
-              const locked = !status.unlocked;
-              return (
-                <motion.button
-                  key={z.id}
-                  type="button"
-                  className={`isw-zone-btn${isActive ? " is-active" : ""}${locked ? " is-locked" : ""}`}
-                  initial={{ opacity: 0, x: -12 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.03 }}
-                  style={{ ["--zone-color" as string]: z.color }}
-                  onClick={() => {
-                    if (locked) {
-                      setToast(`🔒 ${locked ? status.reason : z.name}`);
-                    } else {
-                      onChangeZone(z);
-                    }
-                  }}
-                  whileTap={!locked ? { scale: 0.97 } : {}}
-                  aria-disabled={locked}
-                >
-                  <span className="isw-zone-btn__icon">{locked ? "🔒" : (isActive ? z.bossIcon : "🗺️")}</span>
-                  <div className="isw-zone-btn__info">
-                    <div className="isw-zone-btn__name">{z.name}</div>
-                    {locked
-                      ? <div className="isw-zone-btn__lock-reason">{status.reason}</div>
-                      : <div className="isw-zone-btn__meta">{z.region} · {z.description.slice(0, 40)}</div>
-                    }
-                  </div>
-                  {!locked && (
-                    <span className="isw-zone-btn__boost">×{z.rewardBoost.toFixed(1)}</span>
-                  )}
-                  {isActive && <span className="isw-zone-btn__here">Here</span>}
-                </motion.button>
-              );
-            })}
-          </AnimatePresence>
-        </div>
-        <button
-          type="button"
-          className="isw-zones__more-btn"
-          onClick={() => setShowAll(s => !s)}
-        >
-          {showAll ? `▲ Show less` : `▼ Show all ${ALL_ZONES.length} zones`}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-// ─── Re-exports ───────────────────────────────────────────────────────────────
+// ── Re-exports (type-only; value re-exports removed for Fast Refresh compatibility)
 export type { IdleGameState, WorldZone, DatabaseMap, DatabaseMonster, DatabaseItem } from "./idlestory/gameEngine";
-export { DEFAULT_STATE } from "./idlestory/gameEngine";

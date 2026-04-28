@@ -180,6 +180,26 @@ function walkCheerio($, node, tokens, baseUrl, stats) {
     return;
   }
 
+  if (tag === "table") {
+    const rows = $(node)
+      .find("tr")
+      .map((_, row) =>
+        $(row)
+          .find("th, td")
+          .map((__, cell) => cleanText($(cell).text() || ""))
+          .get()
+          .filter(Boolean)
+          .join(" | ")
+      )
+      .get()
+      .filter(Boolean);
+    if (rows.length) {
+      tokens.push({ type: "list", items: rows });
+      stats.lists += 1;
+    }
+    return;
+  }
+
   if (tag.startsWith("h") && tag.length === 2) {
     const level = Number(tag[1]);
     const text = cleanText($(node).text() || "");
@@ -367,6 +387,8 @@ export function detectCategory(section) {
 
   const haystack = `${title} ${textBlob}`;
   const categories = [
+    { key: "fixes", label: "Fixes", terms: ["fix", "bug", "issue", "maintenance"] },
+    { key: "ui-qol", label: "UI / QoL", terms: ["ui", "qol", "quality", "interface", "menu"] },
     { key: "classes", label: "Classes", terms: ["class", "job", "character", "ability", "skill"] },
     { key: "skills", label: "Skills", terms: ["skill", "mastery", "ability", "core"] },
     { key: "items", label: "Items", terms: ["item", "equipment", "gear", "drop", "loot", "reward"] },
@@ -377,8 +399,6 @@ export function detectCategory(section) {
     { key: "enhancement", label: "Enhancement", terms: ["enhance", "star force", "upgrade", "cube"] },
     { key: "farming", label: "Farming", terms: ["farm", "meso", "drop rate", "grind", "exp"] },
     { key: "maps", label: "Maps", terms: ["map", "region", "area", "zone", "field"] },
-    { key: "ui-qol", label: "UI / QoL", terms: ["ui", "qol", "quality", "interface", "menu"] },
-    { key: "fixes", label: "Fixes", terms: ["fix", "bug", "issue", "maintenance"] },
     { key: "cash-shop", label: "Cash Shop", terms: ["cash shop", "cash", "nx", "sale", "package"] }
   ];
 
@@ -429,8 +449,41 @@ export function parseArticleHtml(html = "", baseUrl = "") {
   }
 
   if (!root || !root.length) {
-    console.error("[KMS Parser] root content NOT FOUND");
-    throw new Error("Article root content NOT FOUND");
+    const body = $("body");
+    if (body.length && (cleanText(body.text() || "").length || body.find("img").length)) {
+      root = body;
+      rootSelector = "body";
+    }
+  }
+
+  if (!root || !root.length) {
+    const fallbackText = cleanText($.root().text() || html.replace(/<[^>]*>/g, " "));
+    const fallbackImages = $("img")
+      .toArray()
+      .map((node) => extractImageFromNode($, node, baseUrl))
+      .filter((image) => image.src);
+    const fallbackDetails = [
+      ...fallbackImages.slice(0, 8).map((image) => ({ type: "image", src: image.src, alt: image.alt })),
+      ...(fallbackText ? [{ type: "text", value: fallbackText }] : [])
+    ];
+    const sections = [{ title: "Full Article", details: fallbackDetails }];
+    return {
+      summary: fallbackText.slice(0, 260),
+      heroImage: fallbackImages[0]?.src || "",
+      sections,
+      categories: groupSectionsByCategory(sections),
+      tokens: fallbackDetails,
+      fullText: fallbackText,
+      stats: {
+        rootTextLength: fallbackText.length,
+        articleTextLength: fallbackText.length,
+        tokenCount: fallbackDetails.length,
+        headings: 0,
+        images: fallbackImages.length,
+        lists: 0,
+        paragraphs: fallbackDetails.length
+      }
+    };
   }
 
   stripNoiseCheerio(root);
@@ -453,8 +506,9 @@ export function parseArticleHtml(html = "", baseUrl = "") {
     console.log("[KMS Parser] lists:", stats.lists);
   }
 
-  if (stats.paragraphs < 5 || fullText.length < 1000) {
-    console.error("[KMS Parser] ARTICLE EXTRACTION FAILED");
+  const likelyPartialExtraction = !tokens.length || (fullText.length < 280 && !stats.images && !stats.lists);
+  if (likelyPartialExtraction) {
+    console.warn("[KMS Parser] ARTICLE EXTRACTION FALLBACK MAY BE PARTIAL");
   }
 
   let sections = buildSections(tokens);
@@ -482,7 +536,10 @@ export function parseArticleHtml(html = "", baseUrl = "") {
   }));
 
   const totalDetails = sections.reduce((sum, section) => sum + (section.details?.length || 0), 0);
-  if (fullText && (sections.length <= 1 || totalDetails < 4)) {
+  const hasStructuredDetails = sections.some((section) =>
+    (section.details || []).some((detail) => detail?.type === "image" || detail?.type === "list")
+  );
+  if (fullText && !hasStructuredDetails && sections.length <= 1 && totalDetails < 4) {
     sections = [
       {
         title: "Full Article",

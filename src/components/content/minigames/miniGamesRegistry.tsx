@@ -1,22 +1,25 @@
-import type { ComponentType } from "react";
+import { lazy, type ComponentType, type LazyExoticComponent } from "react";
 import type { MiniGameId } from "../../../data/miniGames";
-import { BossDodgeGame } from "./BossDodgeGame";
-import { MapleTrainingGame } from "./MapleTrainingGame";
-import { ReactionTestGame } from "./ReactionTestGame";
-import { TapDodgeGame } from "./TapDodgeGame";
-import { ReactionTimerProGame } from "./ReactionTimerProGame";
-import { StackBuilderGame } from "./StackBuilderGame";
-import { AimTrainerGame } from "./AimTrainerGame";
-import { NeoSnakeGame } from "./NeoSnakeGame";
-import { BombDefuseGame } from "./BombDefuseGame";
-import { MemoryFlashGame } from "./MemoryFlashGame";
-import { LaneSwitchRunnerGame } from "./LaneSwitchRunnerGame";
-import { IceSlidePuzzleGame } from "./IceSlidePuzzleGame";
-import { BossClickerGame } from "./BossClickerGame";
-import { MapleSurvivalGame } from "./MapleSurvivalGame";
-import { IdleStoryWorldGame } from "./IdleStoryWorldGame";
 
-export const miniGamesRegistry: Record<MiniGameId, ComponentType> = {
+type MiniGameComponent = LazyExoticComponent<ComponentType>;
+
+const ReactionTestGame = lazy(() => import("./ReactionTestGame").then((module) => ({ default: module.ReactionTestGame })));
+const MapleTrainingGame = lazy(() => import("./MapleTrainingGame").then((module) => ({ default: module.MapleTrainingGame })));
+const MapleSurvivalGame = lazy(() => import("./MapleSurvivalGame").then((module) => ({ default: module.MapleSurvivalGame })));
+const BossDodgeGame = lazy(() => import("./BossDodgeGame").then((module) => ({ default: module.BossDodgeGame })));
+const TapDodgeGame = lazy(() => import("./TapDodgeGame").then((module) => ({ default: module.TapDodgeGame })));
+const ReactionTimerProGame = lazy(() => import("./ReactionTimerProGame").then((module) => ({ default: module.ReactionTimerProGame })));
+const StackBuilderGame = lazy(() => import("./StackBuilderGame").then((module) => ({ default: module.StackBuilderGame })));
+const AimTrainerGame = lazy(() => import("./AimTrainerGame").then((module) => ({ default: module.AimTrainerGame })));
+const NeoSnakeGame = lazy(() => import("./NeoSnakeGame").then((module) => ({ default: module.NeoSnakeGame })));
+const BombDefuseGame = lazy(() => import("./BombDefuseGame").then((module) => ({ default: module.BombDefuseGame })));
+const MemoryFlashGame = lazy(() => import("./MemoryFlashGame").then((module) => ({ default: module.MemoryFlashGame })));
+const LaneSwitchRunnerGame = lazy(() => import("./LaneSwitchRunnerGame").then((module) => ({ default: module.LaneSwitchRunnerGame })));
+const IceSlidePuzzleGame = lazy(() => import("./IceSlidePuzzleGame").then((module) => ({ default: module.IceSlidePuzzleGame })));
+const BossClickerGame = lazy(() => import("./BossClickerGame").then((module) => ({ default: module.BossClickerGame })));
+const IdleStoryWorldGame = lazy(() => import("./IdleStoryWorldGame").then((module) => ({ default: module.IdleStoryWorldGame })));
+
+export const miniGamesRegistry: Record<MiniGameId, MiniGameComponent> = {
   "reaction-test": ReactionTestGame,
   "maple-training": MapleTrainingGame,
   "maple-survival": MapleSurvivalGame,

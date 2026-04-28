@@ -6,7 +6,7 @@
  *   State: locked / available / affordable / unlocked
  */
 
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import { motion } from "framer-motion";
 import type { IdleGameState, TalentNodeId } from "../gameEngine";
 import {
@@ -23,7 +23,7 @@ type Props = {
   onBuyTalent: (id: TalentNodeId) => void;
 };
 
-export function TalentTreePanel({ state, onBuyTalent }: Props) {
+function TalentTreePanelInner({ state, onBuyTalent }: Props) {
   const talentNodes = state.talentNodes ?? {};
   const talentPoints = state.talentPoints ?? 0;
   const stats = useMemo(() => getTalentStats(talentNodes), [talentNodes]);
@@ -174,6 +174,8 @@ export function TalentTreePanel({ state, onBuyTalent }: Props) {
     </div>
   );
 }
+
+export const TalentTreePanel = memo(TalentTreePanelInner);
 
 // ─── Stat chip helper ─────────────────────────────────────────────────────────
 

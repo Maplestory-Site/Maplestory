@@ -1,79 +1,103 @@
-import { useEffect, useMemo, useState } from "react";
-import { fallbackNewsFeed, type NewsCategory, type NewsFeed, type NewsRegion } from "../data/newsHub";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import type { NewsCategory, NewsFeed, NewsRegion } from "../data/newsHub";
+import { getFallbackNewsFeed, loadKmsNewsFeed, loadNewsFeed } from "../lib/newsFeedClient";
 import { filterNewsItems, getFeaturedNews, getNewsCategoryCounts, normalizeNewsFeed } from "../lib/newsHub";
 
 export function useNewsFeed(activeCategory: NewsCategory, query: string, region: NewsRegion) {
-  const [feed, setFeed] = useState<NewsFeed>(() => normalizeNewsFeed(fallbackNewsFeed));
+  const [feed, setFeed] = useState<NewsFeed>(() => getFallbackNewsFeed());
+  const [requestVersion, setRequestVersion] = useState(0);
+  const [status, setStatus] = useState({
+    error: null as string | null,
+    isLoading: true,
+    isRefreshing: false,
+    isStale: false,
+    isUsingFallback: true,
+    lastFetchedAt: ""
+  });
+
+  const refresh = useCallback(() => {
+    setRequestVersion((current) => current + 1);
+  }, []);
 
   useEffect(() => {
-    let active = true;
+    const controller = new AbortController();
 
     async function loadFeed() {
+      setStatus((current) => ({
+        ...current,
+        error: null,
+        isLoading: current.lastFetchedAt ? current.isLoading : true,
+        isRefreshing: Boolean(current.lastFetchedAt)
+      }));
+
       try {
-        const response = await fetch("/api/news", {
-          headers: {
-            Accept: "application/json"
-          }
+        const result = await loadNewsFeed({
+          force: requestVersion > 0,
+          signal: controller.signal
         });
 
-        if (!response.ok) {
-          throw new Error(`Failed to load news feed: ${response.status}`);
-        }
-
-        const payload = (await response.json()) as NewsFeed;
-        const normalized = normalizeNewsFeed(payload);
-
-        if (active && normalized.items.length) {
-          setFeed(normalized);
-        }
+        if (controller.signal.aborted) return;
+        setFeed(result.feed);
+        setStatus({
+          error: result.error,
+          isLoading: false,
+          isRefreshing: false,
+          isStale: result.stale || result.feed.meta.sourceStatus === "stale",
+          isUsingFallback: result.fromFallback || Boolean(result.feed.meta.bundledFallback),
+          lastFetchedAt: result.fetchedAt
+        });
       } catch (error) {
+        if (controller.signal.aborted) return;
+        const message = error instanceof Error ? error.message : "Failed to load news feed.";
         console.warn("[news-feed] Falling back to bundled feed.", error);
+        setStatus((current) => ({
+          ...current,
+          error: message,
+          isLoading: false,
+          isRefreshing: false,
+          isStale: true,
+          isUsingFallback: true
+        }));
       }
     }
 
     void loadFeed();
 
     return () => {
-      active = false;
+      controller.abort();
     };
-  }, []);
+  }, [requestVersion]);
 
   useEffect(() => {
-    let active = true;
+    const controller = new AbortController();
 
     async function loadKmsFeed() {
-      if (region !== "kms") {
-        return;
-      }
+      if (region !== "kms") return;
 
       try {
-        const response = await fetch("/api/kms/feed", {
-          headers: {
-            Accept: "application/json"
-          }
+        const result = await loadKmsNewsFeed({
+          force: requestVersion > 0,
+          signal: controller.signal,
+          timeoutMs: 12000
         });
 
-        if (!response.ok) {
-          throw new Error(`Failed to load KMS feed: ${response.status}`);
-        }
+        if (controller.signal.aborted || !result.feed.items.length) return;
+        const normalized = normalizeNewsFeed(result.feed);
 
-        const payload = (await response.json()) as NewsFeed;
-        const normalized = normalizeNewsFeed(payload);
-
-        if (active && normalized.items.length) {
-          setFeed((current) => {
-            const gmsItems = current.items.filter((item) => item.region === "gms");
-            return {
-              ...current,
-              items: [...gmsItems, ...normalized.items],
-              meta: {
-                ...current.meta,
-                lastUpdated: normalized.meta.lastUpdated || current.meta.lastUpdated
-              }
-            };
-          });
-        }
+        setFeed((current) => {
+          const gmsItems = current.items.filter((item) => item.region === "gms");
+          return {
+            ...current,
+            items: [...gmsItems, ...normalized.items],
+            meta: {
+              ...current.meta,
+              lastSuccessfulSync: normalized.meta.lastSuccessfulSync || current.meta.lastSuccessfulSync,
+              lastUpdated: normalized.meta.lastUpdated || current.meta.lastUpdated
+            }
+          };
+        });
       } catch (error) {
+        if (controller.signal.aborted) return;
         console.warn("[news-feed] KMS feed unavailable.", error);
       }
     }
@@ -81,9 +105,9 @@ export function useNewsFeed(activeCategory: NewsCategory, query: string, region:
     void loadKmsFeed();
 
     return () => {
-      active = false;
+      controller.abort();
     };
-  }, [region]);
+  }, [region, requestVersion]);
 
   const filteredItems = useMemo(
     () => filterNewsItems(feed.items, activeCategory, query, region),
@@ -97,10 +121,18 @@ export function useNewsFeed(activeCategory: NewsCategory, query: string, region:
   const categoryCounts = useMemo(() => getNewsCategoryCounts(feed.items, region), [feed.items, region]);
 
   return {
-    meta: feed.meta,
-    filteredItems,
+    ...status,
+    // Spec-compatible aliases (loading, isFallback). The hook predates the
+    // spec and historically used `isLoading` / `isUsingFallback`; consumers
+    // can use either name. Do not remove the originals — NewsPage.tsx and
+    // any external consumers still depend on them.
+    loading: status.isLoading,
+    isFallback: status.isUsingFallback,
+    categoryCounts,
     featuredItem,
+    filteredItems,
     gridItems,
-    categoryCounts
+    meta: feed.meta,
+    refresh
   };
 }

@@ -142,13 +142,15 @@ export function calcBossXpSpike(
   stage: number,
   xpTarget: number
 ): number {
+  // Balance: was 0.28× xpTarget, now 0.16× — boss still gives a bump
+  // but can't carry multiple level-ups on its own.
   const stageFactor = 1 + (stage / 200);
-  return Math.round(xpTarget * 0.28 * zoneRewardBoost * stageFactor);
+  return Math.round(xpTarget * 0.16 * zoneRewardBoost * stageFactor);
 }
 
 /**
  * Mesos rewarded as a burst on boss kill (on top of regular income).
- * Equivalent to ~18 seconds of full mesos income per boss.
+ * Equivalent to ~6 seconds of full mesos income per boss (was 18×, too generous).
  */
 export function calcBossMesosSpike(
   mesosPerSecond: number,
@@ -156,7 +158,7 @@ export function calcBossMesosSpike(
   stage: number
 ): number {
   const stageFactor = 1 + (stage / 150);
-  return Math.round(mesosPerSecond * 18 * zoneRewardBoost * stageFactor);
+  return Math.round(mesosPerSecond * 6 * zoneRewardBoost * stageFactor);
 }
 
 /** Fame burst on boss kill. */
@@ -179,7 +181,8 @@ export function calcEliteMesosSpike(
   mesosPerSecond: number,
   zoneRewardBoost: number
 ): number {
-  return Math.round(mesosPerSecond * 5 * zoneRewardBoost);
+  // Balance: was 5×, now 2× — elites still rewarding but no longer economy-busting
+  return Math.round(mesosPerSecond * 2 * zoneRewardBoost);
 }
 
 // ─── Progression block reason (for UI) ───────────────────────────────────────

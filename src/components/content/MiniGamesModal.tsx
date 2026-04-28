@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type RefObject } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState, type RefObject } from "react";
 import { createPortal } from "react-dom";
 import type { MiniGameDefinition, MiniGameId } from "../../data/miniGames";
 import { miniGames } from "../../data/miniGames";
@@ -224,7 +224,7 @@ function MiniGamesModalContent({
             <GamesHeader compact className="mini-games-modal__games-header" />
             <div className={`mini-games-modal__canvas ${isLoading ? "is-loading" : ""}`}>
               <div className="mini-games-modal__canvas-content" key={activeGame.id}>
-                {renderGame(activeGame.id)}
+                <Suspense fallback={<MiniGamesCanvasFallback />}>{renderGame(activeGame.id)}</Suspense>
               </div>
               {isLoading ? <div className="mini-games-modal__canvas-loading" aria-hidden="true" /> : null}
             </div>
@@ -267,4 +267,10 @@ function MiniGameCard({
 function renderGame(gameId: MiniGameId) {
   const GameComponent = miniGamesRegistry[gameId] ?? miniGamesRegistry["reaction-test"];
   return <GameComponent />;
+}
+
+function MiniGamesCanvasFallback() {
+  return (
+    <div className="mini-games-modal__canvas-loading" role="status" aria-label="Loading game" />
+  );
 }

@@ -241,6 +241,38 @@ export const ZONE_BACKGROUNDS: ZoneBackground[] = [
     overlay: "linear-gradient(180deg, rgba(15,0,5,.56) 0%, rgba(10,0,2,.82) 100%)",
     tint: "rgba(40,0,0,.24)",
   },
+  {
+    zoneId: "arcane_river",
+    mapId: "450004150",
+    locationName: "Vanishing Journey",
+    image: cdnUrl("450004150"),
+    overlay: "linear-gradient(180deg, rgba(0,16,30,.46) 0%, rgba(0,10,22,.74) 100%)",
+    tint: "rgba(0,80,120,.14)",
+  },
+  {
+    zoneId: "moonbridge",
+    mapId: "450008750",
+    locationName: "Moonbridge",
+    image: cdnUrl("450008750"),
+    overlay: "linear-gradient(180deg, rgba(6,6,26,.50) 0%, rgba(4,4,20,.78) 100%)",
+    tint: "rgba(40,50,120,.16)",
+  },
+  {
+    zoneId: "labyrinth_of_suffering",
+    mapId: "450009320",
+    locationName: "Labyrinth of Suffering",
+    image: cdnUrl("450009320"),
+    overlay: "linear-gradient(180deg, rgba(20,5,26,.54) 0%, rgba(12,3,20,.80) 100%)",
+    tint: "rgba(120,30,150,.16)",
+  },
+  {
+    zoneId: "limina",
+    mapId: "450010400",
+    locationName: "End of the World",
+    image: cdnUrl("450010400"),
+    overlay: "linear-gradient(180deg, rgba(8,0,18,.58) 0%, rgba(4,0,12,.84) 100%)",
+    tint: "rgba(80,0,130,.20)",
+  },
 ];
 
 // ─── Lookup helpers ───────────────────────────────────────────────────────────

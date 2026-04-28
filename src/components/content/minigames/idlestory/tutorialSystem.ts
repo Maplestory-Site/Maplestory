@@ -139,9 +139,12 @@ export function isTutorialActive(t: TutorialState): boolean {
  * 120+         →  1×  (normal speed)
  */
 export function getNewPlayerDpsMult(totalPlayTimeSeconds: number): number {
-  if (totalPlayTimeSeconds <= 30)  return 1.8;
-  if (totalPlayTimeSeconds <= 90)  return 1.4;
-  if (totalPlayTimeSeconds <= 180) return 1.1;
+  // Balance pass 2: early DPS boost removed almost entirely so first enemy
+  // takes 10–14 s (was ~8 s with 1.18×). Mild +5% kept for first 30 s as a
+  // gentle "you're stronger than you think" feel.
+  if (totalPlayTimeSeconds <= 30)  return 1.05;
+  if (totalPlayTimeSeconds <= 90)  return 1.03;
+  if (totalPlayTimeSeconds <= 180) return 1.01;
   return 1.0;
 }
 
@@ -157,9 +160,9 @@ export function getNewPlayerDpsMult(totalPlayTimeSeconds: number): number {
  * 180+         →  1×
  */
 export function getNewPlayerXpMult(totalPlayTimeSeconds: number): number {
-  if (totalPlayTimeSeconds <= 30)  return 2.0;
-  if (totalPlayTimeSeconds <= 90)  return 1.5;
-  if (totalPlayTimeSeconds <= 180) return 1.2;
+  if (totalPlayTimeSeconds <= 30)  return 1.08;
+  if (totalPlayTimeSeconds <= 90)  return 1.04;
+  if (totalPlayTimeSeconds <= 180) return 1.01;
   return 1.0;
 }
 
@@ -173,9 +176,14 @@ export function getNewPlayerXpMult(totalPlayTimeSeconds: number): number {
  * 120+         →  1×
  */
 export function getNewPlayerMesosMult(totalPlayTimeSeconds: number): number {
-  if (totalPlayTimeSeconds <= 30)  return 2.5;
-  if (totalPlayTimeSeconds <= 60)  return 2.0;
-  if (totalPlayTimeSeconds <= 120) return 1.5;
+  // Balance pass 2: early mesos is now intentionally throttled (< 1.0) so the
+  // first upgrade takes 25–30 s instead of ~5 s.  This is a deliberate
+  // anti-rush mechanic — the tutorial should feel earned, not skipped.
+  // Multiplier curves back up to 1.0 by 120 s.
+  if (totalPlayTimeSeconds <= 30)  return 0.58;
+  if (totalPlayTimeSeconds <= 60)  return 0.68;
+  if (totalPlayTimeSeconds <= 120) return 0.78;
+  if (totalPlayTimeSeconds <= 300) return 0.88;
   return 1.0;
 }
 

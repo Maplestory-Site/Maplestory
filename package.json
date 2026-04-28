@@ -8,6 +8,8 @@
     "prebuild": "node ./scripts/sync-youtube.mjs && node ./scripts/sync-twitch.mjs && node ./scripts/sync-news.mjs && node ./scripts/sync-monsters.mjs && node ./scripts/sync-items.mjs && node ./scripts/sync-maps.mjs && node ./scripts/sync-pets.mjs && node ./scripts/sync-quests.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "lint": "eslint .",
     "preview": "vite preview",
     "sync:news": "node ./scripts/sync-news.mjs",
@@ -40,6 +42,7 @@
     "globals": "^17.4.0",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.0",
-    "vite": "^8.0.4"
+    "vite": "^8.0.4",
+    "vitest": "^4.1.5"
   }
 }

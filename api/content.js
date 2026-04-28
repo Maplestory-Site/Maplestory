@@ -29,6 +29,15 @@ const REQUIRED_LATEST_YOUTUBE_VIDEO = {
   viewCount: ""
 };
 
+function sendContentError(res, status, error, code = "CONTENT_ERROR", extra = {}) {
+  res.status(status).json({
+    ok: false,
+    error,
+    code,
+    ...extra
+  });
+}
+
 function getYoutubePublishedTime(video) {
   const value = video?.published || "";
   const parsed = Date.parse(value);
@@ -232,18 +241,18 @@ function buildKmsFallbackPayload(url, html = "") {
 
 async function fetchRawArticle(url, res) {
   if (!url || typeof url !== "string") {
-    res.status(400).json({ error: "Missing url parameter." });
+    sendContentError(res, 400, "Missing url parameter.", "MISSING_URL");
     return;
   }
 
   try {
     const parsed = new URL(url);
     if (!["http:", "https:"].includes(parsed.protocol)) {
-      res.status(400).json({ error: "Invalid URL protocol." });
+      sendContentError(res, 400, "Invalid URL protocol.", "INVALID_URL_PROTOCOL");
       return;
     }
   } catch {
-    res.status(400).json({ error: "Invalid URL." });
+    sendContentError(res, 400, "Invalid URL.", "INVALID_URL");
     return;
   }
 
@@ -261,14 +270,14 @@ async function fetchRawArticle(url, res) {
     });
 
     if (!response.ok) {
-      res.status(response.status).json({ error: "Failed to fetch article." });
+      sendContentError(res, response.status, "Failed to fetch article.", "FETCH_HTML_FAILED");
       return;
     }
 
     const html = await response.text();
     res.status(200).json({ html });
   } catch {
-    res.status(500).json({ error: "Failed to fetch article." });
+    sendContentError(res, 500, "Failed to fetch article.", "FETCH_HTML_FAILED");
   } finally {
     clearTimeout(timeout);
   }
@@ -276,14 +285,14 @@ async function fetchRawArticle(url, res) {
 
 async function fetchKms(url, force, res) {
   if (!url || typeof url !== "string") {
-    res.status(400).json({ error: "Missing url parameter." });
+    sendContentError(res, 400, "Missing url parameter.", "MISSING_URL");
     return;
   }
 
   try {
     const parsed = new URL(url);
     if (!parsed.hostname.includes("orangemushroom.net")) {
-      res.status(400).json({ error: "Invalid source host." });
+      sendContentError(res, 400, "Invalid source host.", "INVALID_SOURCE_HOST");
       return;
     }
 
@@ -349,28 +358,24 @@ async function fetchKms(url, force, res) {
     }
 
     if (process.env.NODE_ENV !== "production") {
-      res.status(500).json({
-        error: "Failed to load KMS article.",
-        message,
-        url
-      });
+      sendContentError(res, 500, "Failed to load KMS article.", "KMS_ARTICLE_FAILED", { message, url });
       return;
     }
 
-    res.status(500).json({ error: "Failed to load KMS article." });
+    sendContentError(res, 500, "Failed to load KMS article.", "KMS_ARTICLE_FAILED");
   }
 }
 
 async function fetchGms(url, force, res) {
   if (!url || typeof url !== "string") {
-    res.status(400).json({ error: "Missing url parameter." });
+    sendContentError(res, 400, "Missing url parameter.", "MISSING_URL");
     return;
   }
 
   try {
     const parsed = new URL(url);
     if (!parsed.hostname.includes("nexon.com")) {
-      res.status(400).json({ error: "Invalid source host." });
+      sendContentError(res, 400, "Invalid source host.", "INVALID_SOURCE_HOST");
       return;
     }
 
@@ -382,7 +387,7 @@ async function fetchGms(url, force, res) {
     res.setHeader("Cache-Control", cacheHeader);
     res.status(200).json(payload);
   } catch {
-    res.status(500).json({ error: "Failed to load GMS article." });
+    sendContentError(res, 500, "Failed to load GMS article.", "GMS_ARTICLE_FAILED");
   }
 }
 
@@ -390,7 +395,7 @@ export default async function handler(req, res) {
   const resource = String(req.query?.resource ?? "");
 
   if (!resource) {
-    res.status(400).json({ error: "Missing resource parameter." });
+    sendContentError(res, 400, "Missing resource parameter.", "MISSING_RESOURCE");
     return;
   }
 
@@ -416,7 +421,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method !== "GET") {
-    res.status(405).json({ error: "Method not allowed." });
+    sendContentError(res, 405, "Method not allowed.", "METHOD_NOT_ALLOWED");
     return;
   }
 
@@ -461,7 +466,7 @@ export default async function handler(req, res) {
     const item = await getNewsItemById(req.query?.id);
 
     if (!item) {
-      res.status(404).json({ error: "News item not found" });
+      sendContentError(res, 404, "News item not found", "NEWS_ITEM_NOT_FOUND");
       return;
     }
 
@@ -498,6 +503,34 @@ export default async function handler(req, res) {
     return;
   }
 
+  if (resource === "youtube-refresh") {
+    const secret = process.env.YOUTUBE_REFRESH_SECRET || process.env.NEWS_REFRESH_SECRET;
+    const provided = req.headers["x-youtube-refresh-secret"] ?? req.query?.secret;
+
+    if (secret && provided !== secret) {
+      res.status(401).json({ ok: false, error: "Unauthorized" });
+      return;
+    }
+
+    try {
+      const feed = normalizeYoutubeFeed(await getYoutubeFeed({ forceRefresh: true }));
+      res.status(200).json({
+        ok: true,
+        lastSynced: feed.lastSynced,
+        itemCount: Array.isArray(feed.videos) ? feed.videos.length : 0,
+        items: (feed.videos || []).slice(0, 5).map((video) => ({
+          id: video.id,
+          title: video.title,
+          published: video.published,
+          href: video.href
+        }))
+      });
+    } catch {
+      res.status(502).json({ ok: false, error: "Failed to refresh YouTube feed." });
+    }
+    return;
+  }
+
   if (resource === "youtube-feed") {
     try {
       const forceRefresh = req.query?.force === "1" || req.query?.force === "true";
@@ -505,10 +538,10 @@ export default async function handler(req, res) {
       res.setHeader("Cache-Control", forceRefresh ? "no-store, max-age=0" : "s-maxage=300, stale-while-revalidate=1800");
       res.status(200).json(feed);
     } catch {
-      res.status(502).json({ error: "Failed to load YouTube feed." });
+      sendContentError(res, 502, "Failed to load YouTube feed.", "YOUTUBE_FEED_FAILED");
     }
     return;
   }
 
-  res.status(404).json({ error: "Unknown content resource." });
+  sendContentError(res, 404, "Unknown content resource.", "UNKNOWN_RESOURCE");
 }

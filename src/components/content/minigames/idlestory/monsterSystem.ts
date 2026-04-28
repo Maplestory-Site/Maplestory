@@ -1,4 +1,4 @@
-﻿/**
+/**
  * IdleStory World monster ecosystem.
  *
  * Map identity lives in monsters.json. This module enriches that content with

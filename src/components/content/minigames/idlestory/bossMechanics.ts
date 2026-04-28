@@ -33,6 +33,10 @@ export type BossFightState = {
   abilityCooldowns: Record<string, number>;
   /** Seconds elapsed when each ability last triggered. */
   abilityLastTrigger: Record<string, number>;
+  /** Next mechanic being telegraphed before it fires. */
+  warningMechanicId: string | null;
+  /** Absolute timestamp when the warning expires. */
+  warningEndMs: number;
   currentPhase: 1 | 2 | 3;
   /** Most recent voice line to display. */
   currentVoiceLine: string | null;
@@ -50,6 +54,8 @@ export function createBossFightState(bossId: string, enrageTimer: number): BossF
     mechanicEndMs: 0,
     abilityCooldowns: {},
     abilityLastTrigger: {},
+    warningMechanicId: null,
+    warningEndMs: 0,
     currentPhase: 1,
     currentVoiceLine: null,
     voiceLineSetAt: 0,
@@ -112,6 +118,9 @@ export function tickBossFight(
   const mechanicStillActive = fight.activeMechanicId !== null && nowMs < fight.mechanicEndMs;
   let newActiveMechanicId = mechanicStillActive ? fight.activeMechanicId : null;
   let newMechanicEndMs = mechanicStillActive ? fight.mechanicEndMs : 0;
+  const warningStillActive = fight.warningMechanicId !== null && nowMs < fight.warningEndMs;
+  let newWarningMechanicId = warningStillActive ? fight.warningMechanicId : null;
+  let newWarningEndMs = warningStillActive ? fight.warningEndMs : 0;
 
   // ── Ability trigger ───────────────────────────────────────────────────────
   let triggered: BossAbility | null = null;
@@ -134,7 +143,14 @@ export function tickBossFight(
       if (nowMs < cooldownEnd) continue;
 
       const lastTrigger = fight.abilityLastTrigger[ability.id] ?? -Infinity;
-      if (newElapsed - lastTrigger < ability.triggerEvery) continue;
+      const secondsUntilReady = ability.triggerEvery - (newElapsed - lastTrigger);
+      if (secondsUntilReady > 0) {
+        if (secondsUntilReady <= 2 && !warningStillActive) {
+          newWarningMechanicId = ability.id;
+          newWarningEndMs = nowMs + secondsUntilReady * 1000;
+        }
+        continue;
+      }
 
       triggered = ability;
       break;
@@ -150,6 +166,8 @@ export function tickBossFight(
     newLastTriggers[triggered.id] = newElapsed;
     newActiveMechanicId = triggered.duration > 0 ? triggered.id : null;
     newMechanicEndMs = triggered.duration > 0 ? nowMs + triggered.duration * 1000 : 0;
+    newWarningMechanicId = null;
+    newWarningEndMs = 0;
   }
 
   const nextFight: BossFightState = {
@@ -160,6 +178,8 @@ export function tickBossFight(
     mechanicEndMs: newMechanicEndMs,
     abilityCooldowns: newCooldowns,
     abilityLastTrigger: newLastTriggers,
+    warningMechanicId: newWarningMechanicId,
+    warningEndMs: newWarningEndMs,
     currentPhase: newPhase,
     currentVoiceLine: newVoiceLine,
     voiceLineSetAt: newVoiceLineAt,
@@ -264,4 +284,9 @@ export function getBossDefenceMultiplier(boss: BossDefinition, hpPct: number): n
 export function getMechanicTimeLeft(fight: BossFightState, nowMs: number): number {
   if (!fight.activeMechanicId || fight.mechanicEndMs <= 0) return 0;
   return Math.max(0, (fight.mechanicEndMs - nowMs) / 1000);
+}
+
+export function getWarningTimeLeft(fight: BossFightState, nowMs: number): number {
+  if (!fight.warningMechanicId || fight.warningEndMs <= 0) return 0;
+  return Math.max(0, (fight.warningEndMs - nowMs) / 1000);
 }
