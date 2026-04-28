@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/youtube/refresh",
-      "schedule": "0,30 * * * *"
+      "schedule": "0 1 * * *"
     }
   ],
   "rewrites": [
