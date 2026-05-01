@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Angel of Balance">
+  <rect width="64" height="64" rx="12" fill="#21173a"/>
+  <path d="M31 11c-14 2-22 10-24 24 9-3 17-2 25 4z" fill="#fff6b2"/>
+  <path d="M33 11c14 2 22 10 24 24-9-3-17-2-25 4z" fill="#76dcff"/>
+  <circle cx="32" cy="31" r="11" fill="#b677ff"/>
+  <path d="M32 16v34M20 32h24" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+</svg>

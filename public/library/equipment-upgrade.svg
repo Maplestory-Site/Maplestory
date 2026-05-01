@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" role="img" aria-label="Equipment upgrade artwork">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0e2236"/><stop offset=".5" stop-color="#2860a8"/><stop offset="1" stop-color="#7bd9ff"/></linearGradient></defs>
+  <rect width="1200" height="640" rx="44" fill="url(#bg)"/>
+  <path d="M520 122h160l54 104-134 302-134-302Z" fill="#bff0ff" stroke="#fff" stroke-width="12"/><path d="M520 122l80 406 80-406" fill="none" stroke="#2d75d6" stroke-width="10" opacity=".65"/>
+  <path d="M350 400h500" stroke="#ffe27a" stroke-width="26" stroke-linecap="round"/><path d="M430 480h340" stroke="#ff9f3f" stroke-width="20" stroke-linecap="round"/>
+  <circle cx="870" cy="150" r="64" fill="#ffe27a"/><path d="M870 102v96M822 150h96" stroke="#9d6320" stroke-width="14" stroke-linecap="round"/>
+  <text x="82" y="108" fill="#fff" font-family="Verdana,Arial,sans-serif" font-size="50" font-weight="900">EQUIPMENT UPGRADES</text>
+  <text x="86" y="162" fill="#d9f5ff" font-family="Verdana,Arial,sans-serif" font-size="25">Potential, flames, sets, and safe investment</text>
+</svg>

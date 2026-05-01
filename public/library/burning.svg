@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" role="img" aria-label="Burning event artwork">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#391018"/><stop offset=".5" stop-color="#c54525"/><stop offset="1" stop-color="#ffbf55"/></linearGradient></defs>
+  <rect width="1200" height="640" rx="44" fill="url(#bg)"/>
+  <path d="M590 560c-150-46-210-170-116-300 14 78 76 101 95 28 17-67-31-112 32-210 32 96 138 140 156 250 18 112-56 194-167 232Z" fill="#ffec8a" opacity=".95"/>
+  <path d="M606 538c-88-30-132-105-77-187 11 48 53 58 66 12 10-40-10-72 26-127 32 68 84 99 94 170 10 67-36 113-109 132Z" fill="#ff6b4e"/>
+  <rect x="146" y="382" width="300" height="94" rx="28" fill="#220914" opacity=".55" stroke="#ffd889" stroke-width="6"/>
+  <text x="180" y="444" fill="#fff4cd" font-family="Verdana,Arial,sans-serif" font-size="42" font-weight="900">+2 LEVELS</text>
+  <text x="82" y="108" fill="#fff" font-family="Verdana,Arial,sans-serif" font-size="50" font-weight="900">BURNING EVENTS</text>
+  <text x="86" y="162" fill="#ffe0bf" font-family="Verdana,Arial,sans-serif" font-size="25">Plan characters, rewards, and timing</text>
+</svg>

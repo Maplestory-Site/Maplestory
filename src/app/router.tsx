@@ -45,6 +45,7 @@ export const router = createBrowserRouter([
       { path: "monsters", element: <Navigate replace to="/database/monster" /> },
       { path: "news", element: routeElement(NewsPage) },
       { path: "library", element: routeElement(LibraryPage) },
+      { path: "library/classes/:classId", element: routeElement(LibraryPage) },
       { path: "library/:guideId", element: routeElement(LibraryPage) },
       { path: "games", element: routeElement(GameHubPage) },
       { path: "games/achievements", element: routeElement(GameAchievementsPage) },

@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Holy Water">
+  <rect width="64" height="64" rx="12" fill="#143847"/>
+  <path d="M24 8h16l-3 12v6c8 4 13 11 13 20 0 8-7 13-18 13s-18-5-18-13c0-9 5-16 13-20v-6z" fill="#b8f5ff"/>
+  <path d="M22 40c8 4 15 4 24 0v10c-3 5-25 5-28 0z" fill="#4fdaff"/>
+  <path d="M32 25v18M23 34h18" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+</svg>

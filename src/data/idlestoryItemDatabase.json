@@ -1,0 +1,1505 @@
+{
+  "meta": {
+    "generatedAt": "2026-05-01T07:14:45.610Z",
+    "sourceCount": 5447,
+    "bundledCount": 148,
+    "perBucketCap": 18,
+    "bucketSizes": {
+      "amulet::common": 18,
+      "amulet::epic": 3,
+      "armor::common": 18,
+      "armor::epic": 4,
+      "helmet::common": 18,
+      "helmet::epic": 8,
+      "helmet::rare": 1,
+      "ring::common": 18,
+      "ring::epic": 18,
+      "ring::rare": 1,
+      "weapon::common": 18,
+      "weapon::epic": 5,
+      "weapon::rare": 18
+    }
+  },
+  "items": [
+    {
+      "id": "abyss-pendant",
+      "name": "Abyss Pendant",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/e/e3/Eqp_Reverse_Pendant.png/revision/latest?cb=20200305065535",
+      "type": "Equipment",
+      "category": "Dragon Pendants",
+      "rarity": "common",
+      "level": 125,
+      "idleType": "amulet"
+    },
+    {
+      "id": "alien-fragment-necklace",
+      "name": "Alien Fragment Necklace",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/b/b0/Eqp_Last_Unwelcome_Guest_Necklace.png/revision/latest?cb=20160813201657",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "common",
+      "level": 180,
+      "idleType": "amulet"
+    },
+    {
+      "id": "blackgate-necklace",
+      "name": "Blackgate Necklace",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/9/98/Eqp_Blackgate_Necklace.png/revision/latest?cb=20190914060032",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "common",
+      "level": 120,
+      "idleType": "amulet"
+    },
+    {
+      "id": "bow-tie-blue",
+      "name": "Bow-tie (Blue)",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/b/b5/Eqp_Bow-tie_%28Blue%29.png/revision/latest?cb=20200111231337",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "common",
+      "level": 50,
+      "idleType": "amulet"
+    },
+    {
+      "id": "bow-tie-pink",
+      "name": "Bow-tie (Pink)",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/e/ea/Eqp_Bow-tie_%28Pink%29.png/revision/latest?cb=20200111231332",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "common",
+      "level": 50,
+      "idleType": "amulet"
+    },
+    {
+      "id": "cracked-engraved-gollux-pendant",
+      "name": "Cracked Engraved Gollux Pendant",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/e/ed/Eqp_Cracked_Engraved_Gollux_Pendant.png/revision/latest?cb=20150922083724",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "common",
+      "level": 120,
+      "idleType": "amulet"
+    },
+    {
+      "id": "curbrocks-pendant",
+      "name": "Curbrock's Pendant",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/0/03/Eqp_Curbrock%27s_Pendant.png/revision/latest?cb=20190826000134",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "common",
+      "level": 60,
+      "idleType": "amulet"
+    },
+    {
+      "id": "dominator-pendant",
+      "name": "Dominator Pendant",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/c/c3/Eqp_Dominator_Pendant.png/revision/latest?cb=20160106061857",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "common",
+      "level": 140,
+      "idleType": "amulet"
+    },
+    {
+      "id": "fearless-pendant",
+      "name": "Fearless Pendant",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/7/74/Eqp_Timeless_Pendant.png/revision/latest?cb=20200106103200",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "common",
+      "level": 130,
+      "idleType": "amulet"
+    },
+    {
+      "id": "gold-pendant",
+      "name": "Gold Pendant",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/b/bb/Eqp_Gold_Pendant.png/revision/latest?cb=20161025063504",
+      "type": "Equipment",
+      "category": "Dragon Pendants",
+      "rarity": "common",
+      "level": 50,
+      "idleType": "amulet"
+    },
+    {
+      "id": "golden-flower-pendant",
+      "name": "Golden Flower Pendant",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/7/7f/Eqp_Golden_Flower_Pendant.png/revision/latest?cb=20191012054051",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "common",
+      "level": 120,
+      "idleType": "amulet"
+    },
+    {
+      "id": "greed-pendant",
+      "name": "Greed Pendant",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/3/39/Eqp_Greed_Pendant.png/revision/latest?cb=20170206075046",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "common",
+      "level": 75,
+      "idleType": "amulet"
+    },
+    {
+      "id": "green-bear-pendant",
+      "name": "Green Bear Pendant",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/a/a7/Eqp_Green_Bear_Pendant.png/revision/latest?cb=20201006203809",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "common",
+      "level": 100,
+      "idleType": "amulet"
+    },
+    {
+      "id": "green-owl-pendant",
+      "name": "Green Owl Pendant",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/a/a7/Eqp_Green_Bear_Pendant.png/revision/latest?cb=20201006203809",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "common",
+      "level": 100,
+      "idleType": "amulet"
+    },
+    {
+      "id": "green-peacock-pendant",
+      "name": "Green Peacock Pendant",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/a/a7/Eqp_Green_Bear_Pendant.png/revision/latest?cb=20201006203809",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "common",
+      "level": 100,
+      "idleType": "amulet"
+    },
+    {
+      "id": "green-wolf-pendant",
+      "name": "Green Wolf Pendant",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/a/a7/Eqp_Green_Bear_Pendant.png/revision/latest?cb=20201006203809",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "common",
+      "level": 100,
+      "idleType": "amulet"
+    },
+    {
+      "id": "horuss-eye",
+      "name": "Horus's Eye",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/b/b1/Eqp_Horus%27s_Eye.png/revision/latest?cb=20151227205920",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "common",
+      "level": 70,
+      "idleType": "amulet"
+    },
+    {
+      "id": "ifias-necklace",
+      "name": "Ifia's Necklace",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/e/e0/Eqp_Ifia%27s_Necklace.png/revision/latest?cb=20170512033843",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "common",
+      "level": 110,
+      "idleType": "amulet"
+    },
+    {
+      "id": "chaos-horntail-necklace",
+      "name": "Chaos Horntail Necklace",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/8/85/Eqp_Chaos_Horntail_Necklace.png/revision/latest?cb=20140923211712",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "epic",
+      "level": 120,
+      "idleType": "amulet"
+    },
+    {
+      "id": "daybreak-pendant",
+      "name": "Daybreak Pendant",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/e/e9/Eqp_Daybreak_Pendant.png/revision/latest?cb=20220601213234",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "epic",
+      "level": 140,
+      "idleType": "amulet"
+    },
+    {
+      "id": "horntail-necklace",
+      "name": "Horntail Necklace",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/8/88/Eqp_Horntail_Necklace.png/revision/latest?cb=20151121064432",
+      "type": "Equipment",
+      "category": "Pendants",
+      "rarity": "epic",
+      "level": 120,
+      "idleType": "amulet"
+    },
+    {
+      "id": "absolab-bandit-suit",
+      "name": "AbsoLab Bandit Suit",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/7/7a/Eqp_AbsoLab_Bandit_Suit.png/revision/latest?cb=20150830055013",
+      "type": "Equipment",
+      "category": "Thief Overalls",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "armor"
+    },
+    {
+      "id": "absolab-knight-shoulder",
+      "name": "AbsoLab Knight Shoulder",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/d/d1/Eqp_AbsoLab_Shoulder.png/revision/latest?cb=20160806223349",
+      "type": "Equipment",
+      "category": "Warrior Shoulders",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "armor"
+    },
+    {
+      "id": "absolab-knight-suit",
+      "name": "AbsoLab Knight Suit",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/f/fb/Eqp_AbsoLab_Knight_Suit.png/revision/latest?cb=20150830054823",
+      "type": "Equipment",
+      "category": "Warrior Overalls",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "armor"
+    },
+    {
+      "id": "absolab-mage-shoulder",
+      "name": "AbsoLab Mage Shoulder",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/d/d1/Eqp_AbsoLab_Shoulder.png/revision/latest?cb=20160806223349",
+      "type": "Equipment",
+      "category": "Magician Shoulders",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "armor"
+    },
+    {
+      "id": "absolab-mage-suit",
+      "name": "AbsoLab Mage Suit",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/1/1f/Eqp_AbsoLab_Mage_Suit.png/revision/latest?cb=20150830053259",
+      "type": "Equipment",
+      "category": "Magician Overalls",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "armor"
+    },
+    {
+      "id": "absolab-pirate-shoulder",
+      "name": "AbsoLab Pirate Shoulder",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/d/d1/Eqp_AbsoLab_Shoulder.png/revision/latest?cb=20160806223349",
+      "type": "Equipment",
+      "category": "Pirate Shoulders",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "armor"
+    },
+    {
+      "id": "absolab-pirate-suit",
+      "name": "AbsoLab Pirate Suit",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/2/24/Eqp_AbsoLab_Pirate_Suit.png/revision/latest?cb=20150830055024",
+      "type": "Equipment",
+      "category": "Pirate Overalls",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "armor"
+    },
+    {
+      "id": "absolab-thief-shoulder",
+      "name": "AbsoLab Thief Shoulder",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/d/d1/Eqp_AbsoLab_Shoulder.png/revision/latest?cb=20160806223349",
+      "type": "Equipment",
+      "category": "Thief Shoulders",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "armor"
+    },
+    {
+      "id": "amaterasus-armor",
+      "name": "Amaterasu's Armor",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/2/2b/Eqp_Amaterasu%27s_Armor.png/revision/latest?cb=20190806065550",
+      "type": "Equipment",
+      "category": "Warrior Overalls",
+      "rarity": "common",
+      "level": 150,
+      "idleType": "armor"
+    },
+    {
+      "id": "amaterasus-epaulet",
+      "name": "Amaterasu's Epaulet",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/e/eb/Eqp_Amaterasu%27s_Epaulet.png/revision/latest?cb=20190806072327",
+      "type": "Equipment",
+      "category": "Warrior Shoulders",
+      "rarity": "common",
+      "level": 150,
+      "idleType": "armor"
+    },
+    {
+      "id": "ame-no-uzumes-armor",
+      "name": "Ame-no-Uzume's Armor",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/a/a4/Eqp_Ame-no-Uzume%27s_Armor.png/revision/latest?cb=20190807050242",
+      "type": "Equipment",
+      "category": "Magician Overalls",
+      "rarity": "common",
+      "level": 150,
+      "idleType": "armor"
+    },
+    {
+      "id": "ame-no-uzumes-epaulet",
+      "name": "Ame-no-Uzume's Epaulet",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/2/25/Eqp_Ame-no-Uzume%27s_Epaulet.png/revision/latest?cb=20190807052020",
+      "type": "Equipment",
+      "category": "Magician Shoulders",
+      "rarity": "common",
+      "level": 150,
+      "idleType": "armor"
+    },
+    {
+      "id": "android-legs",
+      "name": "Android Legs",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/8/8e/Eqp_Android_Legs.png/revision/latest?cb=20161017003522",
+      "type": "Equipment",
+      "category": "Bottoms",
+      "rarity": "common",
+      "level": 70,
+      "idleType": "armor"
+    },
+    {
+      "id": "android-vest",
+      "name": "Android Vest",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/6/60/Eqp_Android_Vest.png/revision/latest?cb=20160502020706",
+      "type": "Equipment",
+      "category": "Tops",
+      "rarity": "common",
+      "level": 70,
+      "idleType": "armor"
+    },
+    {
+      "id": "angelic-buster-imperial-shoulder",
+      "name": "Angelic Buster Imperial Shoulder",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/e/e6/Eqp_Angelic_Buster_Imperial_Shoulder.png/revision/latest?cb=20151115215618",
+      "type": "Equipment",
+      "category": "Pirate Shoulders",
+      "rarity": "common",
+      "level": 120,
+      "idleType": "armor"
+    },
+    {
+      "id": "antique-leaf-shoulder",
+      "name": "Antique Leaf Shoulder",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/5/59/Eqp_Antique_Leaf_Shoulder.png/revision/latest?cb=20220830230833",
+      "type": "Equipment",
+      "category": "Shoulders",
+      "rarity": "common",
+      "level": 130,
+      "idleType": "armor"
+    },
+    {
+      "id": "antique-root-shoulder",
+      "name": "Antique Root Shoulder",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/c/c7/Eqp_Antique_Root_Shoulder.png/revision/latest?cb=20220830230820",
+      "type": "Equipment",
+      "category": "Shoulders",
+      "rarity": "common",
+      "level": 150,
+      "idleType": "armor"
+    },
+    {
+      "id": "aqua-platina",
+      "name": "Aqua Platina",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/1/15/Eqp_Aqua_Platina.png/revision/latest?cb=20190524054847",
+      "type": "Equipment",
+      "category": "Warrior Tops",
+      "rarity": "common",
+      "level": 70,
+      "idleType": "armor"
+    },
+    {
+      "id": "black-bean-suit",
+      "name": "Black Bean Suit",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/1/10/Eqp_Black_Bean_Suit.png/revision/latest?cb=20150512034606",
+      "type": "Equipment",
+      "category": "Overalls",
+      "rarity": "epic",
+      "level": 135,
+      "idleType": "armor"
+    },
+    {
+      "id": "chaos-pink-bean-suit",
+      "name": "Chaos Pink Bean Suit",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/3/3d/Eqp_Chaos_Pink_Bean_Suit.png/revision/latest?cb=20150512034345",
+      "type": "Equipment",
+      "category": "Overalls",
+      "rarity": "epic",
+      "level": 135,
+      "idleType": "armor"
+    },
+    {
+      "id": "proton-suit",
+      "name": "Proton Suit",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/a/aa/Eqp_Proton_Suit_%28Male%29.png/revision/latest?cb=20190619164435",
+      "type": "Equipment",
+      "category": "Thief Overalls",
+      "rarity": "epic",
+      "level": 120,
+      "idleType": "armor"
+    },
+    {
+      "id": "royal-black-metal-shoulder",
+      "name": "Royal Black Metal Shoulder",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/6/6b/Eqp_Royal_Black_Metal_Shoulder.png/revision/latest?cb=20160106224701",
+      "type": "Equipment",
+      "category": "Shoulders",
+      "rarity": "epic",
+      "level": 120,
+      "idleType": "armor"
+    },
+    {
+      "id": "a-rice-cake-on-top-of-my-head",
+      "name": "A Rice Cake on Top of My Head",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/c/c4/Eqp_A_Rice_Cake_on_Top_of_My_Head.png/revision/latest?cb=20150912013845",
+      "type": "Equipment",
+      "category": "Hats",
+      "rarity": "common",
+      "level": 30,
+      "idleType": "helmet"
+    },
+    {
+      "id": "absolab-bandit-cap",
+      "name": "AbsoLab Bandit Cap",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/c/cd/Eqp_AbsoLab_Bandit_Cap.png/revision/latest?cb=20150219021229",
+      "type": "Equipment",
+      "category": "Thief Hats",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "helmet"
+    },
+    {
+      "id": "absolab-bandit-cape",
+      "name": "AbsoLab Bandit Cape",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/3/34/Eqp_AbsoLab_Cape.png/revision/latest?cb=20160719041507",
+      "type": "Equipment",
+      "category": "Thief Capes",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "helmet"
+    },
+    {
+      "id": "absolab-knight-cape",
+      "name": "AbsoLab Knight Cape",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/3/34/Eqp_AbsoLab_Cape.png/revision/latest?cb=20160719041507",
+      "type": "Equipment",
+      "category": "Warrior Capes",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "helmet"
+    },
+    {
+      "id": "absolab-knight-helm",
+      "name": "AbsoLab Knight Helm",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/a/a3/Eqp_AbsoLab_Knight_Helm.png/revision/latest?cb=20150219020652",
+      "type": "Equipment",
+      "category": "Warrior Hats",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "helmet"
+    },
+    {
+      "id": "absolab-mage-cape",
+      "name": "AbsoLab Mage Cape",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/3/34/Eqp_AbsoLab_Cape.png/revision/latest?cb=20160719041507",
+      "type": "Equipment",
+      "category": "Magician Capes",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "helmet"
+    },
+    {
+      "id": "absolab-mage-crown",
+      "name": "AbsoLab Mage Crown",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/5/5a/Eqp_AbsoLab_Mage_Crown.png/revision/latest?cb=20150219020914",
+      "type": "Equipment",
+      "category": "Magician Hats",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "helmet"
+    },
+    {
+      "id": "absolab-pirate-cape",
+      "name": "AbsoLab Pirate Cape",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/3/34/Eqp_AbsoLab_Cape.png/revision/latest?cb=20160719041507",
+      "type": "Equipment",
+      "category": "Pirate Capes",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "helmet"
+    },
+    {
+      "id": "absolab-pirate-fedora",
+      "name": "AbsoLab Pirate Fedora",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/1/19/Eqp_AbsoLab_Pirate_Fedora.png/revision/latest?cb=20150219021322",
+      "type": "Equipment",
+      "category": "Pirate Hats",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "helmet"
+    },
+    {
+      "id": "abyss-mask",
+      "name": "Abyss Mask",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/a/a5/Eqp_Reverse_Mask.png/revision/latest?cb=20191013050933",
+      "type": "Equipment",
+      "category": "Dragon Hats",
+      "rarity": "common",
+      "level": 125,
+      "idleType": "helmet"
+    },
+    {
+      "id": "acceptable-lord-pirate-hat",
+      "name": "Acceptable Lord Pirate Hat",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/0/05/Eqp_Lord_Pirate_Hat.png/revision/latest?cb=20150130210812",
+      "type": "Equipment",
+      "category": "Hats",
+      "rarity": "common",
+      "level": 90,
+      "idleType": "helmet"
+    },
+    {
+      "id": "alcadnos-cape",
+      "name": "Alcadno's Cape",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/1/16/Eqp_Alcadno%27s_Cape.png/revision/latest?cb=20191226032417",
+      "type": "Equipment",
+      "category": "Capes",
+      "rarity": "common",
+      "level": 35,
+      "idleType": "helmet"
+    },
+    {
+      "id": "alma-von-leon-helmet",
+      "name": "Alma Von Leon Helmet",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/4/4b/Eqp_Royal_Von_Leon_Helm.png/revision/latest?cb=20130712064422",
+      "type": "Equipment",
+      "category": "Magician Hats",
+      "rarity": "common",
+      "level": 120,
+      "idleType": "helmet"
+    },
+    {
+      "id": "amaterasus-cape",
+      "name": "Amaterasu's Cape",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/0/08/Eqp_Amaterasu%27s_Cape.png/revision/latest?cb=20190806070700",
+      "type": "Equipment",
+      "category": "Warrior Capes",
+      "rarity": "common",
+      "level": 150,
+      "idleType": "helmet"
+    },
+    {
+      "id": "amaterasus-helm",
+      "name": "Amaterasu's Helm",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/b/bf/Eqp_Amaterasu%27s_Helm.png/revision/latest?cb=20161116022415",
+      "type": "Equipment",
+      "category": "Warrior Hats",
+      "rarity": "common",
+      "level": 150,
+      "idleType": "helmet"
+    },
+    {
+      "id": "ame-no-uzumes-cape",
+      "name": "Ame-no-Uzume's Cape",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/9/9d/Eqp_Ame-no-Uzume%27s_Cape.png/revision/latest?cb=20190807051434",
+      "type": "Equipment",
+      "category": "Magician Capes",
+      "rarity": "common",
+      "level": 150,
+      "idleType": "helmet"
+    },
+    {
+      "id": "ame-no-uzumes-helm",
+      "name": "Ame-no-Uzume's Helm",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/6/62/Eqp_Ame-no-Uzume%27s_Helm.png/revision/latest?cb=20190807042838",
+      "type": "Equipment",
+      "category": "Magician Hats",
+      "rarity": "common",
+      "level": 150,
+      "idleType": "helmet"
+    },
+    {
+      "id": "amoss-royal-cape",
+      "name": "Amos's Royal Cape",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/4/46/Eqp_Amos%27s_Royal_Cape.png/revision/latest?cb=20210102100837",
+      "type": "Equipment",
+      "category": "Capes",
+      "rarity": "common",
+      "level": 50,
+      "idleType": "helmet"
+    },
+    {
+      "id": "black-bean-hat",
+      "name": "Black Bean Hat",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/1/1e/Eqp_Black_Bean_Hat.png/revision/latest?cb=20150201223647",
+      "type": "Equipment",
+      "category": "Hats",
+      "rarity": "epic",
+      "level": 135,
+      "idleType": "helmet"
+    },
+    {
+      "id": "chaos-pink-bean-hat",
+      "name": "Chaos Pink Bean Hat",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/3/3a/Eqp_Pink_Bean_Hat.png/revision/latest?cb=20150201223645",
+      "type": "Equipment",
+      "category": "Hats",
+      "rarity": "epic",
+      "level": 135,
+      "idleType": "helmet"
+    },
+    {
+      "id": "chaos-zakum-helmet",
+      "name": "Chaos Zakum Helmet",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/6/68/Eqp_Chaos_Zakum_Helmet.png/revision/latest?cb=20140923211822",
+      "type": "Equipment",
+      "category": "Hats",
+      "rarity": "epic",
+      "level": 100,
+      "idleType": "helmet"
+    },
+    {
+      "id": "enraged-zakum-cape",
+      "name": "Enraged Zakum Cape",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/9/9e/Eqp_Enraged_Zakum_Cape.png/revision/latest?cb=20160424044217",
+      "type": "Equipment",
+      "category": "Capes",
+      "rarity": "epic",
+      "level": 150,
+      "idleType": "helmet"
+    },
+    {
+      "id": "enraged-zakum-helmet",
+      "name": "Enraged Zakum Helmet",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/0/07/Eqp_Enraged_Zakum_Helmet.png/revision/latest?cb=20151116044347",
+      "type": "Equipment",
+      "category": "Hats",
+      "rarity": "epic",
+      "level": 150,
+      "idleType": "helmet"
+    },
+    {
+      "id": "ludi-scarlion-hat",
+      "name": "Ludi Scarlion Hat",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/5/51/Eqp_Scarlion_Hat.png/revision/latest?cb=20151119082207",
+      "type": "Equipment",
+      "category": "Hats",
+      "rarity": "epic",
+      "level": 110,
+      "idleType": "helmet"
+    },
+    {
+      "id": "pink-zakum-helmet",
+      "name": "Pink Zakum Helmet",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/4/4c/Eqp_Pink_Zakum_Helmet.png/revision/latest?cb=20151116090828",
+      "type": "Equipment",
+      "category": "Hats",
+      "rarity": "epic",
+      "level": 30,
+      "idleType": "helmet"
+    },
+    {
+      "id": "zakum-helmet",
+      "name": "Zakum Helmet",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/1/17/Eqp_Zakum_Helmet.png/revision/latest?cb=20151116042441",
+      "type": "Equipment",
+      "category": "Hats",
+      "rarity": "epic",
+      "level": 50,
+      "idleType": "helmet"
+    },
+    {
+      "id": "rare-alien-fragment-helmet",
+      "name": "Rare Alien Fragment Helmet",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/a/ac/Eqp_Rare_Alien_Fragment_Helmet.png/revision/latest?cb=20150130204216",
+      "type": "Equipment",
+      "category": "Hats",
+      "rarity": "rare",
+      "level": 180,
+      "idleType": "helmet"
+    },
+    {
+      "id": "1st-unwelcome-guest-ring",
+      "name": "1st Unwelcome Guest Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/e/e4/Eqp_1st_Unwelcome_Guest_Ring.png/revision/latest?cb=20151122070009",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "common",
+      "level": 47,
+      "idleType": "ring"
+    },
+    {
+      "id": "2nd-unwelcome-guest-ring",
+      "name": "2nd Unwelcome Guest Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/3/3a/Eqp_2nd_Unwelcome_Guest_Ring.png/revision/latest?cb=20151122065809",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "common",
+      "level": 67,
+      "idleType": "ring"
+    },
+    {
+      "id": "3rd-unwelcome-guest-ring",
+      "name": "3rd Unwelcome Guest Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/d/da/Eqp_3rd_Unwelcome_Guest_Ring.png/revision/latest?cb=20151122065541",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "common",
+      "level": 87,
+      "idleType": "ring"
+    },
+    {
+      "id": "adventure-deep-dark-critical-ring",
+      "name": "Adventure Deep Dark Critical Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/1/12/Eqp_Adventure_Deep_Dark_Critical_Ring.png/revision/latest?cb=20210419231240",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "common",
+      "level": 130,
+      "idleType": "ring"
+    },
+    {
+      "id": "alien-fragment-earrings",
+      "name": "Alien Fragment Earrings",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/8/88/Eqp_Last_Unwelcome_Guest_Earrings.png/revision/latest?cb=20160813201545",
+      "type": "Equipment",
+      "category": "Earrings",
+      "rarity": "common",
+      "level": 180,
+      "idleType": "ring"
+    },
+    {
+      "id": "alien-fragment-ring",
+      "name": "Alien Fragment Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/5/53/Eqp_Last_Unwelcome_Guest_Ring.png/revision/latest?cb=20151122063239",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "common",
+      "level": 180,
+      "idleType": "ring"
+    },
+    {
+      "id": "almighty-ring",
+      "name": "Almighty Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/7/72/Eqp_Strength_Ring_VII.png/revision/latest?cb=20200106103727",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "common",
+      "level": 30,
+      "idleType": "ring"
+    },
+    {
+      "id": "altaire-earrings",
+      "name": "Altaire Earrings",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/3/38/Eqp_Altaire_Earrings.png/revision/latest?cb=20160123205214",
+      "type": "Equipment",
+      "category": "Earrings",
+      "rarity": "common",
+      "level": 50,
+      "idleType": "ring"
+    },
+    {
+      "id": "amethyst-earrings",
+      "name": "Amethyst Earrings",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/8/82/Eqp_Amethyst_Earrings.png/revision/latest?cb=20141003202637",
+      "type": "Equipment",
+      "category": "Earrings",
+      "rarity": "common",
+      "level": 15,
+      "idleType": "ring"
+    },
+    {
+      "id": "angelic-blessing",
+      "name": "Angelic Blessing",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/c/c6/Eqp_Angelic_Blessing.png/revision/latest?cb=20190709154538",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "common",
+      "level": 30,
+      "idleType": "ring"
+    },
+    {
+      "id": "angelic-buster-imperial-ring",
+      "name": "Angelic Buster Imperial Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/f/f9/Eqp_Angelic_Buster_Imperial_Ring.png/revision/latest?cb=20151126084103",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "common",
+      "level": 120,
+      "idleType": "ring"
+    },
+    {
+      "id": "awake-ring",
+      "name": "Awake Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/9/9f/Eqp_Awake_Ring.png/revision/latest?cb=20210622214319",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "common",
+      "level": 120,
+      "idleType": "ring"
+    },
+    {
+      "id": "berserkers-eternal-ring",
+      "name": "Berserker's Eternal Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/1/10/Eqp_Berserker%27s_Eternal_Ring.png/revision/latest?cb=20200106103930",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "common",
+      "level": 30,
+      "idleType": "ring"
+    },
+    {
+      "id": "berserkers-meister-immortal-ring",
+      "name": "Berserker's Meister Immortal Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/1/10/Eqp_Berserker%27s_Eternal_Ring.png/revision/latest?cb=20200106103930",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "common",
+      "level": 90,
+      "idleType": "ring"
+    },
+    {
+      "id": "blackgate-ring",
+      "name": "Blackgate Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/0/05/Eqp_Blackgate_Ring.png/revision/latest?cb=20190914060032",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "common",
+      "level": 120,
+      "idleType": "ring"
+    },
+    {
+      "id": "blue-moon",
+      "name": "Blue Moon",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/9/96/Eqp_Blue_Moon_%28Earrings%29.png/revision/latest?cb=20200211043609",
+      "type": "Equipment",
+      "category": "Earrings",
+      "rarity": "common",
+      "level": 40,
+      "idleType": "ring"
+    },
+    {
+      "id": "blue-soul-ring",
+      "name": "Blue Soul Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/2/2f/Eqp_Blue_Soul_Ring.png/revision/latest?cb=20191008010230",
+      "type": "Equipment",
+      "category": "Soul Rings",
+      "rarity": "common",
+      "level": 60,
+      "idleType": "ring"
+    },
+    {
+      "id": "breath-of-divinity",
+      "name": "Breath of Divinity",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/a/aa/Eqp_Breath_of_Divinity.png/revision/latest?cb=20170829002151",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "common",
+      "level": 150,
+      "idleType": "ring"
+    },
+    {
+      "id": "berserker-ring",
+      "name": "Berserker Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/3/36/Eqp_Berserker_Ring.png/revision/latest?cb=20210326132453",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "epic",
+      "level": 110,
+      "idleType": "ring"
+    },
+    {
+      "id": "clean-defense-ring",
+      "name": "Clean Defense Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/0/0f/Eqp_Clean_Defense_Ring.png/revision/latest?cb=20210326132453",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "epic",
+      "level": 110,
+      "idleType": "ring"
+    },
+    {
+      "id": "clean-stance-ring",
+      "name": "Clean Stance Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/1/11/Eqp_Clean_Stance_Ring.png/revision/latest?cb=20210326132453",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "epic",
+      "level": 110,
+      "idleType": "ring"
+    },
+    {
+      "id": "cleansing-ring",
+      "name": "Cleansing Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/b/b4/Eqp_Cleansing_Ring.png/revision/latest?cb=20210326132453",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "epic",
+      "level": 110,
+      "idleType": "ring"
+    },
+    {
+      "id": "continuous-ring",
+      "name": "Continuous Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/7/79/Eqp_Continuous_Ring.png/revision/latest?cb=20231116081959",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "epic",
+      "level": 110,
+      "idleType": "ring"
+    },
+    {
+      "id": "crisis-h-ring",
+      "name": "Crisis H Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/e/e6/Eqp_Crisis_H_Ring.png/revision/latest?cb=20210326132453",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "epic",
+      "level": 110,
+      "idleType": "ring"
+    },
+    {
+      "id": "crisis-hm-ring",
+      "name": "Crisis HM Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/d/dc/Eqp_Crisis_HM_Ring.png/revision/latest?cb=20210326132453",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "epic",
+      "level": 110,
+      "idleType": "ring"
+    },
+    {
+      "id": "crisis-m-ring",
+      "name": "Crisis M Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/f/fe/Eqp_Crisis_M_Ring.png/revision/latest?cb=20210326132453",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "epic",
+      "level": 110,
+      "idleType": "ring"
+    },
+    {
+      "id": "critical-damage-ring",
+      "name": "Critical Damage Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/b/b6/Eqp_Critical_Damage_Ring.png/revision/latest?cb=20210326132453",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "epic",
+      "level": 110,
+      "idleType": "ring"
+    },
+    {
+      "id": "critical-defense-ring",
+      "name": "Critical Defense Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/5/5f/Eqp_Critical_Defense_Ring.png/revision/latest?cb=20210326132453",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "epic",
+      "level": 110,
+      "idleType": "ring"
+    },
+    {
+      "id": "critical-shift-ring",
+      "name": "Critical Shift Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/2/27/Eqp_Critical_Shift_Ring.png/revision/latest?cb=20160214055648",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "epic",
+      "level": 110,
+      "idleType": "ring"
+    },
+    {
+      "id": "dea-sidus-earring",
+      "name": "Dea Sidus Earring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/4/49/Eqp_Dea_Sidus_Earring.png/revision/latest?cb=20151115034904",
+      "type": "Equipment",
+      "category": "Earrings",
+      "rarity": "epic",
+      "level": 130,
+      "idleType": "ring"
+    },
+    {
+      "id": "durability-ring",
+      "name": "Durability Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/b/b8/Eqp_Durability_Ring.png/revision/latest?cb=20171016183528",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "epic",
+      "level": 110,
+      "idleType": "ring"
+    },
+    {
+      "id": "gold-emerald-earrings",
+      "name": "Gold Emerald Earrings",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/0/0a/Eqp_Gold_Emerald_Earrings.png/revision/latest?cb=20201227090513",
+      "type": "Equipment",
+      "category": "Earrings",
+      "rarity": "epic",
+      "level": 80,
+      "idleType": "ring"
+    },
+    {
+      "id": "health-cut-ring",
+      "name": "Health Cut Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/0/06/Eqp_Health_Cut_Ring.png/revision/latest?cb=20170829022018",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "epic",
+      "level": 110,
+      "idleType": "ring"
+    },
+    {
+      "id": "level-jump-d-ring",
+      "name": "Level Jump D Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/c/c4/Eqp_Level_Jump_Ring.png/revision/latest?cb=20210326132453",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "epic",
+      "level": 110,
+      "idleType": "ring"
+    },
+    {
+      "id": "level-jump-i-ring",
+      "name": "Level Jump I Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/c/c4/Eqp_Level_Jump_Ring.png/revision/latest?cb=20210326132453",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "epic",
+      "level": 110,
+      "idleType": "ring"
+    },
+    {
+      "id": "level-jump-l-ring",
+      "name": "Level Jump L Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/c/c4/Eqp_Level_Jump_Ring.png/revision/latest?cb=20210326132453",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "epic",
+      "level": 110,
+      "idleType": "ring"
+    },
+    {
+      "id": "dawn-guardian-angel-ring",
+      "name": "Dawn Guardian Angel Ring",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/a/aa/Eqp_Guardian_Angel_Ring.png/revision/latest?cb=20211115213933",
+      "type": "Equipment",
+      "category": "Rings",
+      "rarity": "rare",
+      "level": 160,
+      "idleType": "ring"
+    },
+    {
+      "id": "absolab-ancient-bow",
+      "name": "AbsoLab Ancient Bow",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/a/ad/Eqp_AbsoLab_Ancient_Bow.png/revision/latest?cb=20190614003457",
+      "type": "Equipment",
+      "category": "Ancient Bows",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-archer-cape",
+      "name": "AbsoLab Archer Cape",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/3/34/Eqp_AbsoLab_Cape.png/revision/latest?cb=20160719041507",
+      "type": "Equipment",
+      "category": "Bowman Capes",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-archer-gloves",
+      "name": "AbsoLab Archer Gloves",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/8/8f/Eqp_AbsoLab_Gloves.png/revision/latest?cb=20160719041450",
+      "type": "Equipment",
+      "category": "Bowman Gloves",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-archer-hood",
+      "name": "AbsoLab Archer Hood",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/b/b5/Eqp_AbsoLab_Archer_Hood.png/revision/latest?cb=20150219021057",
+      "type": "Equipment",
+      "category": "Bowman Hats",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-archer-shoes",
+      "name": "AbsoLab Archer Shoes",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/d/d1/Eqp_AbsoLab_Shoes.png/revision/latest?cb=20160719041459",
+      "type": "Equipment",
+      "category": "Bowman Shoes",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-archer-shoulder",
+      "name": "AbsoLab Archer Shoulder",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/d/d1/Eqp_AbsoLab_Shoulder.png/revision/latest?cb=20160806223349",
+      "type": "Equipment",
+      "category": "Bowman Shoulders",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-archer-suit",
+      "name": "AbsoLab Archer Suit",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/a/a3/Eqp_AbsoLab_Archer_Suit.png/revision/latest?cb=20150830054638",
+      "type": "Equipment",
+      "category": "Bowman Overalls",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-blade-lord",
+      "name": "AbsoLab Blade Lord",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/c/c3/Eqp_AbsoLab_Blade_Lord.png/revision/latest?cb=20160719054958",
+      "type": "Equipment",
+      "category": "Daggers",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-blast-knuckle",
+      "name": "AbsoLab Blast Knuckle",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/7/7c/Eqp_AbsoLab_Blast_Knuckle.png/revision/latest?cb=20160719055400",
+      "type": "Equipment",
+      "category": "Knuckles",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-broad-saber",
+      "name": "AbsoLab Broad Saber",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/6/6c/Eqp_AbsoLab_Broad_Saber.png/revision/latest?cb=20160719055357",
+      "type": "Equipment",
+      "category": "Two-Handed Swords",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-chain",
+      "name": "AbsoLab Chain",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/d/dd/Eqp_AbsoLab_Chain.png/revision/latest?cb=20171121070115",
+      "type": "Equipment",
+      "category": "Chains",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-crossbow",
+      "name": "AbsoLab Crossbow",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/b/b3/Eqp_AbsoLab_Crossbow.png/revision/latest?cb=20160719055357",
+      "type": "Equipment",
+      "category": "Crossbows",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-desperado",
+      "name": "AbsoLab Desperado",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/8/8d/Eqp_AbsoLab_Desperado.png/revision/latest?cb=20210805181121",
+      "type": "Equipment",
+      "category": "Desperados",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-dual-bowguns",
+      "name": "AbsoLab Dual Bowguns",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/a/ab/Eqp_AbsoLab_Dual_Bowguns.png/revision/latest?cb=20160512045307",
+      "type": "Equipment",
+      "category": "Dual Bowguns",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-forked-cane",
+      "name": "AbsoLab Forked Cane",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/e/ea/Eqp_AbsoLab_Forked_Cane.png/revision/latest?cb=20160719055358",
+      "type": "Equipment",
+      "category": "Canes",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-hellslayer",
+      "name": "AbsoLab Hellslayer",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/9/92/Eqp_AbsoLab_Hellslayer.png/revision/latest?cb=20160719055512",
+      "type": "Equipment",
+      "category": "Polearms",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-katana",
+      "name": "AbsoLab Katana",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/c/c4/Eqp_AbsoLab_Katana.png/revision/latest?cb=20160719054958",
+      "type": "Equipment",
+      "category": "Katanas",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-monster-ritual-fan",
+      "name": "AbsoLab Monster Ritual Fan",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/7/79/Eqp_AbsoLab_Monster_Ritual_Fan.png/revision/latest?cb=20191127145311",
+      "type": "Equipment",
+      "category": "Ritual Fans",
+      "rarity": "common",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "arcane-symbol-chu-chu-island",
+      "name": "Arcane Symbol: Chu Chu Island",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/7/74/Eqp_Arcane_Symbol_Chu_Chu_Island.png/revision/latest?cb=20170116215643",
+      "type": "Equipment",
+      "category": "Arcane Symbols",
+      "rarity": "epic",
+      "level": 200,
+      "idleType": "weapon"
+    },
+    {
+      "id": "chaos-zakums-tree-branch",
+      "name": "Chaos Zakum's Tree Branch",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/1/12/Eqp_Zakum%27s_Tree_Branch.png/revision/latest?cb=20160424162015",
+      "type": "Equipment",
+      "category": "Wands",
+      "rarity": "epic",
+      "level": 50,
+      "idleType": "weapon"
+    },
+    {
+      "id": "cursed-kaiserium",
+      "name": "Cursed Kaiserium",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/0/00/Eqp_Kaiserium.png/revision/latest?cb=20160511032648",
+      "type": "Equipment",
+      "category": "Two-Handed Swords",
+      "rarity": "epic",
+      "level": 150,
+      "idleType": "weapon"
+    },
+    {
+      "id": "kaiserion",
+      "name": "Kaiserion",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/8/8e/Eqp_Kaiserion.png/revision/latest?cb=20151018081333",
+      "type": "Equipment",
+      "category": "Two-Handed Swords",
+      "rarity": "epic",
+      "level": 110,
+      "idleType": "weapon"
+    },
+    {
+      "id": "zakums-tree-branch",
+      "name": "Zakum's Tree Branch",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/1/12/Eqp_Zakum%27s_Tree_Branch.png/revision/latest?cb=20160424162015",
+      "type": "Equipment",
+      "category": "Wands",
+      "rarity": "epic",
+      "level": 10,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-bit-hammer",
+      "name": "AbsoLab Bit Hammer",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/4/4f/Eqp_AbsoLab_Bit_Hammer.png/revision/latest?cb=20160719054957",
+      "type": "Equipment",
+      "category": "One-Handed Blunt Weapons",
+      "rarity": "rare",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "absolab-broad-hammer",
+      "name": "AbsoLab Broad Hammer",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/0/00/Eqp_AbsoLab_Broad_Hammer.png/revision/latest?cb=20160719055357",
+      "type": "Equipment",
+      "category": "Two-Handed Blunt Weapons",
+      "rarity": "rare",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "abyss-bellocce",
+      "name": "Abyss Bellocce",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/2/2a/Eqp_Timeless_Bellocce.png/revision/latest?cb=20170411024505",
+      "type": "Equipment",
+      "category": "Two-Handed Blunt Weapons",
+      "rarity": "rare",
+      "level": 125,
+      "idleType": "weapon"
+    },
+    {
+      "id": "amaterasus-goldcutter",
+      "name": "Amaterasu's Goldcutter",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/5/5a/Eqp_Amaterasu%27s_Goldcutter.png/revision/latest?cb=20190806074916",
+      "type": "Equipment",
+      "category": "One-Handed Blunt Weapons",
+      "rarity": "rare",
+      "level": 150,
+      "idleType": "weapon"
+    },
+    {
+      "id": "amaterasus-hammer",
+      "name": "Amaterasu's Hammer",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/4/40/Eqp_Amaterasu%27s_Hammer.png/revision/latest?cb=20190806075744",
+      "type": "Equipment",
+      "category": "Two-Handed Blunt Weapons",
+      "rarity": "rare",
+      "level": 150,
+      "idleType": "weapon"
+    },
+    {
+      "id": "amaterasus-lupine-goldcutter",
+      "name": "Amaterasu's Lupine Goldcutter",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/a/ae/Eqp_Amaterasu%27s_Lupine_Goldcutter.png/revision/latest?cb=20201217142952",
+      "type": "Equipment",
+      "category": "One-Handed Blunt Weapons",
+      "rarity": "rare",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "amaterasus-lupine-hammer",
+      "name": "Amaterasu's Lupine Hammer",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/2/2f/Eqp_Amaterasu%27s_Lupine_Hammer.png/revision/latest?cb=20201217142952",
+      "type": "Equipment",
+      "category": "Two-Handed Blunt Weapons",
+      "rarity": "rare",
+      "level": 160,
+      "idleType": "weapon"
+    },
+    {
+      "id": "arcane-umbra-hammer",
+      "name": "Arcane Umbra Hammer",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/6/6d/Eqp_Arcane_Umbra_Hammer.png/revision/latest?cb=20161223004833",
+      "type": "Equipment",
+      "category": "One-Handed Blunt Weapons",
+      "rarity": "rare",
+      "level": 200,
+      "idleType": "weapon"
+    },
+    {
+      "id": "arcane-umbra-two-handed-hammer",
+      "name": "Arcane Umbra Two-Handed Hammer",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/e/ed/Eqp_Arcane_Umbra_Two-Handed_Hammer.png/revision/latest?cb=20161223192825",
+      "type": "Equipment",
+      "category": "Two-Handed Blunt Weapons",
+      "rarity": "rare",
+      "level": 200,
+      "idleType": "weapon"
+    },
+    {
+      "id": "authority-scepter",
+      "name": "Authority Scepter",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/f/fd/Eqp_Authority_Scepter.png/revision/latest?cb=20150531184606",
+      "type": "Equipment",
+      "category": "One-Handed Blunt Weapons",
+      "rarity": "rare",
+      "level": 50,
+      "idleType": "weapon"
+    },
+    {
+      "id": "balrogs-golden-hammer",
+      "name": "Balrog's Golden Hammer",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/6/6f/Eqp_Heaven%27s_Justice.png/revision/latest?cb=20180916174629",
+      "type": "Equipment",
+      "category": "One-Handed Blunt Weapons",
+      "rarity": "rare",
+      "level": 80,
+      "idleType": "weapon"
+    },
+    {
+      "id": "balrogs-leomite",
+      "name": "Balrog's Leomite",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/f/f7/Eqp_Leomite.png/revision/latest?cb=20170227055859",
+      "type": "Equipment",
+      "category": "Two-Handed Blunt Weapons",
+      "rarity": "rare",
+      "level": 90,
+      "idleType": "weapon"
+    },
+    {
+      "id": "balrogs-morningstar",
+      "name": "Balrog's Morningstar",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/f/f4/Eqp_The_Morningstar.png/revision/latest?cb=20181021005543",
+      "type": "Equipment",
+      "category": "Two-Handed Blunt Weapons",
+      "rarity": "rare",
+      "level": 80,
+      "idleType": "weapon"
+    },
+    {
+      "id": "balrogs-ruin-hammer",
+      "name": "Balrog's Ruin Hammer",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/a/a0/Eqp_Ruin_Hammer.png/revision/latest?cb=20171123043730",
+      "type": "Equipment",
+      "category": "One-Handed Blunt Weapons",
+      "rarity": "rare",
+      "level": 90,
+      "idleType": "weapon"
+    },
+    {
+      "id": "battle-hammer",
+      "name": "Battle Hammer",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/2/27/Eqp_Battle_Hammer.png/revision/latest?cb=20180618042215",
+      "type": "Equipment",
+      "category": "One-Handed Blunt Weapons",
+      "rarity": "rare",
+      "level": 100,
+      "idleType": "weapon"
+    },
+    {
+      "id": "bent-judgement",
+      "name": "Bent Judgement",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/7/70/Eqp_Bent_Judgement.png/revision/latest?cb=20190519003521",
+      "type": "Equipment",
+      "category": "One-Handed Blunt Weapons",
+      "rarity": "rare",
+      "level": 75,
+      "idleType": "weapon"
+    },
+    {
+      "id": "black-tube",
+      "name": "Black Tube",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/a/a5/Eqp_Black_Tube.png/revision/latest?cb=20190519002812",
+      "type": "Equipment",
+      "category": "One-Handed Blunt Weapons",
+      "rarity": "rare",
+      "level": 50,
+      "idleType": "weapon"
+    },
+    {
+      "id": "blazing-sword",
+      "name": "Blazing Sword",
+      "image": "https://static.wikia.nocookie.net/maplestory/images/c/c7/Eqp_Blazing_Sword.png/revision/latest?cb=20140421175939",
+      "type": "Equipment",
+      "category": "One-Handed Swords",
+      "rarity": "rare",
+      "level": 53,
+      "idleType": "weapon"
+    }
+  ]
+}

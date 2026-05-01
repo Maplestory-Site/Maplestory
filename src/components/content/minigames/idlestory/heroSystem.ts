@@ -48,8 +48,8 @@ export const HEROES: Record<HeroId, HeroDefinition> = {
     rarity: "common",
     role: "Frontline explorer",
     baseCost: 120,
-    baseDps: 4,
-    baseStats: { attack: 7, defense: 8, hp: 140, attackSpeed: 0.75 },
+    baseDps: 2.2,
+    baseStats: { attack: 4, defense: 8, hp: 140, attackSpeed: 0.74 },
     passiveBonus: "+8% team defense while active",
     skillUnlockLevels: [1, 5, 10]
   },

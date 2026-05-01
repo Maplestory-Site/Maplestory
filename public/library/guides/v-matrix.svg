@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" role="img" aria-label="V Matrix guide art">
+  <rect width="880" height="440" fill="#151728"/>
+  <g transform="translate(180 92)" fill="#202b40" stroke="#8fd7ff" stroke-width="5">
+    <rect width="118" height="118" rx="22"/><rect x="142" width="118" height="118" rx="22"/><rect x="284" width="118" height="118" rx="22"/><rect x="426" width="118" height="118" rx="22"/>
+    <rect y="142" width="118" height="118" rx="22"/><rect x="142" y="142" width="118" height="118" rx="22"/><rect x="284" y="142" width="118" height="118" rx="22"/><rect x="426" y="142" width="118" height="118" rx="22"/>
+  </g>
+  <g fill="#f6c66a"><circle cx="239" cy="151" r="24"/><circle cx="381" cy="293" r="24"/><circle cx="665" cy="151" r="24"/></g>
+  <text x="54" y="70" fill="#fff" font-family="Verdana, Arial, sans-serif" font-size="38" font-weight="900">V MATRIX</text>
+  <text x="54" y="110" fill="#fff" opacity=".78" font-family="Verdana, Arial, sans-serif" font-size="22">Slots, boost nodes, and build choices.</text>
+</svg>

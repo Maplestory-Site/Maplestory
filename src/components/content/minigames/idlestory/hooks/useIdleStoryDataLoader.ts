@@ -104,6 +104,10 @@ function sanitizeMaps(items: DatabaseMap[]) {
   }));
 }
 
+export function normalizeLoadedZoneIdForGame(zoneId: string): string {
+  return getFullZoneOrFirst(zoneId).id;
+}
+
 type UseIdleStoryDataLoaderParams = {
   currentZoneName: string;
   setToast: (message: string) => void;
@@ -111,7 +115,6 @@ type UseIdleStoryDataLoaderParams = {
 };
 
 export function useIdleStoryDataLoader({
-  currentZoneName,
   setToast,
   setState
 }: UseIdleStoryDataLoaderParams) {
@@ -147,11 +150,10 @@ export function useIdleStoryDataLoader({
         const nextMaps = sanitizeMaps(nextMapsRaw);
         if (!isMountedRef.current || requestId !== requestIdRef.current || controller.signal.aborted) return;
         setMaps(nextMaps);
-        setState((cur) =>
-          nextMaps.some((entry) => entry.id === cur.zone)
-            ? cur
-            : { ...cur, zone: nextMaps[0]?.id ?? cur.zone }
-        );
+        setState((cur) => {
+          const safeZoneId = normalizeLoadedZoneIdForGame(cur.zone);
+          return safeZoneId === cur.zone ? cur : { ...cur, zone: safeZoneId };
+        });
 
         const nextMonsters = await fetchDatabase<DatabaseMonster>("/api/monsters", controller.signal);
         if (!isMountedRef.current || requestId !== requestIdRef.current || controller.signal.aborted) return;
@@ -161,7 +163,7 @@ export function useIdleStoryDataLoader({
         if (!isMountedRef.current || requestId !== requestIdRef.current || controller.signal.aborted) return;
         setItems(limitItems(nextItems));
 
-        setToast(`${currentZoneName} - ready to adventure!`);
+        setToast("Zone data ready.");
       } catch {
         if (!isMountedRef.current || requestId !== requestIdRef.current || controller.signal.aborted) return;
         setToast("Offline mode - zone data loaded from cache.");
@@ -174,7 +176,7 @@ export function useIdleStoryDataLoader({
       requestIdRef.current += 1;
       controller.abort();
     };
-  }, [currentZoneName, setState, setToast]);
+  }, [setState, setToast]);
 
   useEffect(() => {
     if (offlineGainsAppliedRef.current) return;

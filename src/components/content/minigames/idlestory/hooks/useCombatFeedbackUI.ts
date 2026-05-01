@@ -37,6 +37,7 @@ type UseCombatFeedbackUIParams = {
   playLevelUp: () => void;
   playSuccess: () => void;
   setToast: (message: string) => void;
+  showTickDamageNumbers?: boolean;
 };
 
 export function useCombatFeedbackUI({
@@ -48,7 +49,8 @@ export function useCombatFeedbackUI({
   playReward,
   playLevelUp,
   playSuccess,
-  setToast
+  setToast,
+  showTickDamageNumbers = true
 }: UseCombatFeedbackUIParams) {
   const [dmgNums, setDmgNums] = useState<DmgNumber[]>([]);
   const [feelBursts, setFeelBursts] = useState<FeelBurst[]>([]);
@@ -129,9 +131,11 @@ export function useCombatFeedbackUI({
       const dmg = Math.round(prev.hp - state.enemyHp);
       if (dmg > 0) {
         const kind = isBoss ? "boss" : dps > 200 && defaultRng() < 0.15 ? "crit" : "normal";
-        spawnDmg(dmg, kind);
-        spawnFeelBurst(kind === "crit" ? "crit" : "hit");
-        if (kind === "crit") playCrit(); else playHit();
+        if (showTickDamageNumbers) {
+          spawnDmg(dmg, kind);
+          spawnFeelBurst(kind === "crit" ? "crit" : "hit");
+          if (kind === "crit") playCrit(); else playHit();
+        }
 
         if (!hitRef.current) {
           hitRef.current = true;
@@ -167,6 +171,7 @@ export function useCombatFeedbackUI({
     playCrit,
     playHit,
     playReward,
+    showTickDamageNumbers,
     resetManagedTimeoutRef
   ]);
 

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" role="img" aria-label="Attack speed guide art">
+  <defs><linearGradient id="bg" x1="0" x2="1"><stop stop-color="#151d2d"/><stop offset="1" stop-color="#3a2714"/></linearGradient></defs>
+  <rect width="880" height="440" fill="url(#bg)"/>
+  <g stroke-linecap="round">
+    <path d="M120 282c160-170 294-208 520-158" fill="none" stroke="#ffcf5f" stroke-width="20"/>
+    <path d="M172 330c190-136 340-156 584-80" fill="none" stroke="#7bd9ff" stroke-width="14" opacity=".8"/>
+    <path d="M250 236h360" stroke="#ff6e61" stroke-width="34"/>
+  </g>
+  <circle cx="654" cy="126" r="54" fill="#ffe381"/>
+  <text x="54" y="72" fill="#fff" font-family="Verdana, Arial, sans-serif" font-size="38" font-weight="900">ATTACK SPEED</text>
+  <text x="54" y="112" fill="#fff" opacity=".78" font-family="Verdana, Arial, sans-serif" font-size="22">Faster actions, cleaner windows.</text>
+</svg>

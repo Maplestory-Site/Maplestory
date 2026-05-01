@@ -1,5 +1,5 @@
 /**
- * libraryGuides.ts — pure filter / search / lookup helpers for the Maple Library.
+ * Pure filter / search / lookup helpers for the Maple Library.
  *
  * No React, no DOM, no fetch. All functions are deterministic and easy to test.
  */
@@ -46,7 +46,7 @@ export function matchesQuery(text: string, query: string): boolean {
 
 /** Build a single searchable haystack string for a guide. */
 export function buildGuideHaystack(guide: LibraryGuide): string {
-  const sectionText = guide.sections.map((s) => `${s.heading} ${s.body}`).join(" ");
+  const sectionText = guide.sections.map((section) => `${section.heading} ${section.body}`).join(" ");
   return [
     guide.title,
     guide.subcategory ?? "",
@@ -66,7 +66,7 @@ export function guideMatches(guide: LibraryGuide, filter: LibraryFilter): boolea
   if (filter.region && guide.region !== filter.region) return false;
   if (filter.tag) {
     const wanted = filter.tag.toLowerCase();
-    const hit = guide.tags.some((t) => t.toLowerCase() === wanted);
+    const hit = guide.tags.some((tag) => tag.toLowerCase() === wanted);
     if (!hit) return false;
   }
   if (filter.query.trim() && !matchesQuery(buildGuideHaystack(guide), filter.query)) {
@@ -80,12 +80,12 @@ export function filterGuides(guides: LibraryGuide[], filter: LibraryFilter): Lib
 }
 
 export function getGuideById(guides: LibraryGuide[], id: string): LibraryGuide | null {
-  return guides.find((g) => g.id === id) ?? null;
+  return guides.find((guide) => guide.id === id) ?? null;
 }
 
 /** Featured guides for the hero strip. Falls back to first N if none are flagged. */
 export function getFeaturedGuides(guides: LibraryGuide[], limit = 3): LibraryGuide[] {
-  const flagged = guides.filter((g) => g.featured);
+  const flagged = guides.filter((guide) => guide.featured);
   if (flagged.length >= 1) return flagged.slice(0, limit);
   return guides.slice(0, limit);
 }
@@ -94,16 +94,18 @@ export function getFeaturedGuides(guides: LibraryGuide[], limit = 3): LibraryGui
 export function getRelatedGuides(all: LibraryGuide[], guide: LibraryGuide): LibraryGuide[] {
   const relatedIds = guide.relatedGuideIds?.length ? guide.relatedGuideIds : guide.relatedIds ?? [];
   if (!relatedIds.length) return [];
-  const map = new Map(all.map((g) => [g.id, g] as const));
-  return relatedIds.map((id) => map.get(id)).filter((g): g is LibraryGuide => Boolean(g));
+  const map = new Map(all.map((item) => [item.id, item] as const));
+  return relatedIds.map((id) => map.get(id)).filter((item): item is LibraryGuide => Boolean(item));
 }
 
-/** Map of category key → count, including "All". Useful for tab badges. */
-export function getCategoryCounts(guides: LibraryGuide[]): Record<LibraryCategory | LibraryCategoryKey | "All" | "all", number> {
+/** Map of category key to count, including "All". Useful for tab badges. */
+export function getCategoryCounts(
+  guides: LibraryGuide[]
+): Record<LibraryCategory | LibraryCategoryKey | "All" | "all", number> {
   const counts: Record<string, number> = { All: guides.length, all: guides.length };
-  for (const g of guides) {
-    counts[g.category] = (counts[g.category] ?? 0) + 1;
-    const key = categoryToKey(g.category);
+  for (const guide of guides) {
+    counts[guide.category] = (counts[guide.category] ?? 0) + 1;
+    const key = categoryToKey(guide.category);
     counts[key] = (counts[key] ?? 0) + 1;
   }
   return counts as Record<LibraryCategory | LibraryCategoryKey | "All" | "all", number>;
@@ -112,7 +114,9 @@ export function getCategoryCounts(guides: LibraryGuide[]): Record<LibraryCategor
 /** Unique tag list, sorted alphabetically, lower-cased. */
 export function getTagList(guides: LibraryGuide[]): string[] {
   const set = new Set<string>();
-  for (const g of guides) for (const t of g.tags) set.add(t.toLowerCase());
+  for (const guide of guides) {
+    for (const tag of guide.tags) set.add(tag.toLowerCase());
+  }
   return [...set].sort();
 }
 
@@ -146,6 +150,52 @@ export function getAllExternalLinks(guides: LibraryGuide[]): LibraryExternalLink
 /** True if a link type is third-party (Wiki / Community / Tool / Video). Used for the disclaimer. */
 export function isThirdPartyLinkType(type: LibraryExternalLinkType): boolean {
   return type !== "Official";
+}
+
+// Sorting
+
+export type LibrarySortMode = "featured" | "recent" | "beginner" | "az";
+
+const DIFFICULTY_RANK: Record<LibraryDifficulty, number> = {
+  Beginner: 0,
+  Intermediate: 1,
+  Advanced: 2
+};
+
+/**
+ * Sort guides by mode. Returns a NEW array; never mutates input.
+ *
+ *  - featured  : featured flag first, then most recent.
+ *  - recent    : most recently updated first (by lastUpdated descending).
+ *  - beginner  : Beginner -> Intermediate -> Advanced, then alphabetical.
+ *  - az        : alphabetical by title.
+ */
+export function sortGuides(guides: LibraryGuide[], mode: LibrarySortMode): LibraryGuide[] {
+  const arr = [...guides];
+  switch (mode) {
+    case "featured":
+      arr.sort((a, b) => {
+        const featuredDelta = Number(Boolean(b.featured)) - Number(Boolean(a.featured));
+        if (featuredDelta !== 0) return featuredDelta;
+        return b.lastUpdated.localeCompare(a.lastUpdated);
+      });
+      return arr;
+    case "recent":
+      arr.sort((a, b) => b.lastUpdated.localeCompare(a.lastUpdated));
+      return arr;
+    case "beginner":
+      arr.sort((a, b) => {
+        const rankDelta = DIFFICULTY_RANK[a.difficulty] - DIFFICULTY_RANK[b.difficulty];
+        if (rankDelta !== 0) return rankDelta;
+        return a.title.localeCompare(b.title);
+      });
+      return arr;
+    case "az":
+      arr.sort((a, b) => a.title.localeCompare(b.title));
+      return arr;
+    default:
+      return arr;
+  }
 }
 
 export function categoryToKey(category: LibraryCategory): LibraryCategoryKey {

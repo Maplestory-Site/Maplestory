@@ -238,7 +238,9 @@ export function gameTick(
     dungeonRelicReward = dungeonTick.rewards.relics;
     dungeonFameReward = dungeonTick.rewards.fame;
   } else {
-    const combatTick = computeCombatTick(aiReadyState, context.zone, safeSeconds, combinedDpsMult);
+    const combatTick = computeCombatTick(aiReadyState, context.zone, safeSeconds, combinedDpsMult, {
+      mode: safeSeconds > 2 ? "offline" : "online"
+    });
     combatState = combatTick.newState;
     kills = combatTick.kills;
     bossesKilled = combatTick.bossesKilled;
@@ -286,7 +288,10 @@ export function gameTick(
       : normalKills * (normalRewardMonster?.goldReward ?? (18 + combatState.stage * 4)) +
         eliteKills * (eliteRewardMonster?.goldReward ?? (54 + combatState.stage * 12)) +
         bossesKilled * (bossRewardMonster?.goldReward ?? (180 + combatState.stage * 40));
-  const killMesos  = baseKillMesos * context.zone.rewardBoost * capFactor;
+  const earlyKillRewardMult = combatState.totalPlayTime < 300
+    ? 0.36 + (combatState.totalPlayTime / 300) * 0.44
+    : 1;
+  const killMesos  = baseKillMesos * context.zone.rewardBoost * capFactor * earlyKillRewardMult;
   const fameGain   = dungeonRun ? 0 : getFamePerSecond(combatState, context.monster) * safeSeconds;
   const bossFame   = bossesKilled * (8 + combatState.prestigeCount * 2);
   const replayabilityBonuses = getReplayabilityBonuses(

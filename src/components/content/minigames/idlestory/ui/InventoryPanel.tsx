@@ -1,4 +1,4 @@
-import { memo, useEffect, useMemo, useState } from "react";
+import { memo, useEffect, useMemo, useState, type CSSProperties } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   formatNumber,
@@ -21,6 +21,15 @@ import type {
 } from "../gameEngine";
 import { GEAR, getGearCost, getGearEffect } from "../progressionSystem";
 import { MAX_ITEM_REROLLS, getItemPower } from "../itemSystem";
+import {
+  compareItemStats,
+  getItemRarityStyle,
+  getItemTypeLabel,
+  isItemUpgrade,
+  resolveItemVisuals,
+  type ItemDatabaseEntry
+} from "../itemVisuals";
+import "../inventory-icons.css";
 
 type Props = {
   state: IdleGameState;
@@ -34,6 +43,17 @@ type Props = {
   onRerollLoot: (itemId: string, mode: RerollMode) => void;
   onSalvageLoot: (itemId: string) => void;
   onCraftLoot: (recipeId: CraftRecipeId) => void;
+};
+
+type InventoryFilter = "all" | "weapon" | "armor" | "accessory" | "sets" | "rare";
+type InventorySort = "newest" | "rarity" | "power" | "level" | "type";
+
+const RARITY_RANK: Record<string, number> = {
+  common: 1,
+  uncommon: 2,
+  rare: 3,
+  epic: 4,
+  legendary: 5
 };
 
 const SLOT_META: Record<IdleItemType, { icon: string; label: string }> = {
@@ -50,8 +70,57 @@ const LEGACY_GEAR: Record<GearId, { icon: string; label: string }> = {
   charm: { icon: "Charm", label: "Charm forge" }
 };
 
+const FILTERS: Array<{ id: InventoryFilter; label: string }> = [
+  { id: "all", label: "All" },
+  { id: "weapon", label: "Weapons" },
+  { id: "armor", label: "Armor" },
+  { id: "accessory", label: "Accessories" },
+  { id: "sets", label: "Sets" },
+  { id: "rare", label: "Rare+" }
+];
+
 function rarityLabel(rarity: string): string {
   return rarity ? `${rarity[0].toUpperCase()}${rarity.slice(1)}` : "Common";
+}
+
+function itemCssVars(item: IdleItemInstance): CSSProperties {
+  const style = getItemRarityStyle(item.rarity);
+  return {
+    "--item-rarity": style.color,
+    "--item-rarity-border": style.border,
+    "--item-rarity-glow": style.glow
+  } as CSSProperties;
+}
+
+function ItemVisualIcon({
+  item,
+  database,
+  className,
+  large = false
+}: {
+  item: IdleItemInstance;
+  database: readonly ItemDatabaseEntry[];
+  className?: string;
+  large?: boolean;
+}) {
+  const visuals = useMemo(() => resolveItemVisuals(item, database), [item, database]);
+  const [src, setSrc] = useState(visuals.icon);
+
+  useEffect(() => {
+    setSrc(visuals.icon);
+  }, [visuals.icon]);
+
+  return (
+    <span className={`isw-item-visual${large ? " is-large" : ""}${className ? ` ${className}` : ""}`}>
+      <img
+        alt={item.name}
+        decoding="async"
+        loading="lazy"
+        src={src}
+        onError={() => setSrc(visuals.fallbackIcon)}
+      />
+    </span>
+  );
 }
 
 function statLine(item: IdleItemInstance): string {
@@ -82,16 +151,8 @@ function formatStatDiff(value: number, isPercent = false): string {
   return `${prefix}${isPercent ? `${Math.round(value * 100)}%` : formatNumber(value)}`;
 }
 
-function getItemDeltaRows(item: IdleItemInstance, equipped?: IdleItemInstance) {
-  const base = equipped?.stats;
-  return [
-    { label: "Attack", value: item.stats.attack - (base?.attack ?? 0), percent: false },
-    { label: "Defense", value: item.stats.defense - (base?.defense ?? 0), percent: false },
-    { label: "HP", value: item.stats.hp - (base?.hp ?? 0), percent: false },
-    { label: "Crit", value: item.stats.critChance - (base?.critChance ?? 0), percent: true },
-    { label: "Crit DMG", value: item.stats.critDamage - (base?.critDamage ?? 0), percent: true },
-    { label: "Speed", value: item.stats.attackSpeed - (base?.attackSpeed ?? 0), percent: true }
-  ];
+function isPercentStat(key: string): boolean {
+  return !["attack", "defense", "hp"].includes(key);
 }
 
 function canAffordMaterials(
@@ -151,8 +212,11 @@ function InventoryPanelInner({
   onCraftLoot
 }: Props) {
   const [selected, setSelected] = useState<IdleItemInstance | null>(null);
+  const [filter, setFilter] = useState<InventoryFilter>("all");
+  const [sort, setSort] = useState<InventorySort>("newest");
   const inventory = state.inventory ?? [];
   const equipment = state.equipment ?? {};
+  const itemDatabase = items as ItemDatabaseEntry[];
   const fallbackItems = items.slice(0, 10);
   const materials = state.materials ?? { shard: 0, essence: 0, crystal: 0, bossCore: 0 };
   const craftRecipes = useMemo(() => getCraftRecipeDefinitions(), []);
@@ -160,6 +224,27 @@ function InventoryPanelInner({
     () => getActiveSetBonuses(state.equipment, { buildFocus: state.buildFocus, talentNodes: state.talentNodes }),
     [state.equipment, state.buildFocus, state.talentNodes]
   );
+  const latestDropIds = useMemo(
+    () => new Set((state.lastLootDrops ?? []).map((item) => item.id)),
+    [state.lastLootDrops]
+  );
+  const visibleInventory = useMemo(() => {
+    const filtered = inventory.filter((item) => {
+      if (filter === "weapon") return item.type === "weapon";
+      if (filter === "armor") return item.category === "armor" || item.type === "helmet";
+      if (filter === "accessory") return item.category === "accessory" || item.type === "ring" || item.type === "amulet";
+      if (filter === "sets") return Boolean(item.setId);
+      if (filter === "rare") return (RARITY_RANK[item.rarity] ?? 0) >= RARITY_RANK.rare || item.isRareDrop || item.isUnique;
+      return true;
+    });
+    return [...filtered].sort((a, b) => {
+      if (sort === "rarity") return (RARITY_RANK[b.rarity] ?? 0) - (RARITY_RANK[a.rarity] ?? 0) || getItemPower(b) - getItemPower(a);
+      if (sort === "power") return getItemPower(b) - getItemPower(a);
+      if (sort === "level") return b.levelRequirement - a.levelRequirement || getItemPower(b) - getItemPower(a);
+      if (sort === "type") return getItemTypeLabel(a.type).localeCompare(getItemTypeLabel(b.type)) || a.name.localeCompare(b.name);
+      return Number(latestDropIds.has(b.id)) - Number(latestDropIds.has(a.id));
+    });
+  }, [filter, inventory, latestDropIds, sort]);
 
   useEffect(() => {
     if (!selected) return;
@@ -172,6 +257,13 @@ function InventoryPanelInner({
   const selectedSetPieces = selectedSet
     ? Object.values(equipment).filter((entry) => entry?.setId === selectedSet.id).length
     : 0;
+  const selectedEquippedItem = selected ? equipment[selected.type] : undefined;
+  const selectedIsEquipped = Boolean(selected && selectedEquippedItem?.id === selected.id);
+  const selectedCompareTarget = selectedIsEquipped ? undefined : selectedEquippedItem;
+  const selectedVisuals = selected ? resolveItemVisuals(selected, itemDatabase) : null;
+  const selectedPowerDelta = selected ? comparePower(selected, selectedCompareTarget) : 0;
+  const selectedDeltaRows = selected ? compareItemStats(selectedCompareTarget ?? null, selected) : [];
+  const selectedRecommended = Boolean(selected && !selectedIsEquipped && isItemUpgrade(selectedCompareTarget ?? null, selected));
 
   return (
     <div className="isw-panel isw-inv isw-premium-panel">
@@ -193,12 +285,20 @@ function InventoryPanelInner({
           return (
             <motion.button
               key={type}
-              className={`isw-equip-slot ${item ? `isw-rarity-card--${item.rarity}` : "is-empty"}`}
+              className={`isw-equip-slot ${item ? `isw-rarity-card--${item.rarity} has-item` : "is-empty"}`}
+              data-rarity={item?.rarity}
               onClick={() => item ? setSelected(item) : undefined}
+              style={item ? itemCssVars(item) : undefined}
               whileTap={{ scale: 0.94 }}
               type="button"
             >
-              <span className="isw-equip-slot__icon">{item ? item.name.slice(0, 2) : meta.icon}</span>
+              <span className="isw-equip-slot__icon">
+                {item ? (
+                  <ItemVisualIcon item={item} database={itemDatabase} />
+                ) : (
+                  meta.icon
+                )}
+              </span>
               <span className="isw-equip-slot__label">{meta.label}</span>
               <strong>{item ? item.name : "Empty"}</strong>
               <small>{item ? `${item.isUnique ? "Unique" : item.isRareDrop ? "Rare drop" : rarityLabel(item.rarity)} | PWR ${formatNumber(getItemPower(item))}` : "Tap loot to equip"}</small>
@@ -286,45 +386,90 @@ function InventoryPanelInner({
       {state.lastLootDrops?.length ? (
         <div className="isw-inv__recent-drops">
           {state.lastLootDrops.slice(0, 3).map((item) => (
-            <span key={item.id} className={`isw-rarity--${item.rarity}`}>
+            <span key={item.id} className={`isw-rarity--${item.rarity}`} style={itemCssVars(item)}>
+              <ItemVisualIcon item={item} database={itemDatabase} />
               + {rarityLabel(item.rarity)} {item.name}
             </span>
           ))}
         </div>
       ) : null}
 
+      <div className="isw-inv__toolbar" aria-label="Inventory filters">
+        <div className="isw-inv__filter-row">
+          {FILTERS.map((entry) => (
+            <button
+              key={entry.id}
+              className={`isw-inv__filter${filter === entry.id ? " is-active" : ""}`}
+              onClick={() => setFilter(entry.id)}
+              type="button"
+            >
+              {entry.label}
+            </button>
+          ))}
+        </div>
+        <label className="isw-inv__sort">
+          <span>Sort</span>
+          <select value={sort} onChange={(event) => setSort(event.target.value as InventorySort)}>
+            <option value="newest">Newest</option>
+            <option value="rarity">Rarity</option>
+            <option value="power">Power</option>
+            <option value="level">Level</option>
+            <option value="type">Type</option>
+          </select>
+        </label>
+      </div>
+
       <div className="isw-inv__loot-grid">
-        {inventory.map((item, index) => {
+        {visibleInventory.map((item, index) => {
           const equipped = Object.values(equipment).some((entry) => entry?.id === item.id);
+          const visuals = resolveItemVisuals(item, itemDatabase);
+          const recommended = !equipped && isItemUpgrade(equipment[item.type] ?? null, item);
+          const isNew = item.isNew || latestDropIds.has(item.id);
           return (
             <motion.button
               key={item.id}
               className={`isw-loot-card isw-rarity-card--${item.rarity}${equipped ? " is-equipped" : ""}`}
+              data-rarity={item.rarity}
               onClick={() => setSelected(item)}
+              style={itemCssVars(item)}
               whileTap={{ scale: 0.92 }}
               initial={{ opacity: 0, y: 10, scale: 0.96 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}
               transition={{ delay: Math.min(index * 0.015, 0.18) }}
               type="button"
             >
-              <span className="isw-loot-card__icon">{item.name.slice(0, 2)}</span>
+              <span className="isw-loot-card__icon">
+                <ItemVisualIcon item={item} database={itemDatabase} />
+              </span>
               <span className="isw-loot-card__rarity">{rarityLabel(item.rarity)}</span>
+              <span className="isw-loot-card__type">{visuals.typeLabel}</span>
               <strong>{item.name}</strong>
               <small>{statLine(item)}</small>
               <small className="isw-loot-card__affix">{affixPreview(item, 1)}</small>
               {item.setId ? (
-                <small className="isw-loot-card__affix">
+                <small className="isw-loot-card__set">
                   Set: {getItemSetDefinition(item.setId)?.name ?? item.setId}
                 </small>
               ) : null}
+              <small className="isw-loot-card__source">{visuals.dropSourceLabel}</small>
               <span className="isw-loot-card__power">PWR {formatNumber(getItemPower(item))}</span>
-              <span className="isw-loot-card__power">Value {formatNumber(item.value)}g</span>
+              <span className="isw-loot-card__power">Value {formatNumber(item.sellValue ?? item.value)}g</span>
+              {isNew && <span className="isw-loot-card__tag is-new">New</span>}
+              {recommended && <span className="isw-loot-card__tag is-recommended">Recommended</span>}
               {item.isUnique && <span className="isw-loot-card__tag is-unique">Unique</span>}
               {!item.isUnique && item.isRareDrop && <span className="isw-loot-card__tag is-rare-drop">Rare Drop</span>}
               {equipped && <span className="isw-loot-card__tag">Equipped</span>}
             </motion.button>
           );
         })}
+
+        {inventory.length > 0 && visibleInventory.length === 0 ? (
+          <div className="isw-loot-card is-preview is-empty-state">
+            <span className="isw-loot-card__icon">?</span>
+            <strong>No items match this filter</strong>
+            <small>Try All or another item family.</small>
+          </div>
+        ) : null}
 
         {!inventory.length && fallbackItems.map((item) => (
           <div className="isw-loot-card is-preview" key={item.id}>
@@ -370,6 +515,8 @@ function InventoryPanelInner({
           <motion.div className="isw-sheet-backdrop" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setSelected(null)}>
             <motion.div
               className={`isw-item-sheet isw-rarity-card--${selected.rarity}`}
+              data-rarity={selected.rarity}
+              style={itemCssVars(selected)}
               initial={{ y: 80, opacity: 0, scale: 0.94 }}
               animate={{ y: 0, opacity: 1, scale: 1 }}
               exit={{ y: 60, opacity: 0, scale: 0.96 }}
@@ -377,16 +524,25 @@ function InventoryPanelInner({
               onClick={(event) => event.stopPropagation()}
             >
               <div className="isw-item-sheet__top">
-                <span className="isw-item-sheet__icon">{selected.name.slice(0, 2)}</span>
+                <div className="isw-item-sheet__visual">
+                  <ItemVisualIcon item={selected} database={itemDatabase} large />
+                  {selectedRecommended ? <span className="isw-item-sheet__badge">Recommended</span> : null}
+                </div>
                 <div>
                   <span className="isw-loot-card__rarity">{rarityLabel(selected.rarity)}</span>
                   <h3>{selected.name}</h3>
+                  <p>{selectedVisuals?.description}</p>
+                  <p>{selectedVisuals?.categoryLabel} | {SLOT_META[selected.type].label} | Lv.{selected.levelRequirement} | +{selected.enhanceLevel}</p>
+                  <p>{selected.category.toUpperCase()} | Value {formatNumber(selected.sellValue ?? selected.value)}g | Rerolls {selected.rerollCount}</p>
                   <p>{selected.isUnique ? "Unique drop" : selected.isRareDrop ? "Rare drop proc" : "Standard drop"}{selected.qualityRoll ? ` | Roll ${Math.round(selected.qualityRoll * 100)}%` : ""}</p>
-                  <p>{SLOT_META[selected.type].label} | Lv.{selected.levelRequirement} | +{selected.enhanceLevel}</p>
-                  <p>{selected.category.toUpperCase()} | Value {formatNumber(selected.value)}g | Rerolls {selected.rerollCount}</p>
                   {selectedSet ? (
                     <p>Set: {selectedSet.name} ({selectedSetPieces}/{selectedSet.pieceTypes.length})</p>
                   ) : null}
+                  <div className="isw-item-sheet__chips">
+                    {(selectedVisuals?.tags ?? []).slice(0, 5).map((tag) => (
+                      <span key={tag}>{tag}</span>
+                    ))}
+                  </div>
                 </div>
                 <button type="button" onClick={() => setSelected(null)}>Close</button>
               </div>
@@ -396,19 +552,24 @@ function InventoryPanelInner({
                   <span>Power</span>
                   <strong>{formatNumber(getItemPower(selected))}</strong>
                 </div>
-                <div className={comparePower(selected, equipment[selected.type]) >= 0 ? "is-positive" : "is-negative"}>
+                <div className={selectedPowerDelta >= 0 ? "is-positive" : "is-negative"}>
                   <span>Compare</span>
-                  <strong>{comparePower(selected, equipment[selected.type]) >= 0 ? "+" : ""}{formatNumber(comparePower(selected, equipment[selected.type]))}</strong>
+                  <strong>{selectedPowerDelta >= 0 ? "+" : ""}{formatNumber(selectedPowerDelta)}</strong>
                 </div>
               </div>
 
               <div className="isw-item-sheet__compare">
-                {getItemDeltaRows(selected, equipment[selected.type]).map((entry) => (
-                  <div key={entry.label} className={entry.value >= 0 ? "is-positive" : "is-negative"}>
-                    <span>{entry.label}</span>
-                    <strong>{formatStatDiff(entry.value, entry.percent)}</strong>
+                {selectedDeltaRows.length ? selectedDeltaRows.map((entry) => (
+                  <div key={entry.key} className={entry.better ? "is-positive" : "is-negative"}>
+                    <span>{statDisplayLabel(entry.key)}</span>
+                    <strong>{formatStatDiff(entry.delta, isPercentStat(entry.key))}</strong>
                   </div>
-                ))}
+                )) : (
+                  <div>
+                    <span>Compare</span>
+                    <strong>No stat change</strong>
+                  </div>
+                )}
               </div>
 
               <div className="isw-item-sheet__affixes">
@@ -437,6 +598,40 @@ function InventoryPanelInner({
                 </div>
               ) : null}
 
+              <div className="isw-item-sheet__source">
+                <div>
+                  <span>Drop Source</span>
+                  <strong>{selectedVisuals?.dropSourceLabel}</strong>
+                </div>
+                <div>
+                  <span>Database Match</span>
+                  <strong>{selectedVisuals?.metadata?.name ?? "IdleStory generated item"}</strong>
+                </div>
+                {selectedVisuals?.databaseUrl ? (
+                  <a href={selectedVisuals.databaseUrl} target="_blank" rel="noreferrer">
+                    View in Database
+                  </a>
+                ) : null}
+              </div>
+
+              {selected.potentialLines?.length ? (
+                <div className="isw-item-sheet__affixes">
+                  <span>Potential</span>
+                  {selected.potentialLines.map((line, index) => (
+                    <strong key={`${selected.id}-potential-${index}`}>{line}</strong>
+                  ))}
+                </div>
+              ) : null}
+
+              {selected.bonusStats ? (
+                <div className="isw-item-sheet__affixes">
+                  <span>Bonus Stats</span>
+                  {Object.entries(selected.bonusStats).map(([key, value]) => (
+                    Number(value) ? <strong key={key}>{statDisplayLabel(key)} +{statDisplayValue(key, Number(value))}</strong> : null
+                  ))}
+                </div>
+              ) : null}
+
               <div className="isw-item-sheet__stats">
                 {Object.entries(selected.stats).map(([key, value]) => (
                   <div key={key}>
@@ -447,8 +642,8 @@ function InventoryPanelInner({
               </div>
 
               <div className="isw-item-sheet__actions">
-                <motion.button className="isw-primary-btn" whileTap={{ scale: 0.94 }} type="button" onClick={() => onEquipLoot(selected.id)}>Equip</motion.button>
-                <motion.button whileTap={{ scale: 0.94 }} type="button" onClick={() => onUnequipLoot(selected.type)}>Unequip</motion.button>
+                <motion.button className="isw-primary-btn" whileTap={{ scale: 0.94 }} type="button" disabled={selectedIsEquipped} onClick={() => onEquipLoot(selected.id)}>Equip</motion.button>
+                <motion.button whileTap={{ scale: 0.94 }} type="button" disabled={!selectedIsEquipped} onClick={() => onUnequipLoot(selected.type)}>Unequip</motion.button>
                 {(() => {
                   const enhanceCost = getEnhanceCost(selected);
                   const canEnhance =
@@ -499,7 +694,7 @@ function InventoryPanelInner({
                     </button>
                   );
                 })()}
-                <button type="button" onClick={() => onSalvageLoot(selected.id)}>
+                <button type="button" disabled={selectedIsEquipped} onClick={() => onSalvageLoot(selected.id)}>
                   Salvage | {formatMaterialCost(getSalvageYield(selected))}
                 </button>
               </div>
@@ -512,4 +707,3 @@ function InventoryPanelInner({
 }
 
 export const InventoryPanel = memo(InventoryPanelInner);
-

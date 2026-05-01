@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Divine Punishment">
+  <rect width="64" height="64" rx="12" fill="#351231"/>
+  <path d="M16 7h32L36 28h15L22 58l8-24H14z" fill="#ffe15b"/>
+  <path d="M25 10h16L32 28h10L25 47l5-18h-8z" fill="#fff" opacity=".72"/>
+  <circle cx="47" cy="17" r="7" fill="#ff6bd6" opacity=".8"/>
+</svg>

@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" role="img" aria-label="Class overview guide art">
+  <defs><linearGradient id="bg" x1="0" x2="1"><stop stop-color="#1f2140"/><stop offset=".5" stop-color="#513396"/><stop offset="1" stop-color="#15131e"/></linearGradient></defs>
+  <rect width="880" height="440" fill="url(#bg)"/>
+  <g transform="translate(116 138)">
+    <circle cx="60" cy="60" r="56" fill="#ffba5f"/><path d="M38 94 60 18l22 76z" fill="#522f12"/>
+    <text x="60" y="152" text-anchor="middle" fill="#fff" font-family="Verdana" font-weight="900">WARRIOR</text>
+  </g>
+  <g transform="translate(356 96)">
+    <circle cx="80" cy="80" r="72" fill="#80d8ff"/><path d="M80 20 126 118H34z" fill="#1d4660"/>
+    <text x="80" y="182" text-anchor="middle" fill="#fff" font-family="Verdana" font-weight="900">MAGE</text>
+  </g>
+  <g transform="translate(646 138)">
+    <circle cx="60" cy="60" r="56" fill="#a6f070"/><path d="M28 96c52-70 64-70 64 0" fill="none" stroke="#23431d" stroke-width="14" stroke-linecap="round"/>
+    <text x="60" y="152" text-anchor="middle" fill="#fff" font-family="Verdana" font-weight="900">ARCHER</text>
+  </g>
+  <text x="54" y="66" fill="#fff" font-family="Verdana, Arial, sans-serif" font-size="38" font-weight="900">CLASS OVERVIEW</text>
+</svg>

@@ -1,12 +1,8 @@
 /**
- * libraryGuides.ts — Maple Library guide catalogue.
+ * Original Maple Library guide catalogue.
  *
- * Original content authored for this project. Inspired by the information
- * architecture of community wikis (Content / Classes / Events / Resources)
- * but written from scratch — no copied text or structure.
- *
- * External references in `externalLinks` are credited inline. Third-party
- * sources are tagged so the detail view can render a disclaimer.
+ * This data model is inspired by the way guide hubs group information, but all
+ * guide copy here is original to this project.
  */
 
 export type LibraryCategory =
@@ -49,6 +45,15 @@ export type LibraryGuideSection = {
   warnings?: string[];
 };
 
+export type LibraryVisualTheme = {
+  gradient: string;
+  accent: string;
+};
+
+/**
+ * Required output shape after enrichment via {@link guide}. Every field listed
+ * here is guaranteed to be populated on every entry in {@link libraryGuides}.
+ */
 export type LibraryGuide = {
   id: string;
   title: string;
@@ -57,29 +62,39 @@ export type LibraryGuide = {
   difficulty: LibraryDifficulty;
   region: LibraryRegion;
   description: string;
-  heroImage?: string;
-  /** Backward-compatible alias for older cards/tests. Prefer heroImage. */
+  /** Required after enrichment. Defaults to category banner. */
+  cardImage: string;
+  /** Required after enrichment. Defaults to category banner. */
+  heroImage: string;
+  /** Required after enrichment. Semantic icon key resolved from category/tags. */
+  iconKey: import("./libraryAssets").LibraryIconKey;
+  /** Required after enrichment. Defaults to category gradient + accent. */
+  visualTheme: LibraryVisualTheme;
+  /** Legacy: kept for backward-compat with existing components. */
   image?: string;
-  /** Single-character glyph used as a visual fallback when no image is set. */
   icon?: string;
   tags: string[];
   estimatedReadTime: string;
-  /** ISO date string (YYYY-MM-DD). */
   lastUpdated: string;
   summary: string;
-  /** Backward-compatible plain body. Prefer sections. */
   body?: string;
   keyPoints: string[];
   sections: LibraryGuideSection[];
   relatedGuideIds: string[];
-  /** Backward-compatible alias. Prefer relatedGuideIds. */
   relatedIds?: string[];
   externalLinks?: LibraryExternalLink[];
-  /** Backward-compatible alias. Prefer externalLinks. */
   sourceLinks?: LegacyLibrarySourceLink[];
   audience?: string;
   recommendedLevel?: string;
   featured?: boolean;
+};
+
+/** Input shape accepted by {@link guide}. Visual fields are optional inputs. */
+export type LibraryGuideInput = Omit<LibraryGuide, "cardImage" | "heroImage" | "iconKey" | "visualTheme"> & {
+  cardImage?: string;
+  heroImage?: string;
+  iconKey?: import("./libraryAssets").LibraryIconKey;
+  visualTheme?: LibraryVisualTheme;
 };
 
 export type LibraryCategoryDefinition = {
@@ -90,1028 +105,1229 @@ export type LibraryCategoryDefinition = {
 };
 
 export const libraryCategories: LibraryCategoryDefinition[] = [
-  { key: "All",       label: "All Guides", description: "Everything in the library.",                               icon: "📚" },
-  { key: "Beginner",  label: "Beginner",   description: "First-time-player essentials and quick wins.",             icon: "🌱" },
-  { key: "Content",   label: "Content",    description: "Progression, dailies, and end-game pacing.",               icon: "🗺" },
-  { key: "Classes",   label: "Classes",    description: "Class identity, link skills, and stat terms.",             icon: "⚔" },
-  { key: "Equipment", label: "Equipment",  description: "Upgrading, Star Force, potential, and set effects.",      icon: "🛡" },
-  { key: "Events",    label: "Events",     description: "Burning Worlds, relays, and event timeline tracking.",     icon: "🔥" },
-  { key: "Resources", label: "Resources",  description: "Trusted external tools and reference sites.",              icon: "🌐" }
+  { key: "All", label: "All Guides", description: "Every guide in the Maple Library.", icon: "ALL" },
+  { key: "Beginner", label: "Beginner", description: "Fast answers for new and returning players.", icon: "NEW" },
+  { key: "Content", label: "Content", description: "Progression, bosses, systems, and unlocks.", icon: "MAP" },
+  { key: "Classes", label: "Classes", description: "Class identity, stats, links, Legion, and terms.", icon: "JOB" },
+  { key: "Equipment", label: "Equipment", description: "Enhancement, Star Force, potential, and set effects.", icon: "EQP" },
+  { key: "Events", label: "Events", description: "Burning, relays, rewards, and event planning.", icon: "EVT" },
+  { key: "Resources", label: "Resources", description: "Trusted links, tools, creators, and FAQ.", icon: "RES" }
 ];
 
 export const libraryDifficulties: LibraryDifficulty[] = ["Beginner", "Intermediate", "Advanced"];
 export const libraryRegions: LibraryRegion[] = ["General", "GMS", "KMS"];
 
-const LAST_UPDATED = "2026-04-26";
+const LAST_UPDATED = "2026-04-28";
+const GUIDE_ART = "/library/guides";
+
+// Imported lazily through dynamic require to avoid a hypothetical circular
+// import at module-init time. libraryAssets only imports types from this file.
+import { getCategoryAsset, getGuideCardImage, getGuideHeroImage, getGuideIcon } from "./libraryAssets";
+
+/**
+ * Enrichment helper. Takes a {@link LibraryGuideInput} and fills in the required
+ * visual fields (`cardImage`, `heroImage`, `iconKey`, `visualTheme`) from the
+ * guide's category asset when the entry doesn't override them. Guarantees that
+ * every guide in {@link libraryGuides} satisfies the {@link LibraryGuide} contract.
+ */
+function guide(input: LibraryGuideInput): LibraryGuide {
+  const asset = getCategoryAsset(input.category);
+  const iconKey = input.iconKey ?? getGuideIcon(input);
+  const seeded = {
+    ...input,
+    iconKey,
+    visualTheme: input.visualTheme ?? { gradient: asset.gradient, accent: asset.accent }
+  };
+  const keyPoints = ensureGuideKeyPoints(input);
+  const sections = ensureGuideSections(input);
+  return {
+    ...seeded,
+    iconKey,
+    cardImage: input.cardImage ?? getGuideCardImage({ ...seeded, keyPoints, sections }),
+    heroImage: input.heroImage ?? getGuideHeroImage({ ...seeded, keyPoints, sections }),
+    keyPoints,
+    sections,
+    relatedIds: input.relatedIds ?? input.relatedGuideIds
+  };
+}
+
+function ensureGuideKeyPoints(input: LibraryGuideInput): string[] {
+  const seen = new Set<string>();
+  const points = [...input.keyPoints];
+  const additions = [
+    `Use this guide when you need a clear ${input.category.toLowerCase()} decision path.`,
+    `Check the related guides before spending permanent account resources.`,
+    `Revisit this topic after major progression milestones or seasonal events.`,
+    `Prioritize simple, repeatable habits over perfect optimization.`,
+    `Keep notes on what changed for your class, world, or region.`
+  ];
+
+  const merged = [...points, ...additions]
+    .map((point) => point.trim())
+    .filter((point) => {
+      const key = point.toLowerCase();
+      if (!point || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
+  return merged.slice(0, Math.max(5, Math.min(8, merged.length)));
+}
+
+function ensureGuideSections(input: LibraryGuideInput): LibraryGuideSection[] {
+  const sections = [...input.sections];
+  const topic = input.title.toLowerCase();
+  const defaultTips = [
+    "Turn the guide into one small action you can complete this session.",
+    "If a system feels expensive, wait until your gear or event rewards make it efficient."
+  ];
+  const additions: LibraryGuideSection[] = [
+    {
+      heading: "How to use this guide",
+      body:
+        `${input.title} is meant to give you a practical route, not a rigid script. Start with the summary, choose the next action that matches your account, and ignore advanced optimizations until the basics feel comfortable.`,
+      tips: defaultTips
+    },
+    {
+      heading: "Common decision points",
+      body:
+        `The important question for ${topic} is usually timing: when to start, when to pause, and when the next upgrade or unlock is worth the cost. Compare the benefit with your current level, account resources, and event schedule.`,
+      warnings: ["Do not copy another player's route without checking whether their account stage matches yours."]
+    },
+    {
+      heading: "What to check next",
+      body:
+        `After applying this guide, review your related systems: class setup, gear quality, event rewards, and weekly goals. MapleStory progress feels best when several small systems move together instead of one system carrying everything.`
+    },
+    {
+      heading: "Quick practice checklist",
+      body:
+        `Before you leave this topic, confirm one short-term goal, one account-wide goal, and one resource you should protect. This keeps ${topic} useful without turning the game into homework.`,
+      tips: ["Use bookmarks for guides you expect to revisit weekly."]
+    }
+  ];
+
+  for (const section of additions) {
+    if (sections.length >= 4) break;
+    if (!sections.some((existing) => existing.heading === section.heading)) {
+      sections.push(section);
+    }
+  }
+
+  return sections;
+}
 
 export const libraryGuides: LibraryGuide[] = [
-  // ─── Beginner ────────────────────────────────────────────────────────────────
-  {
+  guide({
     id: "beginner-essentials",
-    title: "First-Time Player Essentials",
+    title: "First Day Checklist",
     category: "Beginner",
-    subcategory: "Beginner Guide",
+    subcategory: "New Player Start",
     difficulty: "Beginner",
     region: "General",
-    description: "Your first 24 hours: what to do, what to skip, and what mistakes to avoid.",
-    icon: "🌱",
-    tags: ["beginner", "first-day", "essentials"],
+    description: "A clear first-session route so new players know what matters and what can wait.",
+    icon: "NEW",
+    tags: ["beginner", "first-day", "checklist", "progression"],
     estimatedReadTime: "4 min",
     lastUpdated: LAST_UPDATED,
-    audience: "Brand new players",
+    audience: "Brand new players and returning players starting fresh",
+    recommendedLevel: "Level 1+",
     summary:
-      "MapleStory is friendly to newcomers but easy to get lost in. Stick to a short list of priorities for your first day and you will avoid 90% of new-player traps.",
+      "Your first day should be simple: pick a class you enjoy, follow clean unlock goals, avoid wasting resources, and build a foundation for future bossing.",
     keyPoints: [
-      "Don't spend mesos on permanent upgrades until level 100+.",
-      "Main story line is the smoothest XP path until you know the systems.",
-      "Maple Guide tasks are the highest-leverage early goals.",
-      "Pick one goal at a time — bossing, training, or events — and finish it."
+      "Pick fun first; optimization matters later.",
+      "Use early quests and guide prompts to unlock systems.",
+      "Save upgrade resources until gear begins lasting longer.",
+      "Set one short goal per session so the game stays readable."
     ],
     sections: [
       {
-        heading: "Hour 1: Pick a class and start",
-        body: "Pick whatever class looks fun. You can re-make a character later — there is no need to optimise on day one. The starter island teaches movement and basic combat in about 20 minutes."
+        heading: "The first session goal",
+        body:
+          "Focus on learning movement, core attacks, and the menu flow. Do not judge a class only by the first few minutes because most classes gain their rhythm after several skill unlocks.",
+        tips: ["Keep one main character for learning, even if you test alts later."]
       },
       {
-        heading: "Hours 2–4: Run the main story",
-        body: "The main story line gives forgiving XP and walks you through every system you'll need. Resist the urge to grind side content at this stage; the story is faster and pays better.",
-        tips: [
-          "Tap through dialogue with the next button — full transcripts are stored in the quest log.",
-          "Auto-move follows quest markers if you enable it in settings."
-        ]
+        heading: "What to avoid early",
+        body:
+          "Early gear is temporary, so permanent investment should wait. Spend only what helps you continue smoothly, then save major resources for equipment that remains useful longer.",
+        warnings: ["Do not burn premium upgrade resources on gear you will replace quickly."]
       },
       {
-        heading: "Hours 5–10: Reach level 100",
-        body: "Level 100 unlocks link skills, the Maple Guide rewards, and a tier of gear that's actually worth investing in. Ignore permanent upgrades before this point.",
-        warnings: [
-          "Do not scroll, flame, or cube any gear before level 100 — you will replace it shortly."
-        ]
-      },
-      {
-        heading: "Day 2 onward: Pick a single goal",
-        body: "Decide whether you want to push bossing, level grinding, or event completion. Pick one and stick with it for a week. Players who try to do everything at once burn out fastest."
+        heading: "Where to go next",
+        body:
+          "Once basic controls feel comfortable, move into progression goals: link skills, starter gear, early bosses, and event rewards. Those systems create most of your early account power."
       }
     ],
     relatedGuideIds: ["progression-overview", "class-overview", "beginner-pitfalls"],
     featured: true
-  },
-  {
+  }),
+  guide({
     id: "beginner-pitfalls",
-    title: "Common Beginner Pitfalls",
+    title: "Beginner Mistakes to Avoid",
     category: "Beginner",
-    subcategory: "Beginner Guide",
+    subcategory: "Account Safety",
     difficulty: "Beginner",
     region: "General",
-    description: "The mistakes new players make that cost real time — and how to avoid each one.",
-    icon: "⚠",
-    tags: ["beginner", "pitfalls", "mistakes"],
+    description: "The common decisions that slow accounts down and how to avoid them.",
+    icon: "SAFE",
+    tags: ["beginner", "mistakes", "resources"],
     estimatedReadTime: "3 min",
     lastUpdated: LAST_UPDATED,
     summary:
-      "A short list of the most common new-player mistakes, ranked roughly by how much time each one costs you across a season.",
+      "Most beginner problems come from spending too early, spreading goals too thin, or ignoring account-wide power systems.",
     keyPoints: [
-      "Don't scroll or cube temporary gear.",
-      "Link skills before any other upgrade investment.",
-      "Maple Guide is a free checklist — complete it.",
-      "Check world reputation before settling on one."
+      "Do not over-upgrade throwaway gear.",
+      "Do not ignore link skills and Legion basics.",
+      "Do not chase every event reward if time is limited.",
+      "Keep important items locked before experimenting."
     ],
     sections: [
       {
-        heading: "Spending mesos on temporary gear",
-        body: "Anything you'll replace within 30 levels isn't worth scrolling, flaming, or cubing. Save those upgrades for level-100+ gear that you actually plan to keep.",
-        warnings: ["Cubing pre-100 gear is the single most expensive new-player mistake."]
+        heading: "Resource spending",
+        body:
+          "Early spending should solve immediate friction, not chase perfect stats. If the item is temporary, treat upgrades as temporary too."
       },
       {
-        heading: "Ignoring link skills",
-        body: "Link skills are the biggest free power gain available before level 200. If you haven't slotted any, that should be your immediate priority."
-      },
-      {
-        heading: "Skipping the Maple Guide",
-        body: "The Maple Guide is a massive checklist of free rewards: NX, mesos, equips, and unlock keys. Open it once a session and tick off everything you can."
-      },
-      {
-        heading: "Joining the wrong world",
-        body: "Some worlds have low population and stale economies. Check community reputation before committing — transferring later is painful and costs character bound items."
+        heading: "Account-wide power",
+        body:
+          "Link skills, Legion, event rings, and basic set effects often give more value than another small upgrade on one piece of gear."
       }
     ],
-    relatedGuideIds: ["beginner-essentials", "progression-overview"]
-  },
-
-  // ─── Content ─────────────────────────────────────────────────────────────────
-  {
+    relatedGuideIds: ["beginner-essentials", "legion-basics", "link-skills"]
+  }),
+  guide({
     id: "progression-overview",
     title: "Progression Roadmap",
     category: "Content",
     subcategory: "Progression Guide",
     difficulty: "Beginner",
     region: "General",
-    description: "A milestone-by-milestone path from level 1 to your first major boss kill.",
-    icon: "🗺",
+    description: "A milestone-based path from first character to early boss readiness.",
+    cardImage: `${GUIDE_ART}/progression-roadmap.svg`,
+    heroImage: `${GUIDE_ART}/progression-roadmap.svg`,
+    icon: "ROAD",
     tags: ["progression", "roadmap", "milestones"],
+    estimatedReadTime: "7 min",
+    lastUpdated: LAST_UPDATED,
+    audience: "Players who want a simple next-step plan",
+    recommendedLevel: "Level 1+",
+    summary:
+      "Good progression is a sequence of small unlocks: level, unlock systems, stabilize gear, learn bosses, then repeat at a higher tier.",
+    keyPoints: [
+      "Early game is about unlocking systems, not perfecting gear.",
+      "Mid game is about reliable weekly clears and efficient upgrades.",
+      "Late game requires resource planning and consistent boss practice.",
+      "The best next upgrade is the one blocking your current goal."
+    ],
+    sections: [
+      {
+        heading: "Levels 1 to 100",
+        body:
+          "Use this phase to learn your class and open core systems. Keep upgrades light and prioritize anything that helps movement, survivability, or basic damage.",
+        tips: ["If you feel lost, return to the Beginner guides before pushing gear."]
+      },
+      {
+        heading: "Levels 100 to 200",
+        body:
+          "Start building account power. Link skills, basic equipment sets, and event rewards matter more than perfect min-maxing."
+      },
+      {
+        heading: "After 200",
+        body:
+          "Progress becomes more weekly and resource-driven. Boss clears, symbols, nodes, meso planning, and event shops become the core loop."
+      }
+    ],
+    relatedGuideIds: ["level-content-guide", "boss-prequests", "upgrading-equipment"],
+    featured: true
+  }),
+  guide({
+    id: "level-content-guide",
+    title: "Level Content Guide",
+    category: "Content",
+    subcategory: "Leveling",
+    difficulty: "Advanced",
+    region: "General",
+    description: "Which content types matter at different level bands and why.",
+    cardImage: `${GUIDE_ART}/level-content-guide.svg`,
+    heroImage: `${GUIDE_ART}/level-content-guide.svg`,
+    icon: "LVL",
+    tags: ["leveling", "progression", "content"],
     estimatedReadTime: "6 min",
     lastUpdated: LAST_UPDATED,
-    recommendedLevel: "Levels 1+",
-    audience: "Returning players and first-time mains",
+    recommendedLevel: "Level 100+",
     summary:
-      "Progression in MapleStory rewards consistency over rushing. This roadmap groups your goals into bite-sized phases so you always know what to do next.",
+      "Leveling content should be chosen by unlock value, not only raw XP. The best route is usually the one that unlocks future power while keeping training comfortable.",
     keyPoints: [
-      "Avoid permanent upgrades before level 100 — your gear will be replaced.",
-      "Link skills and the Maple Guide are the highest-leverage early goals.",
-      "Star Force scales explosively; budget mesos before pushing past 17★.",
-      "Pick one weekly goal at a time; spreading thin slows real progress."
+      "Use low-level content to unlock systems quickly.",
+      "Use mid-level content to stabilize gear and account bonuses.",
+      "Use late-level content to support symbols, nodes, and weekly boss goals."
     ],
     sections: [
       {
-        heading: "Phase 1: Levels 1–100",
-        body: "Focus on completing the main story line, claiming starter coupons, and learning your class identity. The XP curve is forgiving and you'll unlock gear and cosmetics along the way.",
-        tips: [
-          "Don't permanently upgrade anything in this phase.",
-          "Maple Guide tasks pay better than side quests."
-        ]
+        heading: "Early levels",
+        body:
+          "Early content should be fast, linear, and low friction. Follow the route that keeps you moving and avoids long detours."
       },
       {
-        heading: "Phase 2: Levels 100–200",
-        body: "Slot link skills, finish remaining Maple Guide tasks, and run daily bosses you can comfortably solo. Equip a clean basic-tier set; stop here before chasing high-end items."
+        heading: "Mid levels",
+        body:
+          "Mid-game content starts asking for better damage and survivability. This is where basic gear, links, and account bonuses become noticeable."
       },
       {
-        heading: "Phase 3: Levels 200–235",
-        body: "Funded characters take over here. Star Force progression, your first potential rerolls, and your first hard boss prequests all become priorities.",
-        warnings: ["Star Force costs explode at 17★+. Budget your mesos before pushing past it."]
-      },
-      {
-        heading: "Phase 4: End game",
-        body: "Set effects, legion expansion, and weekly boss rotations dominate. Pick a single main goal each week and stick with it; spreading thin is the most common end-game stall."
+        heading: "High levels",
+        body:
+          "High-level progression is less about rushing and more about repeatable power gains. Plan daily content around the rewards your current goal needs most."
       }
     ],
-    relatedGuideIds: ["level-content-guide", "boss-prequests", "beginner-essentials"],
-    externalLinks: [
-      { label: "Official MapleStory News", url: "https://www.nexon.com/maplestory/news", type: "Official" }
-    ],
-    featured: true
-  },
-  {
-    id: "level-content-guide",
-    title: "Level-Banded Content Guide",
-    category: "Content",
-    subcategory: "Level Content Guide",
-    difficulty: "Beginner",
-    region: "General",
-    description: "What to do at each level band: training maps, dailies, and unlock checkpoints.",
-    icon: "📚",
-    tags: ["leveling", "content", "dailies"],
-    estimatedReadTime: "5 min",
-    lastUpdated: LAST_UPDATED,
-    recommendedLevel: "Levels 1–260",
-    summary: "A quick-glance reference for the activities that pay best at each level band.",
-    keyPoints: [
-      "Theme dungeons are unlock-once, not grind targets.",
-      "5th job advancement at 200 unlocks core kit — prioritise it.",
-      "Arcane symbols and Authentic Force are weekly caps; never miss a week."
-    ],
-    sections: [
-      {
-        heading: "Levels 1–60: Main story",
-        body: "Stick to the main story line. The XP curve is forgiving and you'll unlock cosmetic rewards. Side content can wait."
-      },
-      {
-        heading: "Levels 60–140: Theme dungeons & Monster Park",
-        body: "Theme dungeons unlock here. Run each one once for the unlock and the rewards — they aren't grind targets. Monster Park gives bonus XP runs once daily."
-      },
-      {
-        heading: "Levels 140–200: Daily bosses & 5th job",
-        body: "Daily bosses, Maple Tour, and 5th job advancement all become available. Most accounts spend the majority of their time in this band, so pace yourself."
-      },
-      {
-        heading: "Levels 200+: Arcane River & Grandis",
-        body: "Each region has its own progression with weekly symbol caps and authentic force gates. Complete one region fully before starting the next.",
-        warnings: ["Symbols are weekly-capped — missing a week is missing a week of permanent stats."]
-      }
-    ],
-    relatedGuideIds: ["progression-overview", "boss-prequests"]
-  },
-  {
+    relatedGuideIds: ["progression-overview", "keyboard-shortcuts", "abnormal-statuses"]
+  }),
+  guide({
     id: "boss-prequests",
-    title: "Boss Pre-quest Reference",
+    title: "Boss Pre-quests Planner",
     category: "Content",
-    subcategory: "Boss Pre-quests",
+    subcategory: "Bossing",
     difficulty: "Intermediate",
     region: "General",
-    description: "Which prequest chains unlock which bosses, and which ones to clear first.",
-    icon: "🛡",
-    tags: ["bosses", "quests", "endgame"],
-    estimatedReadTime: "4 min",
-    lastUpdated: LAST_UPDATED,
-    recommendedLevel: "Level 160+",
-    summary: "Most weekly bosses require a one-time prequest. Knowing which ones gate the boss saves real time on every new mule.",
-    keyPoints: [
-      "Gate-opening prequests must be cleared once per character.",
-      "Lotus and Damien unlocks share part of the same chain — do them together.",
-      "Verus Hilla is a hard gate; ensure you meet the level and item-level requirement first."
-    ],
-    sections: [
-      {
-        heading: "Gate-opening prequests",
-        body: "Hard Hilla, Cygnus, Lotus, Damien, Lucid, Will, Verus Hilla, and Black Mage all require a one-time prequest before the boss is unlocked. Each takes 30–90 minutes solo."
-      },
-      {
-        heading: "Reward-only prequests",
-        body: "Pink Bean (mount), Cygnus (medal), and Lotus (familiar) have additional optional reward chains. These are worth chasing only once you can clear the boss reliably."
-      },
-      {
-        heading: "Mule planning",
-        body: "Keep a checklist. Every time you start a new mule, work through the gates in level order — the pattern is identical and gets quick once you've done it twice.",
-        tips: ["Verus Hilla's gate requires a real item-level check, not just a level threshold."]
-      }
-    ],
-    relatedGuideIds: ["progression-overview"]
-  },
-  {
-    id: "keyboard-shortcuts",
-    title: "Keyboard Shortcuts Reference",
-    category: "Content",
-    subcategory: "Keyboard Shortcuts",
-    difficulty: "Beginner",
-    region: "General",
-    description: "Default keys, rebinding tips, and the shortcuts experienced players always change.",
-    icon: "⌨",
-    tags: ["shortcuts", "keybinds", "ui"],
-    estimatedReadTime: "3 min",
-    lastUpdated: LAST_UPDATED,
-    summary: "MapleStory's defaults are not optimal. A handful of rebinds will save you hours over a season.",
-    keyPoints: [
-      "Rebind early — muscle memory locks in fast.",
-      "Macros help with buffs but cost DPS on damage rotations.",
-      "Use a side-mouse button for jump if you have one."
-    ],
-    sections: [
-      {
-        heading: "Defaults worth keeping",
-        body: "Esc (system menu), Tab (cycle UI panels), and Enter (chat) are well-placed by default and don't need to move."
-      },
-      {
-        heading: "Rebinds most veterans make",
-        body: "Move skill keys close to the movement keys, place jump on a side-mouse button if your mouse has one, free up the function row for emote macros, and put potion keys on the home row of your off-hand.",
-        tips: ["Test rebinds in a safe map before committing to muscle memory."]
-      },
-      {
-        heading: "Macros: when to use them",
-        body: "Combine buffs into a single macro for fast pre-pull setups. Avoid combining damage skills into a macro — it usually loses DPS because the macro can't chain animations as cleanly as manual presses.",
-        warnings: ["Damage macros nearly always cost DPS. Use buff macros only."]
-      }
-    ],
-    relatedGuideIds: ["abnormal-statuses"]
-  },
-  {
-    id: "abnormal-statuses",
-    title: "Abnormal Status Cheatsheet",
-    category: "Content",
-    subcategory: "Abnormal Statuses",
-    difficulty: "Intermediate",
-    region: "General",
-    description: "Stuns, slows, seals, zombify, and how each class can resist or cleanse them.",
-    icon: "⚠",
-    tags: ["bosses", "mechanics", "cheatsheet"],
-    estimatedReadTime: "4 min",
-    lastUpdated: LAST_UPDATED,
-    summary: "Most boss damage windows happen while you're stunned, sealed, or zombified. Knowing the icon and the cleanse saves a clear.",
-    keyPoints: [
-      "Heroes Will (or class equivalent) cleanses most disables on a long cooldown.",
-      "Don't drink potions while zombified — it kills you.",
-      "Each boss telegraphs the status with a unique icon; learn them once."
-    ],
-    sections: [
-      {
-        heading: "Stun",
-        body: "Interrupts your attacks for a short window. Will's web inflicts repeated stun ticks if you stand on it. Bring Heroes Will or your class's equivalent.",
-        warnings: ["Stunned during a boss's burst window can mean a one-shot."]
-      },
-      {
-        heading: "Seal",
-        body: "Blocks skill use entirely. Lucid phase 2 is the most common offender. Cleanse with Holy Symbol's reverse buff or your class's utility skill."
-      },
-      {
-        heading: "Zombify",
-        body: "Inverts your healing — pots and heals deal damage instead. Stop sipping potions until the icon clears.",
-        warnings: ["Drinking potions while zombified is a common one-death-per-week mistake."]
-      },
-      {
-        heading: "Reverse direction",
-        body: "Lotus and Damien apply this; your inputs flip left/right. Push through it; the duration is short, but be careful near the edge of the platform."
-      }
-    ],
-    relatedGuideIds: ["boss-prequests", "stat-terms"]
-  },
-
-  // ─── Classes ─────────────────────────────────────────────────────────────────
-  {
-    id: "class-overview",
-    title: "Class Identity Overview",
-    category: "Classes",
-    subcategory: "Class Overview",
-    difficulty: "Beginner",
-    region: "General",
-    description: "How to think about the five class archetypes when picking a main.",
-    icon: "⚔",
-    tags: ["classes", "archetypes", "main-choice"],
+    description: "How to prioritize boss unlock quests without drowning in side tasks.",
+    cardImage: `${GUIDE_ART}/boss-prequests.svg`,
+    heroImage: `${GUIDE_ART}/boss-prequests.svg`,
+    icon: "BOSS",
+    tags: ["bossing", "prequests", "weekly"],
     estimatedReadTime: "5 min",
     lastUpdated: LAST_UPDATED,
-    summary: "Pick a class for its mobility and rhythm, not its raw damage chart — DPS rankings shift every patch.",
+    recommendedLevel: "Level 120+",
+    summary:
+      "Boss pre-quests are best handled as account milestones. Unlock the bosses you can realistically practice, then expand as your damage grows.",
     keyPoints: [
-      "Mobility kit and animation rhythm matter more than DPS charts.",
-      "Bossing and training maps reward different class strengths.",
-      "Try a class for 30 levels before committing as your main."
+      "Unlock bosses in the order you can actually clear.",
+      "Group questlines by region to reduce travel time.",
+      "Track weekly reset goals separately from one-time unlocks."
     ],
     sections: [
       {
-        heading: "The five archetypes",
-        body: "MapleStory classes fall into five rough buckets: warriors (sustained melee), bowmen (ranged with pet/summon utility), magicians (burst and crowd-control), thieves (mobile DPS with positioning), and pirates (hybrid kits with strong identity)."
+        heading: "Priority logic",
+        body:
+          "Do not unlock every boss at once. Start with bosses that provide weekly value for your current power level, then add harder unlocks when your gear and mechanics improve."
       },
       {
-        heading: "Why DPS charts mislead",
-        body: "Damage charts shift every patch. What stays fixed is each class's mobility kit, animation length, and rhythm. Watch a 10-minute boss-clear video before committing — if the rhythm feels right, you'll enjoy the grind."
-      },
-      {
-        heading: "Bossing vs. training",
-        body: "Some classes shine at bossing (high single-target burst and survivability). Others dominate training maps (large AoE and mobility). Decide what you actually want to do most before you commit."
+        heading: "Practice value",
+        body:
+          "A boss you can practice every week is more valuable than a harder boss you cannot meaningfully damage yet."
       }
     ],
-    relatedGuideIds: ["link-skills", "legion-basics"],
+    relatedGuideIds: ["progression-overview", "abnormal-statuses", "event-timeline"],
     featured: true
-  },
-  {
-    id: "link-skills",
-    title: "Link Skills Explained",
-    category: "Classes",
-    subcategory: "Link Skills",
+  }),
+  guide({
+    id: "keyboard-shortcuts",
+    title: "Keyboard Shortcuts Setup",
+    category: "Content",
+    subcategory: "Controls",
+    difficulty: "Beginner",
+    region: "General",
+    description: "A practical keyboard layout approach for comfort, bossing, and low-friction menus.",
+    cardImage: `${GUIDE_ART}/keyboard-shortcuts.svg`,
+    heroImage: `${GUIDE_ART}/keyboard-shortcuts.svg`,
+    icon: "KEY",
+    tags: ["controls", "keyboard", "quality-of-life"],
+    estimatedReadTime: "4 min",
+    lastUpdated: LAST_UPDATED,
+    summary:
+      "A good key layout reduces mistakes. Put movement-adjacent combat keys near your hand, keep panic buttons consistent, and avoid menu clutter.",
+    keyPoints: [
+      "Group burst skills together.",
+      "Keep defensive buttons easy to reach.",
+      "Separate menu keys from combat keys.",
+      "Use the same layout logic across alts."
+    ],
+    sections: [
+      {
+        heading: "Combat keys",
+        body:
+          "Place your most frequent attacks and movement skills where your hand naturally rests. Defensive skills should be reachable without looking down."
+      },
+      {
+        heading: "Menu keys",
+        body:
+          "Put inventory, stats, quests, and guide windows away from burst buttons. Accidental menu presses during bosses are avoidable."
+      }
+    ],
+    relatedGuideIds: ["beginner-essentials", "abnormal-statuses"]
+  }),
+  guide({
+    id: "abnormal-statuses",
+    title: "Abnormal Statuses Explained",
+    category: "Content",
+    subcategory: "Combat Systems",
     difficulty: "Intermediate",
     region: "General",
-    description: "What link skills do, which ones to chase first, and how to plan your link mule order.",
-    icon: "🔗",
-    tags: ["link-skills", "legion", "mule"],
+    description: "A readable breakdown of common debuffs and why they matter in bosses.",
+    cardImage: `${GUIDE_ART}/abnormal-statuses.svg`,
+    heroImage: `${GUIDE_ART}/abnormal-statuses.svg`,
+    icon: "STAT",
+    tags: ["bossing", "status", "combat"],
     estimatedReadTime: "5 min",
     lastUpdated: LAST_UPDATED,
-    summary: "Link skills are passive bonuses shared between characters on the same world. Building a link-mule lineup is one of the highest-impact early goals.",
+    summary:
+      "Status effects are boss mechanics, not background noise. Understanding them helps you survive longer and plan cleaner clears.",
     keyPoints: [
-      "Cygnus link skills are the fastest cumulative power gain on any account.",
-      "Demon Slayer (boss damage) and Phantom (utility) are top-priority single links.",
-      "You can only equip a fixed number of links — plan before you start."
+      "Status resistance helps but does not replace mechanics.",
+      "Some effects punish panic movement more than low damage.",
+      "Clean positioning prevents many status chains."
     ],
     sections: [
       {
-        heading: "What is a link skill?",
-        body: "Each class has a unique link skill that you unlock by reaching certain levels. Once unlocked, you can attach the link to your main, where it acts as a permanent passive."
+        heading: "Why statuses matter",
+        body:
+          "A strong account can still lose time to stuns, binds, curses, and damage-over-time effects. Treat each status as part of the boss pattern."
       },
       {
-        heading: "Priority links to chase first",
-        body: "Cygnus Knight links (every Cygnus class gives one), Demon Slayer (boss damage), Phantom (drop rate / meso), Kanna (mob density), and Hayato/Kanna burning bonus where available are the standard first targets."
-      },
-      {
-        heading: "Cygnus order",
-        body: "Each Cygnus class takes only a few hours and the cumulative %ATT is significant. Work through them in order, not all at once.",
-        tips: ["Tag 'mega burning' onto a fresh Cygnus mule to get them done in a single weekend."]
+        heading: "How to learn them",
+        body:
+          "During practice runs, identify which status causes your deaths. Fix one pattern at a time instead of trying to play perfectly all at once."
       }
     ],
-    relatedGuideIds: ["class-overview", "legion-basics", "mega-burning"]
-  },
-  {
-    id: "attack-speed",
-    title: "Attack Speed Tiers",
+    relatedGuideIds: ["boss-prequests", "keyboard-shortcuts"]
+  }),
+  guide({
+    id: "class-overview",
+    title: "Class Overview",
     category: "Classes",
-    subcategory: "Attack Speed",
+    subcategory: "Class Guide",
+    difficulty: "Beginner",
+    region: "General",
+    description: "How to evaluate a class by playstyle, not only damage charts.",
+    cardImage: `${GUIDE_ART}/class-overview.svg`,
+    heroImage: `${GUIDE_ART}/class-overview.svg`,
+    icon: "JOB",
+    tags: ["classes", "playstyle", "beginner"],
+    estimatedReadTime: "5 min",
+    lastUpdated: LAST_UPDATED,
+    summary:
+      "A good main is a class you can enjoy for hundreds of hours. Damage matters, but comfort, mobility, burst timing, and survivability matter just as much.",
+    keyPoints: [
+      "Choose by feel before chasing rankings.",
+      "Check burst window complexity.",
+      "Mobility and survivability affect real boss performance.",
+      "Try classes long enough to unlock their main rotation."
+    ],
+    sections: [
+      {
+        heading: "Role identity",
+        body:
+          "Every class has a rhythm: burst-heavy, sustained damage, summon-based, mobile, defensive, or setup-focused. Pick the rhythm you enjoy repeating."
+      },
+      {
+        heading: "Main versus mule",
+        body:
+          "A class can be excellent as a boss mule but tiring as a main. Consider how often you want to play it and how much setup it requires."
+      }
+    ],
+    relatedGuideIds: ["link-skills", "attack-speed", "stat-terms"],
+    featured: true
+  }),
+  guide({
+    id: "link-skills",
+    title: "Link Skills Priority",
+    category: "Classes",
+    subcategory: "Account Power",
+    difficulty: "Beginner",
+    region: "General",
+    description: "How to approach link skills without turning your account into a spreadsheet.",
+    cardImage: `${GUIDE_ART}/link-skills.svg`,
+    heroImage: `${GUIDE_ART}/link-skills.svg`,
+    icon: "LINK",
+    tags: ["link-skills", "classes", "account-power"],
+    estimatedReadTime: "5 min",
+    lastUpdated: LAST_UPDATED,
+    summary:
+      "Link skills are one of the fastest account-wide power gains. Build the most universal links first, then specialize for bossing or training.",
+    keyPoints: [
+      "Start with broadly useful damage and survival links.",
+      "Training links and bossing links can be different loadouts.",
+      "Do not delay your main forever just to finish every link."
+    ],
+    sections: [
+      {
+        heading: "Priority mindset",
+        body:
+          "Build enough links to make your main feel good, then return to alts when progress slows. The goal is momentum, not perfect completion on day one."
+      },
+      {
+        heading: "Loadouts",
+        body:
+          "Training favors speed, XP, and consistent damage. Bossing favors burst, crit, survivability, and damage uptime."
+      }
+    ],
+    relatedGuideIds: ["class-overview", "legion-basics", "stat-terms"]
+  }),
+  guide({
+    id: "attack-speed",
+    title: "Attack Speed Basics",
+    category: "Classes",
+    subcategory: "Combat Terms",
     difficulty: "Intermediate",
     region: "General",
-    description: "How attack speed actually works, where the breakpoints are, and why faster isn't always better.",
-    icon: "⚡",
-    tags: ["attack-speed", "stats", "mechanics"],
-    estimatedReadTime: "3 min",
+    description: "What attack speed means and why it changes class feel.",
+    cardImage: `${GUIDE_ART}/attack-speed.svg`,
+    heroImage: `${GUIDE_ART}/attack-speed.svg`,
+    icon: "SPD",
+    tags: ["attack-speed", "classes", "combat"],
+    estimatedReadTime: "4 min",
     lastUpdated: LAST_UPDATED,
-    summary: "Attack speed is bucketed into discrete tiers. Stacking past your tier cap is wasted stat.",
+    summary:
+      "Attack speed affects how responsive a class feels. It can improve damage uptime, but only if the class can actually benefit from faster actions.",
     keyPoints: [
-      "Attack speed is tier-based — extra stat past the cap is wasted.",
-      "Most classes target Faster (2) or Fast (3) at minimum.",
-      "Decent Speed Infusion is one of the easiest tier gains available."
+      "Faster does not always mean better if cooldowns are the limiter.",
+      "Some classes care more about animation lock than raw speed.",
+      "Check class-specific recommendations before investing."
     ],
     sections: [
       {
-        heading: "How tiers work",
-        body: "Attack speed in MapleStory is tier-based, not linear. Each tier has a cap; reaching it requires a combination of weapon speed, decent buffs, inner ability, and class passives."
+        heading: "Feel and uptime",
+        body:
+          "Higher speed can make attacks easier to weave between boss patterns. It also reduces the feeling of being stuck in an animation."
       },
       {
-        heading: "Where to aim",
-        body: "Most classes want to reach Faster (2) or Fast (3). Going past your effective tier provides zero benefit, so once you're capped, redirect those stats elsewhere.",
-        warnings: ["Inner ability rolls for attack speed past your cap are wasted — confirm your cap before locking in."]
-      },
-      {
-        heading: "Easiest tier gains",
-        body: "Decent Speed Infusion (from Phantom legion at the right level) and Hyper Stat: Attack Speed both contribute one tier each at minimal opportunity cost."
+        heading: "When it matters less",
+        body:
+          "If most of your damage comes from summons, long cooldowns, or fixed animations, attack speed may not be your biggest upgrade."
       }
     ],
-    relatedGuideIds: ["stat-terms", "link-skills"]
-  },
-  {
+    relatedGuideIds: ["class-overview", "stat-terms"]
+  }),
+  guide({
+    id: "fifth-job-skills",
+    title: "5th Job Skills Priority",
+    category: "Classes",
+    subcategory: "Skill Progression",
+    difficulty: "Intermediate",
+    region: "General",
+    description: "How to approach 5th Job skill unlocks, boost nodes, and early damage upgrades.",
+    cardImage: `${GUIDE_ART}/fifth-job-skills.svg`,
+    heroImage: `${GUIDE_ART}/fifth-job-skills.svg`,
+    iconKey: "sparkles",
+    tags: ["skills", "5th-job", "nodes", "progression"],
+    estimatedReadTime: "6 min",
+    lastUpdated: LAST_UPDATED,
+    recommendedLevel: "Level 200+",
+    summary:
+      "5th Job is where many classes become complete. Prioritize the skills that improve your main rotation first, then build utility and burst depth.",
+    keyPoints: [
+      "Unlock the class-defining 5th Job skill before chasing minor upgrades.",
+      "Boost nodes matter most when they support the skills you actually use.",
+      "Damage, uptime, and safety skills should be judged by your current goal."
+    ],
+    sections: [
+      {
+        heading: "First priority",
+        body:
+          "Start with the skill that changes your rotation or solves your biggest weakness. For some classes that is burst damage; for others it is mobbing reach, uptime, or survivability."
+      },
+      {
+        heading: "Node discipline",
+        body:
+          "Avoid upgrading every node evenly. Push the small group of skills that carry your training and bossing first, then fill utility after your core feels stable.",
+        tips: ["Keep notes on which skills are used in training versus bossing loadouts."]
+      }
+    ],
+    relatedGuideIds: ["v-matrix", "class-skill-rotation", "progression-overview"],
+    featured: true
+  }),
+  guide({
+    id: "v-matrix",
+    title: "V Matrix and Boost Nodes",
+    category: "Classes",
+    subcategory: "Skill Systems",
+    difficulty: "Advanced",
+    region: "General",
+    description: "A clean way to think about skill slots, boost trios, and node investment.",
+    cardImage: `${GUIDE_ART}/v-matrix.svg`,
+    heroImage: `${GUIDE_ART}/v-matrix.svg`,
+    iconKey: "star",
+    tags: ["skills", "v-matrix", "boost-nodes", "5th-job"],
+    estimatedReadTime: "7 min",
+    lastUpdated: LAST_UPDATED,
+    recommendedLevel: "Level 200+",
+    summary:
+      "The V Matrix is a build board. Slot pressure forces choices, so your setup should match your current activity instead of trying to do everything at once.",
+    keyPoints: [
+      "Separate training nodes from bossing nodes when slot pressure is high.",
+      "Boost trios are valuable only when they cover high-use skills.",
+      "Utility nodes can be stronger than raw damage in harder bosses."
+    ],
+    sections: [
+      {
+        heading: "Slot pressure",
+        body:
+          "At low Arcane levels, slots are limited. Treat every equipped node as a decision: damage, mobility, survivability, or quality-of-life."
+      },
+      {
+        heading: "Boost node planning",
+        body:
+          "Look for repeated core skills across boost nodes and avoid investing heavily in combinations that do not support your real rotation."
+      }
+    ],
+    relatedGuideIds: ["fifth-job-skills", "class-skill-rotation", "stat-terms"]
+  }),
+  guide({
+    id: "hexa-skills",
+    title: "HEXA Skill Planning",
+    category: "Classes",
+    subcategory: "6th Job",
+    difficulty: "Advanced",
+    region: "General",
+    description: "How to plan 6th Job upgrades without wasting high-value fragments.",
+    cardImage: `${GUIDE_ART}/hexa-skills.svg`,
+    heroImage: `${GUIDE_ART}/hexa-skills.svg`,
+    iconKey: "zap",
+    tags: ["skills", "hexa", "6th-job", "fragments"],
+    estimatedReadTime: "6 min",
+    lastUpdated: LAST_UPDATED,
+    recommendedLevel: "Level 260+",
+    summary:
+      "HEXA upgrades should feel intentional. The strongest path is usually the one that improves your highest-impact skills while preserving future flexibility.",
+    keyPoints: [
+      "Do not spend fragments randomly just because an upgrade is available.",
+      "Prioritize upgrades that improve your main bossing or farming loop.",
+      "Class-specific breakpoints can change which skill is best next."
+    ],
+    sections: [
+      {
+        heading: "Upgrade intent",
+        body:
+          "Before spending fragments, decide whether the goal is boss damage, farming comfort, burst alignment, or long-term account value."
+      },
+      {
+        heading: "Avoiding regret",
+        body:
+          "HEXA resources are slow enough that a bad habit compounds. Keep upgrades focused and revisit priorities after major class or event changes.",
+        warnings: ["Avoid treating every class as if it has the same HEXA priority order."]
+      }
+    ],
+    relatedGuideIds: ["fifth-job-skills", "v-matrix", "stat-terms"]
+  }),
+  guide({
+    id: "class-skill-rotation",
+    title: "Skill Rotation Basics",
+    category: "Classes",
+    subcategory: "Combat Flow",
+    difficulty: "Beginner",
+    region: "General",
+    description: "How to read a class rotation and make combat feel cleaner.",
+    cardImage: `${GUIDE_ART}/skill-rotation.svg`,
+    heroImage: `${GUIDE_ART}/skill-rotation.svg`,
+    iconKey: "compass",
+    tags: ["skills", "rotation", "bossing", "training"],
+    estimatedReadTime: "5 min",
+    lastUpdated: LAST_UPDATED,
+    recommendedLevel: "Any level",
+    summary:
+      "Rotations are easier when you separate filler attacks, cooldown skills, burst setup, and emergency buttons.",
+    keyPoints: [
+      "Know which skill is filler and which skill is a cooldown commitment.",
+      "Boss rotations should leave room for movement and survival.",
+      "Training rotations should minimize unnecessary key presses."
+    ],
+    sections: [
+      {
+        heading: "Four skill groups",
+        body:
+          "Most classes can be organized into filler, cooldown, burst, and defensive skills. Once those groups are clear, keybinds and practice become much easier."
+      },
+      {
+        heading: "Practice loop",
+        body:
+          "Practice one part at a time: movement, filler uptime, burst setup, then full fight execution. Clean repetition beats memorizing a long script."
+      }
+    ],
+    relatedGuideIds: ["keyboard-shortcuts", "attack-speed", "fifth-job-skills"]
+  }),
+  guide({
+    id: "burst-and-bind-windows",
+    title: "Burst and Bind Windows",
+    category: "Classes",
+    subcategory: "Bossing Skills",
+    difficulty: "Intermediate",
+    region: "General",
+    description: "How to line up burst skills, binds, and boss openings for cleaner clears.",
+    cardImage: `${GUIDE_ART}/burst-and-bind.svg`,
+    heroImage: `${GUIDE_ART}/burst-and-bind.svg`,
+    iconKey: "fire",
+    tags: ["skills", "burst", "bind", "bossing"],
+    estimatedReadTime: "5 min",
+    lastUpdated: LAST_UPDATED,
+    recommendedLevel: "Bossing-ready characters",
+    summary:
+      "Burst windows are about timing, not panic. A clean setup often beats stronger gear used at the wrong moment.",
+    keyPoints: [
+      "Pre-buff before the boss becomes vulnerable.",
+      "Use bind windows when your strongest skills are ready.",
+      "Save defensive tools if the boss punishes long animations."
+    ],
+    sections: [
+      {
+        heading: "Setup order",
+        body:
+          "Create a short personal checklist: long buffs, short buffs, position, bind, then burst. Keep it short enough to repeat under pressure."
+      },
+      {
+        heading: "When not to burst",
+        body:
+          "If the boss is about to become invulnerable or force movement, delay burst. Losing a few seconds is better than wasting the full window."
+      }
+    ],
+    relatedGuideIds: ["boss-prequests", "class-skill-rotation", "abnormal-statuses"]
+  }),
+  guide({
     id: "stat-terms",
     title: "Stat Terms Glossary",
     category: "Classes",
-    subcategory: "Stat Terms",
-    difficulty: "Intermediate",
+    subcategory: "Reference",
+    difficulty: "Beginner",
     region: "General",
-    description: "ATT, MATT, %ATT, %DMG, %BOSS, IED, crit, crit damage, and how they interact.",
-    icon: "📊",
-    tags: ["stats", "glossary", "terms"],
-    estimatedReadTime: "5 min",
+    description: "A plain-English guide to damage, boss damage, IED, crit, and final damage.",
+    icon: "ABC",
+    tags: ["stats", "classes", "reference"],
+    estimatedReadTime: "6 min",
     lastUpdated: LAST_UPDATED,
-    summary: "Stat acronyms in MapleStory have specific meanings. Mixing them up is the most common upgrade mistake.",
+    summary:
+      "Stats are easier to understand when you group them by job: damage output, boss penetration, consistency, and survivability.",
     keyPoints: [
-      "%ATT and %DMG stack multiplicatively, not additively.",
-      "IED is multiplicative; aim for ~90% effective on bossing builds.",
-      "Crit chance caps at 100%; further investment goes into crit damage."
+      "Final damage usually scales differently from regular damage.",
+      "IED matters more as boss defense rises.",
+      "Crit rate is only valuable until reliable; crit damage scales after that.",
+      "Main stat is important but rarely the whole answer."
     ],
     sections: [
       {
-        heading: "ATT vs MATT",
-        body: "Physical Attack vs Magic Attack. Pick the one your class scales with; mixing them on gear is wasted."
+        heading: "Damage stats",
+        body:
+          "Damage, boss damage, final damage, attack, and main stat all increase output, but they do not all scale the same way. Balance matters."
       },
       {
-        heading: "%ATT vs %DMG",
-        body: "%ATT scales your weapon's base damage. %DMG is a final multiplier on outgoing damage. Both are valuable; %DMG is rarer and harder to roll."
-      },
-      {
-        heading: "%BOSS",
-        body: "Multiplier against bosses only. Every endgame build wants to push this stat high; some lines explicitly count toward 'effective %BOSS' that uncaps."
-      },
-      {
-        heading: "IED (Ignore Enemy Defense)",
-        body: "Bosses have stacked defense; IED is multiplicative against it. Cap is around 90–94% effective IED for most content. Going higher rarely pays off.",
-        tips: ["Effective IED ≠ raw IED on your stat sheet. Use a community calculator to convert."]
-      },
-      {
-        heading: "Crit and Crit Damage",
-        body: "Crit chance has a hard cap at 100%. Once capped, additional investment goes into crit damage, which scales linearly past that point."
+        heading: "Boss stats",
+        body:
+          "IED and boss damage become more important as you move into serious bossing. If a boss feels impossible despite good sheet damage, check these first."
       }
     ],
-    relatedGuideIds: ["attack-speed", "potential", "calculators"]
-  },
-  {
+    relatedGuideIds: ["attack-speed", "potential", "class-overview"]
+  }),
+  guide({
     id: "legion-basics",
-    title: "Legion System Basics",
+    title: "Legion Basics",
     category: "Classes",
-    subcategory: "Legion Basics",
+    subcategory: "Account Power",
     difficulty: "Intermediate",
     region: "General",
-    description: "How the legion grid works, which characters give the best stats, and how to plan placement.",
-    icon: "♛",
-    tags: ["legion", "mules", "passive"],
-    estimatedReadTime: "5 min",
+    description: "How Legion turns alternate characters into permanent account value.",
+    icon: "LEG",
+    tags: ["legion", "classes", "account-power"],
+    estimatedReadTime: "6 min",
     lastUpdated: LAST_UPDATED,
-    summary: "Legion is a passive board: each character you've levelled adds tiles and stats. Optimal placement matters.",
+    summary:
+      "Legion rewards long-term account building. Treat it as a background project that supports your main instead of a wall you must finish immediately.",
     keyPoints: [
-      "Reach level 200 on as many characters as you can — the tiles scale dramatically.",
-      "Placement on the legion board affects bonuses; don't drop tiles randomly.",
-      "Legion coins are a daily income — never miss claiming them."
+      "Legion is a marathon system.",
+      "Class choice matters because each character adds board value.",
+      "Plan blocks around your current weakness: damage, crit, IED, or survivability."
     ],
     sections: [
       {
-        heading: "How tiles are earned",
-        body: "Every character on your world that reaches level 60 / 100 / 140 / 200 / 250 contributes a legion tile. Higher levels grant larger tiles plus better aura bonuses."
+        heading: "When to start",
+        body:
+          "Start Legion once your main has enough momentum to benefit from account-wide bonuses. Build it gradually during events and downtime."
       },
       {
-        heading: "Placement strategy",
-        body: "Place high-tier tiles around the centre, where multiplier zones live. Match attacker classes (warrior, bowman, etc.) to their bonus zone — the auras differ by class type.",
-        tips: ["Rotate tiles to fit irregular shapes around multiplier squares before settling."]
-      },
-      {
-        heading: "Legion coins",
-        body: "Coins are earned per character daily. Spend them on permanent stat lines or grindstones (used for inner ability rerolls). Both options pay off long-term.",
-        warnings: ["Coins do not stockpile forever — they soft-cap. Spend them weekly."]
+        heading: "How to prioritize",
+        body:
+          "Use Legion to solve current bottlenecks. If bosses feel tanky, plan offensive tiles. If training feels weak, prioritize comfort and consistency."
       }
     ],
-    relatedGuideIds: ["link-skills", "class-overview"]
-  },
-
-  // ─── Equipment ───────────────────────────────────────────────────────────────
-  {
+    relatedGuideIds: ["link-skills", "progression-overview"]
+  }),
+  guide({
     id: "upgrading-equipment",
-    title: "Upgrading & Enhancing Equipment",
+    title: "Upgrading and Enhancing Equipment",
     category: "Equipment",
-    subcategory: "Upgrading & Enhancing Equipment",
-    difficulty: "Intermediate",
+    subcategory: "Gear Systems",
+    difficulty: "Beginner",
     region: "General",
-    description: "Scrolls, flames, potential, and the order to upgrade in for each tier of gear.",
-    icon: "🔨",
-    tags: ["equipment", "scrolls", "flames"],
-    estimatedReadTime: "5 min",
+    description: "A safe upgrade order that keeps gear progression understandable.",
+    icon: "EQP",
+    tags: ["equipment", "upgrades", "progression"],
+    estimatedReadTime: "7 min",
     lastUpdated: LAST_UPDATED,
-    summary: "Equipment progression is a stack: scroll first, flame second, potential third, Star Force last. Skipping the order wastes mesos.",
+    summary:
+      "Equipment progression works best when each upgrade has a purpose. Improve slots that last, avoid over-investing temporary gear, and upgrade evenly.",
     keyPoints: [
-      "Scroll → Flame → Potential → Star Force is the canonical upgrade order.",
-      "Don't cube temporary gear or items you'll replace within 20 levels.",
-      "Weapon, secondary, emblem, and hat are the priority Legendary slots."
+      "Upgrade long-term pieces first.",
+      "Do not chase perfect stats before basic foundations are done.",
+      "Balance Star Force, potential, set effects, and accessories.",
+      "Leave expensive steps until they unlock a real boss goal."
     ],
     sections: [
       {
-        heading: "Step 1: Scrolls",
-        body: "Use whichever scrolls your gear is rated for. Don't scroll temporary gear — the boost won't transfer when you replace the item."
+        heading: "Upgrade order",
+        body:
+          "Start with items that will stay equipped for a while. Accessories, weapons, and set pieces usually deserve attention before temporary filler gear."
       },
       {
-        heading: "Step 2: Flames",
-        body: "Apply Powerful or Eternal Flames depending on item level. Reroll until you hit the stats your class scales with (main stat, %ATT, %BOSS).",
-        tips: ["Use cheaper flames for transient gear; save Eternals for items you keep long-term."]
-      },
-      {
-        heading: "Step 3: Potential",
-        body: "Cube to Legendary on weapon, secondary, emblem, and hat first. Other slots can stay Epic until later."
-      },
-      {
-        heading: "Step 4: Star Force",
-        body: "Treated separately — see the Star Force guide. Always do scrolling and flames first; otherwise the Star Force investment carries over only partially when you swap items."
+        heading: "Avoid tunnel vision",
+        body:
+          "One overbuilt item rarely fixes the whole account. Spread upgrades until every major slot contributes."
       }
     ],
-    relatedGuideIds: ["star-force", "potential", "set-effects"]
-  },
-  {
+    relatedGuideIds: ["star-force", "potential", "set-effects"],
+    featured: true
+  }),
+  guide({
     id: "star-force",
-    title: "Star Force Guide",
+    title: "Star Force Planning",
     category: "Equipment",
-    subcategory: "Star Force",
+    subcategory: "Enhancement",
     difficulty: "Intermediate",
     region: "General",
-    description: "Star catching, safeguard, the chance-time event, and which stars are worth pushing past.",
-    icon: "⭐",
-    tags: ["star-force", "enhancement", "events"],
-    estimatedReadTime: "5 min",
+    description: "How to plan Star Force upgrades without draining your entire meso supply.",
+    icon: "STAR",
+    tags: ["star-force", "equipment", "mesos"],
+    estimatedReadTime: "6 min",
     lastUpdated: LAST_UPDATED,
-    summary: "Star Force adds flat stats per star. Costs explode at 17★; plan your budget before you start.",
+    summary:
+      "Star Force is powerful but volatile. Plan stopping points, use events carefully, and never start a session without a budget.",
     keyPoints: [
-      "Star catching saves real money — practise the timing.",
-      "Use Safeguard at 15★ and 16★; the cost is worth it.",
-      "Reserve 17★+ pushes for major events; never blind-push at full price."
+      "Set a budget before enhancing.",
+      "Use event windows for expensive pushes.",
+      "Do not star one item so hard that the rest of your gear falls behind."
     ],
     sections: [
       {
-        heading: "0★–15★: The cheap range",
-        body: "0★–10★ is cheap and fast. 10★–15★ is moderate cost. Star catching reduces failures; learn the timing on a piece you don't care about first."
+        heading: "Safe stopping points",
+        body:
+          "Choose a target before starting. If you reach it early, stop. This keeps progression predictable and prevents emotional overspending."
       },
       {
-        heading: "15★–17★: The investment range",
-        body: "Expensive but high impact. Use Safeguard at 15★ and 16★ to prevent destruction. The cost is worth it — replacing destroyed end-game gear is far worse.",
-        warnings: ["Never push 15★ → 16★ without Safeguard. Destruction at this tier is catastrophic."]
-      },
-      {
-        heading: "17★–22★: The end-game push",
-        body: "Wait for 5/10/15 sales and the Star Catch event before pushing here. Shining Star Force and 1+1 events cut effective cost roughly in half.",
-        tips: ["Stockpile mesos pre-event. The cheapest stars on the calendar are during major Maple events."]
+        heading: "Event timing",
+        body:
+          "Star Force events can make big pushes more efficient. Save larger attempts for windows where cost or risk is reduced."
       }
     ],
-    relatedGuideIds: ["upgrading-equipment", "potential"]
-  },
-  {
+    relatedGuideIds: ["upgrading-equipment", "potential", "set-effects"]
+  }),
+  guide({
     id: "potential",
-    title: "Potential & Cubing",
+    title: "Potential and Bonus Potential",
     category: "Equipment",
-    subcategory: "Potential",
-    difficulty: "Advanced",
-    region: "General",
-    description: "Tiers, prime lines, bonus potential, and cubing strategies that don't bankrupt you.",
-    icon: "🎲",
-    tags: ["potential", "cubing", "endgame"],
-    estimatedReadTime: "5 min",
-    lastUpdated: LAST_UPDATED,
-    summary: "Potential lines scale your gear's main stats. Reach Legendary on key slots before chasing prime triple-line rolls.",
-    keyPoints: [
-      "Hit Legendary tier first; chase prime triple-line later.",
-      "Black Cubes only on the four core slots.",
-      "Bonus Potential is a separate pool with its own line goals."
-    ],
-    sections: [
-      {
-        heading: "Tier ladder",
-        body: "Potential has tiers: Rare → Epic → Unique → Legendary. Each tier unlocks better lines. Get to Legendary before optimising line rolls."
-      },
-      {
-        heading: "Prime lines",
-        body: "The 'good' lines depend on your class: %ATT or %MATT, %BOSS, IED, %crit damage, and skill-line skip. A prime triple-line drop on a core slot is worth millions of mesos."
-      },
-      {
-        heading: "Black vs Red Cubes",
-        body: "Use Black Cubes on the slots that matter most: weapon, secondary, emblem, and hat. Use Red Cubes elsewhere. The cost difference is real and matters at scale.",
-        tips: ["Save Black Cubes for double-Legendary tier-up attempts on core slots."]
-      },
-      {
-        heading: "Bonus Potential",
-        body: "A separate pool from main potential. Aim for %ATT and %BOSS bonus lines first. Bonus Potential tier-ups are cheaper than main."
-      }
-    ],
-    relatedGuideIds: ["upgrading-equipment", "star-force", "stat-terms"]
-  },
-  {
-    id: "set-effects",
-    title: "Set Effects Reference",
-    category: "Equipment",
-    subcategory: "Set Effects",
+    subcategory: "Stats",
     difficulty: "Intermediate",
     region: "General",
-    description: "How set bonuses stack, which sets are worth completing, and when to swap.",
-    icon: "🛡",
-    tags: ["set-effects", "armor", "endgame"],
-    estimatedReadTime: "4 min",
+    description: "How to read potential lines and know when to stop rolling.",
+    icon: "POT",
+    tags: ["potential", "equipment", "stats"],
+    estimatedReadTime: "6 min",
     lastUpdated: LAST_UPDATED,
-    summary: "Sets give cumulative bonuses at 2/3/4/5/7-piece. Aim for the highest tier your level allows and complete it before partial-mixing.",
+    summary:
+      "Potential is a long-term stat system. The goal is not perfect lines immediately; it is reaching useful lines at the right cost.",
     keyPoints: [
-      "Completing a higher-tier set beats partial-bonus mixing.",
-      "Boss accessory sets are a separate, independent stack.",
-      "Don't replace pieces mid-set unless the new piece is a clear net gain."
+      "Useful lines beat perfect lines early.",
+      "Stop rolling when the item meets its current purpose.",
+      "Prioritize weapon, secondary, and emblem style slots for damage impact."
     ],
     sections: [
       {
-        heading: "End-game armor sets",
-        body: "Common end-game sets: Absolab (lvl 160), Arcane Umbra (lvl 200), Eternal (lvl 250). Each unlocks at the level threshold."
+        heading: "Good enough matters",
+        body:
+          "A good line that helps you clear the next boss is often better than chasing a perfect result that empties your resources."
       },
       {
-        heading: "Mixing sets during transition",
-        body: "Mixing sets is fine while transitioning, but completing a higher tier outweighs partial bonuses from a lower tier. Plan your transition so you don't sit on a half-completed set for months."
-      },
-      {
-        heading: "Boss accessory sets",
-        body: "Princess No, Lotus eye, Magnus eye, etc. are not part of armor sets but each have their own set bonuses and should be collected over time. They stack independently of your armor set.",
-        tips: ["Collect boss accessories on your main first; they're hardest to replace."]
+        heading: "Damage slots",
+        body:
+          "Some slots affect damage more directly than others. Upgrade high-impact slots before spending heavily on small gains."
       }
     ],
-    relatedGuideIds: ["upgrading-equipment", "potential"]
-  },
-  {
-    id: "shared-cash-shop",
+    relatedGuideIds: ["stat-terms", "upgrading-equipment", "star-force"]
+  }),
+  guide({
+    id: "set-effects",
+    title: "Set Effects and Gear Identity",
+    category: "Equipment",
+    subcategory: "Sets",
+    difficulty: "Intermediate",
+    region: "General",
+    description: "Why full equipment sets can beat random high-stat pieces.",
+    icon: "SET",
+    tags: ["set-effects", "equipment", "gear"],
+    estimatedReadTime: "5 min",
+    lastUpdated: LAST_UPDATED,
+    summary:
+      "Set effects create hidden power by rewarding matching pieces. A slightly weaker item can be better if it completes a strong set threshold.",
+    keyPoints: [
+      "Check 2-piece, 3-piece, and higher thresholds before replacing gear.",
+      "Do not break a useful set for a tiny stat increase.",
+      "Set transitions are major progression moments."
+    ],
+    sections: [
+      {
+        heading: "Threshold thinking",
+        body:
+          "Always compare the whole setup, not one item in isolation. The item with more visible stats may still reduce total power if it breaks a set."
+      },
+      {
+        heading: "Transition planning",
+        body:
+          "Move between sets when you have enough replacement pieces to keep bonuses stable. Partial transitions can feel weaker for a while."
+      }
+    ],
+    relatedGuideIds: ["upgrading-equipment", "star-force"]
+  }),
+  guide({
+    id: "shared-cash-shop-inventories",
     title: "Shared Cash Shop Inventories",
     category: "Equipment",
-    subcategory: "Shared Cash Shop Inventories",
-    difficulty: "Beginner",
-    region: "General",
-    description: "How character / account / merchant inventories differ, and what each can hold.",
-    icon: "🛍",
-    tags: ["cash-shop", "inventory", "storage"],
-    estimatedReadTime: "3 min",
-    lastUpdated: LAST_UPDATED,
-    summary: "Cash items live in three different storage pools. Knowing which is which prevents accidental losses.",
-    keyPoints: [
-      "Account tab transfers are usually one-way — confirm before moving.",
-      "Some limited / gifted items cannot be transferred at all.",
-      "Use storage for permanent cosmetics; character tab for active gear."
-    ],
-    sections: [
-      {
-        heading: "Character Tab",
-        body: "Items only that character can use. Tax-free transfers within the same character. The default tab when you open the cash inventory."
-      },
-      {
-        heading: "Account Tab",
-        body: "Items shared between all characters on the same world. Most cash items can be moved here once. Useful for shared cosmetics and pets you want to swap between characters.",
-        warnings: ["Account-tab moves are usually one-way — read the confirmation dialog before clicking."]
-      },
-      {
-        heading: "Storage Tab (cash)",
-        body: "Long-term holding. Use for permanent cosmetics you swap between characters. Gifted and limited items often have transfer restrictions; check the item description before moving anything important."
-      }
-    ],
-    relatedGuideIds: ["upgrading-equipment"]
-  },
-
-  // ─── Events ──────────────────────────────────────────────────────────────────
-  {
-    id: "burning-world",
-    title: "Burning World",
-    category: "Events",
-    subcategory: "Burning World",
-    difficulty: "Beginner",
-    region: "General",
-    description: "What a Burning World is, who it's for, and which rewards to claim before the timer runs out.",
-    icon: "🔥",
-    tags: ["events", "burning-world", "bonus-levels"],
-    estimatedReadTime: "4 min",
-    lastUpdated: LAST_UPDATED,
-    summary: "Burning Worlds spawn fresh — characters created on them gain bonus levels and event-only rewards.",
-    keyPoints: [
-      "Bonus levels stack with normal XP — you'll out-level the curve fast.",
-      "World ends with a forced transfer; plan your destination world.",
-      "Event-only rewards are usually the main draw, not the bonus levels."
-    ],
-    sections: [
-      {
-        heading: "What it is",
-        body: "A Burning World is a brand-new server that runs for a limited time (usually 6–12 months). Characters created there gain bonus levels per level-up and earn exclusive event currency."
-      },
-      {
-        heading: "Who it's for",
-        body: "Returning players, players who want a clean slate, and anyone trying a new class without dragging legacy clutter. Brand new players also benefit because the economy starts fresh."
-      },
-      {
-        heading: "End-of-world transfer",
-        body: "When the world ends, your characters transfer to a permanent server with rewards intact. Plan your destination before transfer day — some worlds are noticeably healthier than others.",
-        warnings: ["Transfer is forced. Delaying the choice doesn't help; you get assigned a world if you don't pick one."]
-      }
-    ],
-    relatedGuideIds: ["tera-burning", "mega-burning", "event-timeline"]
-  },
-  {
-    id: "tera-burning",
-    title: "Tera Burning",
-    category: "Events",
-    subcategory: "Tera Burning",
-    difficulty: "Beginner",
-    region: "General",
-    description: "How Tera Burning works, eligible classes, and the level cap on the bonus levels.",
-    icon: "🔥",
-    tags: ["events", "tera-burning", "bonus-levels"],
-    estimatedReadTime: "3 min",
-    lastUpdated: LAST_UPDATED,
-    summary: "Tera Burning gives +2 bonus levels per natural level-up, capping out around level 150.",
-    keyPoints: [
-      "+2 bonus levels per natural level-up; ends around level 150.",
-      "One Tera Burning slot per account per event in most cases.",
-      "Check the eligible-class list before choosing — some classes are excluded."
-    ],
-    sections: [
-      {
-        heading: "How it works",
-        body: "Each natural level-up grants +2 bonus levels, dropping you near level 150 in well under a week of casual play."
-      },
-      {
-        heading: "Eligibility",
-        body: "Usually requires you to pick one eligible class per event. Not all classes are eligible — read the announcement before committing. Mistakes here cost you the slot for the rest of the event.",
-        warnings: ["Tera Burning slot decisions are permanent for the event. Confirm before clicking."]
-      }
-    ],
-    relatedGuideIds: ["burning-world", "mega-burning"]
-  },
-  {
-    id: "mega-burning",
-    title: "Mega Burning",
-    category: "Events",
-    subcategory: "Mega Burning",
-    difficulty: "Beginner",
-    region: "General",
-    description: "Mega Burning specifics: bonus rate, cap, and how it pairs with link mules.",
-    icon: "🔥",
-    tags: ["events", "mega-burning", "mules"],
-    estimatedReadTime: "3 min",
-    lastUpdated: LAST_UPDATED,
-    summary: "Mega Burning is a lighter burning modifier ideal for link mules — +1 bonus level per level-up to a lower cap.",
-    keyPoints: [
-      "+1 bonus level per natural level-up.",
-      "Best paired with link mules — you don't need them past their link-skill threshold.",
-      "Multiple slots usually available; spread them across new mules."
-    ],
-    sections: [
-      {
-        heading: "How it works",
-        body: "Mega Burning grants +1 bonus level per natural level-up, capping out earlier than Tera Burning. Multiple Mega Burning slots are usually available per account per event — read the patch notes."
-      },
-      {
-        heading: "Best pairing: link mules",
-        body: "You want the link skill at level 70/120/etc., not necessarily level 200, so the lighter burn is enough. Stack Mega Burning on a Cygnus mule to finish a link in a single weekend.",
-        tips: ["Pair Mega Burning with the relay event of the season for compound rewards."]
-      }
-    ],
-    relatedGuideIds: ["tera-burning", "burning-world", "link-skills"]
-  },
-  {
-    id: "maple-relay",
-    title: "Maple Relay",
-    category: "Events",
-    subcategory: "Maple Relay",
-    difficulty: "Beginner",
-    region: "General",
-    description: "The recurring milestone-and-reward event format and how to plan your relay schedule.",
-    icon: "🏃",
-    tags: ["events", "relay", "dailies"],
-    estimatedReadTime: "3 min",
-    lastUpdated: LAST_UPDATED,
-    summary: "Maple Relay events award milestone rewards across multiple characters — split tasks evenly, don't overload one main.",
-    keyPoints: [
-      "Spread completions across many characters — don't focus on one main.",
-      "Some relays cap rewards at a fixed character count; check the chart first.",
-      "Daily tasks reset at server reset; plan your weekly relay route."
-    ],
-    sections: [
-      {
-        heading: "How relays work",
-        body: "Maple Relay events run in waves: complete a set of tasks on a character to earn a milestone tier, then 'pass the baton' to the next character. Daily tasks usually include monster kills, quest completions, and a bossing target."
-      },
-      {
-        heading: "Reward structure",
-        body: "Reward structure usually scales with how many characters reach the milestone, not how high one character climbs. Spread completions instead of pushing one main.",
-        tips: ["Plan a 'relay route' — the order you'll cycle through your characters daily — before the event starts."]
-      }
-    ],
-    relatedGuideIds: ["event-timeline", "burning-world"]
-  },
-  {
-    id: "event-timeline",
-    title: "Event Timeline Tracking",
-    category: "Events",
-    subcategory: "Event Timeline",
-    difficulty: "Beginner",
-    region: "General",
-    description: "How to track event start/end times, double up overlapping events, and not miss limited rewards.",
-    icon: "📅",
-    tags: ["events", "timeline", "schedule"],
-    estimatedReadTime: "4 min",
-    lastUpdated: LAST_UPDATED,
-    summary: "Most events overlap. The right calendar habit triples your effective rewards over a season.",
-    keyPoints: [
-      "Patch notes are the source of truth — read them once on day one.",
-      "Set end-date reminders; events end at server reset, not midnight.",
-      "Look for overlapping events for compound rewards."
-    ],
-    sections: [
-      {
-        heading: "Habit 1: Read the patch notes once",
-        body: "Pin the patch notes at event start — they list every event, its dates, and its rewards. Skim them once and bookmark the meaty ones."
-      },
-      {
-        heading: "Habit 2: Track end dates",
-        body: "Build a checklist with end dates. Most events end on a Wednesday or Sunday with reset; missing it by an hour is the most common 'I forgot' loss.",
-        warnings: ["Events end at server reset (in your region's time zone), not at midnight. Check carefully."]
-      },
-      {
-        heading: "Habit 3: Pair overlapping events",
-        body: "Burning + Maple Relay + a coupon event running simultaneously is the most efficient use of play time. Plan the overlap window the day after notes drop."
-      }
-    ],
-    relatedGuideIds: ["maple-relay", "burning-world"]
-  },
-
-  // ─── Resources ───────────────────────────────────────────────────────────────
-  {
-    id: "official-site",
-    title: "Official MapleStory Site",
-    category: "Resources",
-    subcategory: "Official MapleStory Site",
+    subcategory: "Account Utility",
     difficulty: "Beginner",
     region: "GMS",
-    description: "Patch notes, maintenance schedules, and official cash-shop announcements.",
-    icon: "🌐",
-    tags: ["official", "patch-notes", "reference"],
-    estimatedReadTime: "2 min",
+    description: "How shared Cash Shop storage helps move cosmetic and utility items safely.",
+    icon: "CS",
+    tags: ["cash-shop", "inventory", "account"],
+    estimatedReadTime: "4 min",
     lastUpdated: LAST_UPDATED,
-    summary: "The official MapleStory site is the authoritative source for patch notes and event schedules.",
+    summary:
+      "Shared storage rules can save money and prevent confusion. Know which characters share inventory before moving cosmetics or utility items.",
     keyPoints: [
-      "Authoritative source for patch notes and dates.",
-      "Cash shop schedules typically appear ahead of in-game listings.",
-      "Maintenance windows are announced here first."
+      "Shared storage depends on character grouping.",
+      "Check whether an item is transferable before buying.",
+      "Treat limited-time cosmetics as account-planning decisions."
     ],
     sections: [
       {
-        heading: "Why it's the source of truth",
-        body: "Bookmark the official news page. Every patch, every event, every emergency maintenance announcement lands there first. Community sites lag by hours or days."
+        heading: "Before buying",
+        body:
+          "Confirm where the item can be moved. Some items are flexible, while others become tied to one character or group after purchase."
       },
       {
-        heading: "Cash shop schedule",
-        body: "The official cash shop schedule is also published here, often a week ahead of in-game listings. Useful for budgeting upcoming sales."
+        heading: "Planning cosmetics",
+        body:
+          "If you play multiple characters, buy cosmetics with transfer rules in mind. It is easier to plan before purchasing than to fix later."
       }
     ],
-    relatedGuideIds: ["maplestory-wiki", "event-timeline"],
-    externalLinks: [
-      { label: "MapleStory Official News", url: "https://www.nexon.com/maplestory/news", type: "Official" }
-    ]
-  },
-  {
-    id: "maplestory-wiki",
-    title: "MapleStory Wiki",
-    category: "Resources",
-    subcategory: "MapleStory Wiki",
-    difficulty: "Beginner",
-    region: "General",
-    description: "Community-maintained reference for items, monsters, maps, and class skills.",
-    icon: "📖",
-    tags: ["wiki", "reference", "community"],
-    estimatedReadTime: "2 min",
-    lastUpdated: LAST_UPDATED,
-    summary: "The community wiki fills in gaps the official site doesn't — item drops, monster locations, skill data.",
-    keyPoints: [
-      "Strongest for drop tables, monster locations, and historical info.",
-      "Cross-check recent-patch info against official notes.",
-      "Skill descriptions on the wiki are usually more readable than in-game."
-    ],
-    sections: [
-      {
-        heading: "Strengths",
-        body: "Thorough item drop tables, monster spawn locations, deep skill data, historical patch notes. Best community reference for content that has been live a while."
-      },
-      {
-        heading: "Weaknesses",
-        body: "Occasional outdated pages, especially around recent patches. Cross-check with official patch notes if a fact looks suspicious. The wiki is a great secondary reference; don't treat it as a primary source for current content.",
-        warnings: ["Wiki edits lag patches by days. Verify current-patch claims against the official site."]
-      }
-    ],
-    relatedGuideIds: ["official-site", "maplestory-io"],
-    externalLinks: [
-      { label: "MapleStory Wiki", url: "https://maplestory.fandom.com/wiki/MapleStory_Wiki", type: "Wiki" }
-    ]
-  },
-  {
-    id: "maplestory-io",
-    title: "MapleStory.io",
-    category: "Resources",
-    subcategory: "MapleStory.io",
-    difficulty: "Beginner",
-    region: "General",
-    description: "Sprite and item visualisation tool — render any in-game equip on any class for previews.",
-    icon: "🖼",
-    tags: ["tool", "visualisation", "cosmetic"],
-    estimatedReadTime: "2 min",
-    lastUpdated: LAST_UPDATED,
-    summary: "Visualise outfits, weapons, and effects without buying or equipping anything in-game.",
-    keyPoints: [
-      "Render any equip on any class without spending mesos.",
-      "Useful for outfit planning and screenshot composition.",
-      "Recent items may lag a few patches behind real game data."
-    ],
-    sections: [
-      {
-        heading: "What it does",
-        body: "MapleStory.io scrapes game assets and renders them in a browser. Great for cosmetic planning, item previews, and screenshots."
-      },
-      {
-        heading: "Caveats",
-        body: "Not affiliated with Nexon. Asset accuracy is excellent for older items; very recent additions may lag a few patches behind. Treat it as a preview, not an official source."
-      }
-    ],
-    relatedGuideIds: ["maplestory-wiki", "calculators"],
-    externalLinks: [
-      { label: "MapleStory.io", url: "https://maplestory.io", type: "Tool" }
-    ]
-  },
-  {
-    id: "community-discords",
-    title: "Community Discords",
-    category: "Resources",
-    subcategory: "Community Discords",
-    difficulty: "Beginner",
-    region: "General",
-    description: "Where to find class-specific Discords, world-specific Discords, and bossing teams.",
-    icon: "💬",
-    tags: ["community", "discord", "social"],
-    estimatedReadTime: "2 min",
-    lastUpdated: LAST_UPDATED,
-    summary: "Discord is where MapleStory's most useful real-time advice lives — every class and most worlds have a hub.",
-    keyPoints: [
-      "Class Discords have pinned guides — read them first.",
-      "World Discords are great for bossing parties and price checks.",
-      "Always check pinned channels before asking — most beginner Qs are answered there."
-    ],
-    sections: [
-      {
-        heading: "Class Discords",
-        body: "Each major class has a community Discord with pinned guides, Q&A channels, and active theorycrafters. They're the fastest place to ask a real player a real question."
-      },
-      {
-        heading: "World Discords",
-        body: "Useful for finding bossing parties, market price checks, and event coordination. Usually invite-linked from your world's subreddit or community hub."
-      },
-      {
-        heading: "Etiquette",
-        body: "Read the pins before asking; most class discords have a 'first 100 hours' channel that answers most beginner questions. People are friendlier when you've shown you read first.",
-        tips: ["Search the channel before posting — your question has been asked before."]
-      }
-    ],
-    relatedGuideIds: ["calculators", "official-site"]
-  },
-  {
-    id: "calculators",
-    title: "Calculators & Planners",
-    category: "Resources",
-    subcategory: "Calculators",
+    relatedGuideIds: ["upgrading-equipment", "resources-official-sites"]
+  }),
+  guide({
+    id: "burning-world",
+    title: "Burning World Strategy",
+    category: "Events",
+    subcategory: "Growth Events",
     difficulty: "Intermediate",
-    region: "General",
-    description: "Star Force cost calculators, cubing simulators, legion planners, and damage calculators.",
-    icon: "🧮",
-    tags: ["calculators", "tools", "planning"],
+    region: "GMS",
+    description: "How to use Burning World for real account progress instead of temporary chaos.",
+    icon: "BURN",
+    tags: ["events", "burning", "progression"],
+    estimatedReadTime: "5 min",
+    lastUpdated: LAST_UPDATED,
+    summary:
+      "Burning events are strongest when attached to a clear goal: a new main, a link skill, a Legion push, or a boss mule.",
+    keyPoints: [
+      "Choose the character before the event starts.",
+      "Plan transfer rules and final destination.",
+      "Use event rewards on gear that survives the event."
+    ],
+    sections: [
+      {
+        heading: "Pick the purpose",
+        body:
+          "A Burning character should have a job: main candidate, link skill, Legion block, or future mule. Without that purpose, rewards can scatter."
+      },
+      {
+        heading: "Event ending plan",
+        body:
+          "Before the event ends, decide what gear, rewards, and character progress need to move to your long-term world."
+      }
+    ],
+    relatedGuideIds: ["tera-burning", "mega-burning", "event-timeline"],
+    featured: true
+  }),
+  guide({
+    id: "tera-burning",
+    title: "Tera Burning Planner",
+    category: "Events",
+    subcategory: "Leveling Events",
+    difficulty: "Beginner",
+    region: "GMS",
+    description: "How to choose a Tera Burning character and avoid wasting the boost.",
+    icon: "TERA",
+    tags: ["events", "tera-burning", "leveling"],
+    estimatedReadTime: "4 min",
+    lastUpdated: LAST_UPDATED,
+    summary:
+      "Tera Burning is best for characters that would otherwise be slow or valuable to finish quickly. Pick based on account benefit and enjoyment.",
+    keyPoints: [
+      "Use Burning on a character with long-term value.",
+      "Prepare inventory and basic links before starting.",
+      "Do not pick a class only because it is trendy."
+    ],
+    sections: [
+      {
+        heading: "Character choice",
+        body:
+          "The best Burning target is one you either want to keep playing or one that gives strong account value after the event."
+      },
+      {
+        heading: "During the event",
+        body:
+          "Claim rewards intentionally and keep a list of what must be finished before the event expires."
+      }
+    ],
+    relatedGuideIds: ["burning-world", "mega-burning", "class-overview"]
+  }),
+  guide({
+    id: "mega-burning",
+    title: "Mega Burning Uses",
+    category: "Events",
+    subcategory: "Leveling Events",
+    difficulty: "Beginner",
+    region: "GMS",
+    description: "A simple way to turn smaller Burning events into useful account gains.",
+    icon: "MEGA",
+    tags: ["events", "mega-burning", "legion"],
     estimatedReadTime: "3 min",
     lastUpdated: LAST_UPDATED,
-    summary: "A handful of community-made calculators turn 'should I cube' into a quantitative answer.",
+    summary:
+      "Mega Burning is excellent for low-friction account projects: link skills, Legion blocks, and classes you want to test.",
     keyPoints: [
-      "Star Force calculators turn budget questions into numbers.",
-      "Cubing sims show real probability distributions, not gambler's-fallacy averages.",
-      "Damage calculators are estimates, not exact — treat them as ballparks."
+      "Use it on useful alts.",
+      "Do not over-invest temporary gear.",
+      "Finish the core milestone before the event ends."
     ],
     sections: [
       {
-        heading: "Star Force calculators",
-        body: "Model expected mesos to push from N★ to M★. They factor in destruction, Safeguard, and event modifiers. Plug in your numbers before you commit a big push."
-      },
-      {
-        heading: "Cubing simulators",
-        body: "Show probability distributions for prime lines. Useful for setting realistic expectations on triple-line attempts and budgeting your cube spend.",
-        warnings: ["Simulators show statistics, not your actual luck. The variance can hurt."]
-      },
-      {
-        heading: "Damage and legion planners",
-        body: "Damage calculators are helpful but rarely match in-game numbers exactly — class passives and edge cases are hard to model. Use them for relative comparisons (option A vs option B), not absolute predictions. Legion planners optimise tile placement on the legion grid; they're worth running once a season."
+        heading: "Best use cases",
+        body:
+          "Mega Burning works well when you need a fast alt for account-wide value. It is less ideal for a main unless the event reward package supports long-term play."
       }
     ],
-    relatedGuideIds: ["star-force", "potential", "stat-terms"]
-  }
+    relatedGuideIds: ["link-skills", "legion-basics", "tera-burning"]
+  }),
+  guide({
+    id: "maple-relay",
+    title: "Maple Relay Routine",
+    category: "Events",
+    subcategory: "Daily Events",
+    difficulty: "Beginner",
+    region: "GMS",
+    description: "How to complete relay-style events without turning them into a chore.",
+    icon: "RELAY",
+    tags: ["events", "daily", "rewards"],
+    estimatedReadTime: "3 min",
+    lastUpdated: LAST_UPDATED,
+    summary:
+      "Relay events reward consistency. Build a small daily routine and stop once the reward requirement is complete.",
+    keyPoints: [
+      "Check the daily objective first.",
+      "Stack relay tasks with normal progression.",
+      "Do not grind past the reward cap unless you enjoy it."
+    ],
+    sections: [
+      {
+        heading: "Daily routine",
+        body:
+          "Run the relay while doing content you already planned. The best event tasks are the ones that fit naturally into your existing loop."
+      }
+    ],
+    relatedGuideIds: ["event-timeline", "resources-official-sites"]
+  }),
+  guide({
+    id: "event-timeline",
+    title: "Event Timeline Planning",
+    category: "Events",
+    subcategory: "Planning",
+    difficulty: "Intermediate",
+    region: "General",
+    description: "How to decide which events deserve your time before they expire.",
+    icon: "TIME",
+    tags: ["events", "timeline", "planning"],
+    estimatedReadTime: "5 min",
+    lastUpdated: LAST_UPDATED,
+    summary:
+      "Event planning is about matching limited time to high-value rewards. Prioritize expiration dates, account-wide rewards, and upgrade materials.",
+    keyPoints: [
+      "Sort rewards by expiration and account value.",
+      "Do daily caps first.",
+      "Skip low-value tasks when your time is limited."
+    ],
+    sections: [
+      {
+        heading: "Reward priority",
+        body:
+          "Account-wide rewards and upgrade materials usually deserve attention first. Cosmetic rewards are great, but they should not block power goals unless you value them most."
+      },
+      {
+        heading: "Avoid burnout",
+        body:
+          "Events are meant to add momentum, not create homework. Pick a realistic daily checklist and keep it short."
+      }
+    ],
+    relatedGuideIds: ["burning-world", "maple-relay", "beginner-essentials"]
+  }),
+  guide({
+    id: "resources-official-sites",
+    title: "Official MapleStory Links",
+    category: "Resources",
+    subcategory: "Useful Links",
+    difficulty: "Beginner",
+    region: "General",
+    description: "A clean list of official sources players should check before relying on rumors.",
+    icon: "LINK",
+    tags: ["resources", "official", "links"],
+    estimatedReadTime: "2 min",
+    lastUpdated: LAST_UPDATED,
+    summary:
+      "Official sources are best for announcements, maintenance, terms, and event rules. Use community tools for interpretation, but verify dates from official pages.",
+    keyPoints: [
+      "Check official posts for event dates.",
+      "Use official pages for rules and account safety.",
+      "Use community resources as helpers, not final authority."
+    ],
+    sections: [
+      {
+        heading: "When to use official links",
+        body:
+          "Use official sources when dates, restrictions, maintenance, or reward eligibility matter. Those details can change between regions."
+      }
+    ],
+    relatedGuideIds: ["event-timeline", "resources-tools"],
+    externalLinks: [
+      { label: "MapleStory Official Site", url: "https://www.nexon.com/maplestory/", type: "Official" }
+    ],
+    featured: true
+  }),
+  guide({
+    id: "resources-wiki",
+    title: "Wiki and Reference Sites",
+    category: "Resources",
+    subcategory: "Reference",
+    difficulty: "Beginner",
+    region: "General",
+    description: "How to use wiki-style references without getting misled by outdated details.",
+    icon: "WIKI",
+    tags: ["resources", "wiki", "reference"],
+    estimatedReadTime: "3 min",
+    lastUpdated: LAST_UPDATED,
+    summary:
+      "Wiki references are useful for item names, quest chains, and historical context, but you should always check region and update date.",
+    keyPoints: [
+      "Confirm region before following a guide.",
+      "Check the update date.",
+      "Use multiple sources for important decisions."
+    ],
+    sections: [
+      {
+        heading: "How to verify",
+        body:
+          "If a page mentions old systems or removed rewards, treat it as historical. Cross-check with current patch notes and official event pages."
+      }
+    ],
+    relatedGuideIds: ["resources-official-sites", "resources-tools"],
+    externalLinks: [
+      { label: "MapleWiki", url: "https://maplestorywiki.net/", type: "Wiki" },
+      { label: "MapleStory.io", url: "https://maplestory.io/", type: "Tool" }
+    ]
+  }),
+  guide({
+    id: "resources-tools",
+    title: "Calculators and Planning Tools",
+    category: "Resources",
+    subcategory: "Tools",
+    difficulty: "Intermediate",
+    region: "General",
+    description: "When calculators help and when they make progression feel harder than it is.",
+    icon: "TOOL",
+    tags: ["resources", "tools", "calculators"],
+    estimatedReadTime: "4 min",
+    lastUpdated: LAST_UPDATED,
+    summary:
+      "Calculators are best for budgets, upgrade odds, and comparing routes. They should guide decisions, not replace playing the game.",
+    keyPoints: [
+      "Use tools before expensive upgrades.",
+      "Do not optimize every small decision.",
+      "Record assumptions so you understand the result."
+    ],
+    sections: [
+      {
+        heading: "Best use cases",
+        body:
+          "Use calculators before Star Force pushes, cubing sessions, or long-term goal planning. For small upgrades, simple rules are usually enough."
+      }
+    ],
+    relatedGuideIds: ["star-force", "potential", "resources-wiki"],
+    externalLinks: [
+      { label: "MapleStory.io", url: "https://maplestory.io/", type: "Tool" }
+    ]
+  }),
+  guide({
+    id: "content-creators",
+    title: "Maple Content Creators",
+    category: "Resources",
+    subcategory: "Community",
+    difficulty: "Beginner",
+    region: "General",
+    description: "How to use videos and creator guides without copying someone else's account plan.",
+    icon: "VID",
+    tags: ["resources", "creators", "video"],
+    estimatedReadTime: "3 min",
+    lastUpdated: LAST_UPDATED,
+    summary:
+      "Creators are great for seeing real gameplay, but every account has different resources. Use videos as examples, then adapt the advice.",
+    keyPoints: [
+      "Watch current patch content when possible.",
+      "Separate entertainment from account advice.",
+      "Adapt recommendations to your world, gear, and budget."
+    ],
+    sections: [
+      {
+        heading: "How to evaluate advice",
+        body:
+          "Ask what assumptions the creator has: funding, server, class, event timing, and account age. Advice that works for one account may be too expensive for another."
+      }
+    ],
+    relatedGuideIds: ["resources-official-sites", "class-overview"],
+    externalLinks: [
+      { label: "SNAILSLAYER YouTube", url: "https://www.youtube.com/@snailslayermain", type: "Video" }
+    ]
+  }),
+  guide({
+    id: "faq",
+    title: "Maple Library FAQ",
+    category: "Resources",
+    subcategory: "FAQ",
+    difficulty: "Beginner",
+    region: "General",
+    description: "Quick answers to common guide, resource, and progression questions.",
+    icon: "FAQ",
+    tags: ["faq", "resources", "beginner"],
+    estimatedReadTime: "4 min",
+    lastUpdated: LAST_UPDATED,
+    summary:
+      "This FAQ helps players decide which guide to open next and how to use the Library without overthinking every system.",
+    keyPoints: [
+      "Beginners should start with First Day Checklist.",
+      "Gear questions belong in Equipment guides.",
+      "Boss questions usually start with pre-quests and status effects.",
+      "External links are credited and marked by type."
+    ],
+    sections: [
+      {
+        heading: "Where should I start?",
+        body:
+          "If you are new or returning, start with First Day Checklist, then Progression Roadmap, then Class Overview."
+      },
+      {
+        heading: "Is this official information?",
+        body:
+          "The guide explanations are original. Official links are marked as official, while wiki, tool, community, and video links are third-party references."
+      }
+    ],
+    relatedGuideIds: ["beginner-essentials", "progression-overview", "resources-official-sites"]
+  })
 ];
-
-export function getLibraryGuides(): LibraryGuide[] {
-  return libraryGuides;
-}

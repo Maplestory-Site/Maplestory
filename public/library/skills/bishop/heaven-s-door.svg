@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Heaven's Door">
+  <rect width="64" height="64" rx="12" fill="#1c2844"/>
+  <path d="M18 55V27c0-11 7-19 14-19s14 8 14 19v28z" fill="#ffd76d"/>
+  <path d="M25 55V29c0-7 3-12 7-12s7 5 7 12v26z" fill="#fff4b7"/>
+  <path d="M12 20c6-5 12-7 20-8 8 1 14 3 20 8" stroke="#fff" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <circle cx="32" cy="36" r="4" fill="#855bff"/>
+</svg>

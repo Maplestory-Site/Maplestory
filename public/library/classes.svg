@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#b997ff"/>
+      <stop offset="100%" stop-color="#3d2173"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="320" fill="url(#bg)"/>
+  <circle cx="320" cy="158" r="180" fill="url(#glow)" opacity="0.4"/>
+  <g stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.95">
+    <path d="M270 100 L370 200 M280 90 L274 96 M290 90 L296 96 M286 84 L290 90"/>
+    <path d="M370 100 L270 200 M360 90 L366 96 M350 90 L344 96 M354 84 L350 90"/>
+    <path d="M260 210 L280 230 M380 210 L360 230"/>
+  </g>
+  <g fill="rgba(255,255,255,0.3)">
+    <circle cx="120" cy="80" r="3"/>
+    <circle cx="500" cy="80" r="3"/>
+    <circle cx="80" cy="200" r="3"/>
+    <circle cx="560" cy="200" r="3"/>
+  </g>
+  <text x="320" y="270" text-anchor="middle" font-family="-apple-system, Segoe UI, sans-serif" font-size="34" font-weight="900" fill="#ffffff" letter-spacing="6">CLASSES</text>
+</svg>

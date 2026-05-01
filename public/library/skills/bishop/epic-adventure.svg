@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Epic Adventure">
+  <rect width="64" height="64" rx="12" fill="#2c1837"/>
+  <path d="M12 51l9-34 21-7 10 12-11 30z" fill="#ffcf55"/>
+  <path d="M23 20l18 22M19 33h22" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+  <path d="M45 10l8-5-1 10 8 5-10 1-5 9-4-9-10-2 8-5-1-10z" fill="#ff6d9d"/>
+</svg>

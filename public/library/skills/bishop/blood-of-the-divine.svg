@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Blood of the Divine">
+  <rect width="64" height="64" rx="12" fill="#39111f"/>
+  <path d="M32 7c10 13 16 23 16 33 0 11-7 18-16 18s-16-7-16-18c0-10 6-20 16-33z" fill="#ff3f6f"/>
+  <path d="M32 18c5 8 8 14 8 20 0 6-3 10-8 10s-8-4-8-10c0-6 3-12 8-20z" fill="#ffd56b"/>
+  <path d="M32 28v17M24 36h16" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+</svg>

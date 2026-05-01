@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Advanced Blessing">
+  <rect width="64" height="64" rx="12" fill="#241b3d"/>
+  <path d="M32 7l8 16 17 2-12 12 3 17-16-8-16 8 3-17L7 25l17-2z" fill="#ffd75b"/>
+  <circle cx="32" cy="32" r="13" fill="#fff3af"/>
+  <path d="M24 34l5 5 12-15" stroke="#7648ff" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

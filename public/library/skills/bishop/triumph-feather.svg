@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Triumph Feather">
+  <rect width="64" height="64" rx="12" fill="#2c1837"/>
+  <path d="M47 8C25 12 11 30 14 54c16-5 34-23 33-46z" fill="#ffd76d"/>
+  <path d="M45 13C34 25 26 34 17 50" stroke="#fff" stroke-width="4" stroke-linecap="round"/>
+  <path d="M28 27l-10 1M36 20l-12-1M33 35l-12 2M40 29l-14 0" stroke="#ff8ac7" stroke-width="3" stroke-linecap="round"/>
+</svg>

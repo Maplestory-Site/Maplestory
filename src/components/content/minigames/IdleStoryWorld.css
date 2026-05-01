@@ -6275,3 +6275,206 @@
   min-width: 0;
 }
 .isw-save-bar__input:focus { outline: none; border-color: rgba(120,200,150,0.5); }
+
+/* IdleStory focused combat-feel pass */
+.isw-attack-fx {
+  position: absolute;
+  inset: 0;
+  z-index: 7;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.isw-attack-fx__wind,
+.isw-attack-fx__slash,
+.isw-attack-fx__projectile,
+.isw-attack-fx__impact {
+  position: absolute;
+  pointer-events: none;
+}
+
+.isw-attack-fx__wind {
+  left: 18%;
+  top: 33%;
+  width: 28%;
+  height: 24%;
+  border-radius: 999px;
+  background: radial-gradient(circle, rgba(255, 247, 205, 0.34), rgba(95, 219, 255, 0.08) 58%, transparent 72%);
+  opacity: 0;
+  transform: scale(0.7) rotate(-8deg);
+  filter: blur(1px);
+}
+
+.isw-attack-fx.is-windup .isw-attack-fx__wind {
+  animation: isw-attack-windup 220ms ease-out;
+}
+
+.isw-attack-fx__slash {
+  left: 38%;
+  top: 42%;
+  width: 35%;
+  height: 7px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.96), rgba(255, 202, 91, 0.92), transparent);
+  opacity: 0;
+  transform: rotate(-15deg) scaleX(0.18);
+  transform-origin: left center;
+  filter: drop-shadow(0 0 14px rgba(255, 207, 90, 0.7));
+}
+
+.isw-attack-fx.is-slash .isw-attack-fx__slash,
+.isw-attack-fx.is-impact .isw-attack-fx__slash {
+  animation: isw-slash-strike 280ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.isw-attack-fx.is-boss .isw-attack-fx__slash {
+  height: 9px;
+  background: linear-gradient(90deg, transparent, rgba(255, 117, 117, 0.96), rgba(255, 190, 72, 0.95), transparent);
+}
+
+.isw-attack-fx__projectile {
+  left: 23%;
+  top: 49%;
+  width: 18%;
+  height: 8px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(102, 245, 255, 0), rgba(102, 245, 255, 0.9), rgba(255, 255, 255, 0.95));
+  box-shadow: 0 0 18px rgba(102, 245, 255, 0.55);
+  opacity: 0;
+}
+
+.isw-attack-fx.has-projectile.is-slash .isw-attack-fx__projectile,
+.isw-attack-fx.has-projectile.is-impact .isw-attack-fx__projectile {
+  animation: isw-projectile-trail 340ms ease-out;
+}
+
+.isw-attack-fx__impact {
+  left: 58%;
+  top: 44%;
+  width: 56px;
+  height: 56px;
+  margin: -28px 0 0 -28px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.96), rgba(255, 203, 89, 0.55) 38%, rgba(255, 115, 82, 0.18) 58%, transparent 72%);
+  opacity: 0;
+  filter: blur(0.2px) drop-shadow(0 0 18px rgba(255, 211, 106, 0.5));
+}
+
+.isw-attack-fx.is-impact .isw-attack-fx__impact {
+  animation: isw-impact-burst 340ms ease-out;
+}
+
+.isw-attack-fx.is-crit .isw-attack-fx__impact {
+  background: radial-gradient(circle, rgba(255, 255, 255, 1), rgba(255, 233, 99, 0.76) 35%, rgba(255, 100, 208, 0.22) 62%, transparent 78%);
+  animation: isw-crit-burst 420ms ease-out;
+}
+
+.isw-attack-fx.is-kill .isw-attack-fx__impact {
+  background: radial-gradient(circle, rgba(236, 255, 205, 1), rgba(134, 239, 172, 0.68) 42%, rgba(250, 204, 21, 0.18) 68%, transparent 80%);
+}
+
+.isw-arena.is-attack-impact .isw-arena__map-img {
+  filter: brightness(1.08) saturate(1.08);
+}
+
+.isw-arena__enemy-sprite.is-visual-impact img,
+.isw-arena__enemy-sprite.is-visual-impact .isw-arena__emoji,
+.isw-boss__sprite.is-hit img,
+.isw-boss__sprite.is-hit .isw-boss__sprite-emoji {
+  animation: isw-enemy-hit-recoil 200ms cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+
+.isw-arena__enemy-sprite.is-visual-crit img,
+.isw-arena__enemy-sprite.is-visual-crit .isw-arena__emoji {
+  filter: drop-shadow(0 0 24px rgba(255, 230, 113, 0.62)) brightness(1.2);
+}
+
+.isw-arena__enemy-sprite.is-visual-kill img,
+.isw-arena__enemy-sprite.is-visual-kill .isw-arena__emoji {
+  animation: isw-enemy-kill-pop 340ms ease-out;
+}
+
+.isw-dmg-num {
+  z-index: 12;
+  letter-spacing: 0.01em;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.65);
+}
+
+.isw-dmg-num--normal {
+  font-size: clamp(12px, 2vw, 16px) !important;
+  color: #f8fafc !important;
+}
+
+.isw-dmg-num--crit {
+  font-size: clamp(18px, 3.2vw, 26px) !important;
+  color: #ffe671 !important;
+}
+
+.isw-dmg-num--boss {
+  font-size: clamp(15px, 2.7vw, 22px) !important;
+  color: #ff8a5c !important;
+}
+
+.isw-dmg-num--kill {
+  font-size: clamp(17px, 3vw, 24px) !important;
+  color: #86efac !important;
+}
+
+.isw-dmg-num--incoming {
+  font-size: clamp(12px, 2vw, 16px) !important;
+  color: #fb7185 !important;
+}
+
+@keyframes isw-attack-windup {
+  0% { opacity: 0; transform: scale(0.62) rotate(-10deg); }
+  55% { opacity: 0.75; transform: scale(1.03) rotate(-4deg); }
+  100% { opacity: 0; transform: scale(1.18) rotate(0deg); }
+}
+
+@keyframes isw-slash-strike {
+  0% { opacity: 0; transform: translateX(-12%) rotate(-15deg) scaleX(0.18); }
+  28% { opacity: 1; transform: translateX(0) rotate(-15deg) scaleX(1); }
+  100% { opacity: 0; transform: translateX(24%) rotate(-15deg) scaleX(0.2); }
+}
+
+@keyframes isw-projectile-trail {
+  0% { opacity: 0; transform: translateX(-20%) scaleX(0.3); }
+  30% { opacity: 1; transform: translateX(120%) scaleX(1); }
+  100% { opacity: 0; transform: translateX(260%) scaleX(0.2); }
+}
+
+@keyframes isw-impact-burst {
+  0% { opacity: 0; transform: scale(0.35); }
+  25% { opacity: 1; transform: scale(0.95); }
+  100% { opacity: 0; transform: scale(1.9); }
+}
+
+@keyframes isw-crit-burst {
+  0% { opacity: 0; transform: scale(0.32) rotate(0deg); }
+  22% { opacity: 1; transform: scale(1.05) rotate(8deg); }
+  100% { opacity: 0; transform: scale(2.2) rotate(18deg); }
+}
+
+@keyframes isw-enemy-hit-recoil {
+  0% { transform: translateX(0) scale(1); }
+  35% { transform: translateX(10px) scale(0.97); }
+  100% { transform: translateX(0) scale(1); }
+}
+
+@keyframes isw-enemy-kill-pop {
+  0% { transform: scale(1); opacity: 1; }
+  55% { transform: scale(1.1); opacity: 0.82; }
+  100% { transform: scale(0.94); opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .isw-attack-fx,
+  .isw-attack-fx *,
+  .isw-arena__enemy-sprite.is-visual-impact img,
+  .isw-arena__enemy-sprite.is-visual-impact .isw-arena__emoji,
+  .isw-arena__enemy-sprite.is-visual-kill img,
+  .isw-arena__enemy-sprite.is-visual-kill .isw-arena__emoji {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Holy Magic Shell">
+  <rect width="64" height="64" rx="12" fill="#10213f"/>
+  <circle cx="32" cy="34" r="23" fill="#67dfff" opacity=".78"/>
+  <circle cx="32" cy="34" r="15" fill="#fff" opacity=".3"/>
+  <path d="M32 13v36M18 31h28" stroke="#fff6a6" stroke-width="7" stroke-linecap="round"/>
+  <path d="M14 47c10 8 26 8 36 0" stroke="#7d64ff" stroke-width="4" stroke-linecap="round" fill="none"/>
+</svg>

@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" role="img" aria-label="Skill rotation guide art">
+  <rect width="880" height="440" fill="#182433"/>
+  <path d="M176 230c0-124 96-184 210-184 152 0 254 90 254 214" fill="none" stroke="#7bd9ff" stroke-width="16" stroke-linecap="round" stroke-dasharray="26 24"/>
+  <path d="M640 260 704 198l-4 90z" fill="#7bd9ff"/>
+  <g fill="#262f43" stroke="#f6c66a" stroke-width="5">
+    <circle cx="188" cy="230" r="54"/><circle cx="374" cy="86" r="54"/><circle cx="610" cy="188" r="54"/><circle cx="468" cy="336" r="54"/>
+  </g>
+  <text x="54" y="70" fill="#fff" font-family="Verdana, Arial, sans-serif" font-size="38" font-weight="900">SKILL ROTATION</text>
+  <text x="54" y="110" fill="#fff" opacity=".78" font-family="Verdana, Arial, sans-serif" font-size="22">Filler. Cooldown. Burst. Defense.</text>
+</svg>

@@ -142,9 +142,7 @@ export function getNewPlayerDpsMult(totalPlayTimeSeconds: number): number {
   // Balance pass 2: early DPS boost removed almost entirely so first enemy
   // takes 10–14 s (was ~8 s with 1.18×). Mild +5% kept for first 30 s as a
   // gentle "you're stronger than you think" feel.
-  if (totalPlayTimeSeconds <= 30)  return 1.05;
-  if (totalPlayTimeSeconds <= 90)  return 1.03;
-  if (totalPlayTimeSeconds <= 180) return 1.01;
+  void totalPlayTimeSeconds;
   return 1.0;
 }
 
@@ -160,9 +158,7 @@ export function getNewPlayerDpsMult(totalPlayTimeSeconds: number): number {
  * 180+         →  1×
  */
 export function getNewPlayerXpMult(totalPlayTimeSeconds: number): number {
-  if (totalPlayTimeSeconds <= 30)  return 1.08;
-  if (totalPlayTimeSeconds <= 90)  return 1.04;
-  if (totalPlayTimeSeconds <= 180) return 1.01;
+  void totalPlayTimeSeconds;
   return 1.0;
 }
 
@@ -180,10 +176,10 @@ export function getNewPlayerMesosMult(totalPlayTimeSeconds: number): number {
   // first upgrade takes 25–30 s instead of ~5 s.  This is a deliberate
   // anti-rush mechanic — the tutorial should feel earned, not skipped.
   // Multiplier curves back up to 1.0 by 120 s.
-  if (totalPlayTimeSeconds <= 30)  return 0.58;
-  if (totalPlayTimeSeconds <= 60)  return 0.68;
-  if (totalPlayTimeSeconds <= 120) return 0.78;
-  if (totalPlayTimeSeconds <= 300) return 0.88;
+  if (totalPlayTimeSeconds <= 30) return 0.38;
+  if (totalPlayTimeSeconds <= 60) return 0.46;
+  if (totalPlayTimeSeconds <= 120) return 0.58;
+  if (totalPlayTimeSeconds <= 300) return 0.72;
   return 1.0;
 }
 

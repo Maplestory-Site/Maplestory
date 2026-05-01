@@ -55,7 +55,7 @@ export type UpgradeDefinition = {
 };
 
 export const UPGRADES: Record<UpgradeId, UpgradeDefinition> = {
-  market: { name: "Free Market", label: "Mesos / sec",  baseCost: 260, boost: 0.14 },
+  market: { name: "Free Market", label: "Mesos / sec",  baseCost: 380, boost: 0.14 },
   forge:  { name: "Star Forge",  label: "Hero DPS",     baseCost: 420, boost: 0.18 },
   guild:  { name: "World Guild", label: "Fame gain",    baseCost: 520, boost: 0.22 }
 };
@@ -131,15 +131,18 @@ export const BOSS_STAGE_IN_MAP = 10;
 
 export function getXpTarget(level: number): number {
   const safeLevel = Math.max(1, level);
-  // Balance: early XP targets raised so a single kill spree can't jump 3 levels.
-  // Lv1→2: was 150, now 220.  Lv5→6: was 2631, now 3700.
+  // Balance pass 3: XP curve targets a long idle game, not a same-session run.
+  //   Lv 1->2:  ~140 XP   (was 220)   - reachable in 5-10 min
+  //   Lv 5->6:  ~3.5K XP  (was 4.8K)  - reachable around 45-90 min
+  //   Lv 10->11: ~22K XP  (was 14K)   - reachable in several hours
+  //   Lv 40+:   exponent steepens so end-game prestige is a real milestone.
   if (safeLevel <= 10) {
-    return Math.floor(220 * Math.pow(safeLevel, 1.85));
+    return Math.floor(140 * Math.pow(safeLevel, 2.20));
   }
   if (safeLevel <= 40) {
-    return Math.floor(380 * Math.pow(safeLevel, 1.96));
+    return Math.floor(420 * Math.pow(safeLevel, 2.15));
   }
-  return Math.floor(560 * Math.pow(safeLevel, 2.05));
+  return Math.floor(680 * Math.pow(safeLevel, 2.30));
 }
 
 export function getStageInMap(stage: number): number {
@@ -336,13 +339,15 @@ export function getMesosPerSecond(
   const relicGoldMult    = getRelicGoldBonus(state.relicUpgrades); // permanent
   const milestoneMesosMult = getMilestoneMesosMult(state.level);  // permanent level bonus
   const talentGoldMult   = getTalentGoldMult(state.talentNodes ?? {}); // talent tree permanent
-  // Balance pass 2: early-game still too hot.
-  //   Original: (7 + dps*0.9)        DPS 10 → 16/s, DPS 100 → 97/s
-  //   Pass 1:   (9 + dps*0.32)       DPS 10 → 12/s, DPS 100 → 41/s
-  //   Pass 2:   (3 + dps*0.18)       DPS 10 → 4.8/s, DPS 100 → 21/s
-  // The flat base is now small enough that very-early DPS (~9) yields ~4.6 mps,
-  // which (combined with reduced tutorial mult) puts first-upgrade at 25–30 s.
-  return (2.45 + dps * 0.14) * zone.rewardBoost * farmBoost * lootBoost * marketBoost
+  // Balance pass 3: long-term idle pacing. Heavy early-game nerf with a soft
+  // cap on the DPS-driven term so end-game multipliers don't snowball.
+  //   Original: (7  + dps*0.9 )    DPS 10 -> 16/s, DPS 100 -> 97/s
+  //   Pass 1:   (9  + dps*0.32)    DPS 10 -> 12/s, DPS 100 -> 41/s
+  //   Pass 2:   (1.85+dps*0.10)    DPS 10 -> 2.85/s, DPS 100 -> 12/s
+  //   Pass 3:   (0.5 + dps*0.07) with sqrt-softened DPS term once dps > 200.
+  // Effect at game start (DPS ~5): 0.85/s base. At DPS 100: 7.5/s. At DPS 10k: ~14/s.
+  const dpsTerm = dps <= 200 ? dps * 0.07 : 200 * 0.07 + Math.sqrt(dps - 200) * 0.45;
+  return (0.5 + dpsTerm) * zone.rewardBoost * farmBoost * lootBoost * marketBoost
     * globalGoldMult * relicGoldMult * milestoneMesosMult * talentGoldMult * equipmentGoldMult;
 }
 

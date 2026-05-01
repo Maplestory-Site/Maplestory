@@ -151,7 +151,7 @@ export function createEngagementObjective(level: number, stage: number, completi
 // ─── Default state ────────────────────────────────────────────────────────────
 
 export const DEFAULT_STATE: IdleGameState = {
-  mesos: 70, // Early pacing: keeps first Snailguard upgrade in the 20-35s target window.
+  mesos: 15, // Pass 3: heavy early throttle. First Snailguard upgrade should take 2-4 min, not seconds.
   crystals: 0,
   fame: 0,
   materials: EMPTY_CRAFTING_MATERIALS,

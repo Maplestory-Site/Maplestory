@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" role="img" aria-label="Abnormal statuses guide art">
+  <defs><linearGradient id="mist" x1="0" x2="1"><stop stop-color="#291b3b"/><stop offset="1" stop-color="#5d244a"/></linearGradient></defs>
+  <rect width="880" height="440" fill="url(#mist)"/>
+  <path d="M0 310c130-68 224-44 354-12s304 30 526-64v206H0z" fill="#15131d"/>
+  <g transform="translate(112 136)">
+    <circle cx="64" cy="64" r="58" fill="#8d4dff" opacity=".72"/><path d="M64 28v72M32 64h64" stroke="#fff" stroke-width="14" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(338 110)">
+    <circle cx="76" cy="76" r="70" fill="#59e37d" opacity=".75"/><path d="M42 42c50 8 82 44 82 82" fill="none" stroke="#17221a" stroke-width="14" stroke-linecap="round"/>
+  </g>
+  <g transform="translate(604 144)">
+    <circle cx="56" cy="56" r="54" fill="#ff6161" opacity=".82"/><path d="M28 28l56 56M84 28 28 84" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
+  </g>
+  <text x="54" y="70" fill="#fff" font-family="Verdana, Arial, sans-serif" font-size="36" font-weight="900">ABNORMAL STATUSES</text>
+  <text x="54" y="108" fill="#fff" opacity=".78" font-family="Verdana, Arial, sans-serif" font-size="22">Debuffs, curses, stuns, and survival checks.</text>
+</svg>

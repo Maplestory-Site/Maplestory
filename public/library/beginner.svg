@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 320" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#75e2a6"/>
+      <stop offset="100%" stop-color="#1f5a3a"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="0.5" cy="0.5" r="0.5">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.55)"/>
+      <stop offset="100%" stop-color="rgba(255,255,255,0)"/>
+    </radialGradient>
+  </defs>
+  <rect width="640" height="320" fill="url(#bg)"/>
+  <circle cx="320" cy="160" r="180" fill="url(#glow)" opacity="0.4"/>
+  <g stroke="#ffffff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" fill="none" opacity="0.95">
+    <path d="M320 78 L335 130 L388 145 L335 160 L320 213 L305 160 L252 145 L305 130 Z"/>
+    <path d="M460 60 L466 78 L484 84 L466 90 L460 108 L454 90 L436 84 L454 78 Z"/>
+    <path d="M168 224 L174 242 L192 248 L174 254 L168 272 L162 254 L144 248 L162 242 Z"/>
+  </g>
+  <text x="320" y="262" text-anchor="middle" font-family="-apple-system, Segoe UI, sans-serif" font-size="34" font-weight="900" fill="#ffffff" letter-spacing="6">BEGINNER</text>
+</svg>

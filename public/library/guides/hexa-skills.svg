@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" role="img" aria-label="HEXA skills guide art">
+  <rect width="880" height="440" fill="#101929"/>
+  <g transform="translate(326 98)" fill="none" stroke="#a7f3ff" stroke-width="10">
+    <path d="M114 0 228 66v132l-114 66L0 198V66z"/>
+    <path d="M114 42 192 88v88l-78 46-78-46V88z"/>
+    <path d="M114 0v264M0 66l228 132M228 66 0 198"/>
+  </g>
+  <circle cx="440" cy="230" r="46" fill="#f6c66a"/>
+  <text x="54" y="72" fill="#fff" font-family="Verdana, Arial, sans-serif" font-size="38" font-weight="900">HEXA SKILLS</text>
+  <text x="54" y="112" fill="#fff" opacity=".78" font-family="Verdana, Arial, sans-serif" font-size="22">6th Job fragments with intent.</text>
+</svg>

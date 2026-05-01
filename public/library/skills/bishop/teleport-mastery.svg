@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Teleport Mastery">
+  <rect width="64" height="64" rx="12" fill="#152642"/>
+  <path d="M15 17h19l-9 10 9 10H15z" fill="#6ce7ff"/>
+  <path d="M49 47H30l9-10-9-10h19z" fill="#ffe161"/>
+  <path d="M20 47c8 5 16 5 24 0M44 17c-8-5-16-5-24 0" stroke="#fff" stroke-width="4" stroke-linecap="round" fill="none"/>
+</svg>

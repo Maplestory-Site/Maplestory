@@ -108,13 +108,26 @@ function getAutoSellValue(item: IdleItemInstance): number {
   return Math.max(minimum, Math.floor(normalized.value * OVERFLOW_AUTO_SELL_RATE));
 }
 
-export function normalizeEquipment(equipment?: EquippedItems): EquippedItems {
+export function validateEquipmentSlots(equipment?: EquippedItems): EquippedItems {
   const merged: EquippedItems = { ...EMPTY_EQUIPMENT };
   for (const slot of ITEM_TYPES) {
     const item = equipment?.[slot];
-    merged[slot] = item ? normalizeItemInstance(item) : undefined;
+    if (!item) {
+      merged[slot] = undefined;
+      continue;
+    }
+    const normalized = normalizeItemInstance(item);
+    merged[slot] = normalized.type === slot ? normalized : undefined;
   }
   return merged;
+}
+
+export function normalizeEquipment(equipment?: EquippedItems): EquippedItems {
+  return validateEquipmentSlots(equipment);
+}
+
+export function normalizeInventory(items: unknown): IdleItemInstance[] {
+  return normalizeItemList(items);
 }
 
 export function addLootToInventory(state: IdleGameState, drops: IdleItemInstance[]): IdleGameState {
@@ -498,4 +511,3 @@ export function craftInventoryItem(
     success: true
   };
 }
-

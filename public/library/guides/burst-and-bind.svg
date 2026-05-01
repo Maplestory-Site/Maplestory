@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" role="img" aria-label="Burst and bind guide art">
+  <defs><radialGradient id="burst" cx=".5" cy=".5" r=".65"><stop stop-color="#fff7b5"/><stop offset=".35" stop-color="#ff8d4f"/><stop offset="1" stop-color="#241026"/></radialGradient></defs>
+  <rect width="880" height="440" fill="#140e1d"/>
+  <circle cx="440" cy="224" r="170" fill="url(#burst)" opacity=".82"/>
+  <g stroke="#fff" stroke-width="10" stroke-linecap="round" opacity=".85">
+    <path d="M440 66v92M440 290v92M282 224h92M506 224h92M326 110l64 64M490 274l64 64M554 110l-64 64M390 274l-64 64"/>
+  </g>
+  <rect x="324" y="174" width="232" height="100" rx="28" fill="#101725" stroke="#f6c66a" stroke-width="6"/>
+  <text x="54" y="70" fill="#fff" font-family="Verdana, Arial, sans-serif" font-size="38" font-weight="900">BURST &amp; BIND</text>
+</svg>

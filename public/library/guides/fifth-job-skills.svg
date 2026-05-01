@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" role="img" aria-label="5th Job skills guide art">
+  <rect width="880" height="440" fill="#162035"/>
+  <circle cx="440" cy="214" r="116" fill="#8b5cff" opacity=".5"/>
+  <circle cx="440" cy="214" r="70" fill="#f6c66a"/>
+  <g fill="#24324a" stroke="#7bd9ff" stroke-width="5">
+    <rect x="120" y="118" width="104" height="104" rx="22"/><rect x="250" y="250" width="104" height="104" rx="22"/>
+    <rect x="526" y="250" width="104" height="104" rx="22"/><rect x="656" y="118" width="104" height="104" rx="22"/>
+  </g>
+  <g fill="#fff" font-family="Verdana, Arial, sans-serif" font-weight="900">
+    <text x="54" y="72" font-size="38">5TH JOB SKILLS</text>
+    <text x="386" y="226" font-size="34" fill="#1b1724">V</text>
+  </g>
+</svg>

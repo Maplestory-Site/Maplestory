@@ -110,6 +110,27 @@ export type CombatTickResult = {
   eliteKills: number;
 };
 
+export type CombatTickMode = "online" | "offline";
+
+export type CombatTickOptions = {
+  mode?: CombatTickMode;
+};
+
+function getMaxKillsPerTick(deltaSeconds: number, state: IdleGameState, mode: CombatTickMode): number {
+  if (mode === "offline") {
+    return Math.min(3000, Math.max(6, Math.ceil(deltaSeconds * 6)));
+  }
+
+  const isEarlyOnline = state.totalPlayTime < 300 || state.level < 5 || state.stage < 20;
+  if (isEarlyOnline) return 1;
+
+  if (state.level < 15 || state.stage < 60) {
+    return Math.min(4, Math.max(2, Math.ceil(deltaSeconds * 2)));
+  }
+
+  return Math.min(3000, Math.max(3, Math.ceil(deltaSeconds * 4)));
+}
+
 /**
  * Resolves combat for `deltaSeconds` of real time.
  *
@@ -123,7 +144,8 @@ export function computeCombatTick(
   state: IdleGameState,
   zone: WorldZone,
   deltaSeconds: number,
-  dpsMultiplier = 1.0
+  dpsMultiplier = 1.0,
+  options: CombatTickOptions = {}
 ): CombatTickResult {
   const dps = calculateDPS(state) * Math.max(0, dpsMultiplier);
   const playerPower = Math.max(1, calculateDPS(state));
@@ -144,7 +166,8 @@ export function computeCombatTick(
   // Offline ticks can represent hours, so the cap scales with elapsed time.
   // Balance: minimum was 30 (allows 30 stage skips per 1s online tick).
   // Now 6 minimum — still generous for offline but prevents online stage-skip spam.
-  const MAX_KILLS_PER_TICK = Math.min(3000, Math.max(6, Math.ceil(deltaSeconds * 6)));
+  const mode = options.mode ?? (deltaSeconds > 2 ? "offline" : "online");
+  const MAX_KILLS_PER_TICK = getMaxKillsPerTick(deltaSeconds, state, mode);
   while (damage > 0 && kills < MAX_KILLS_PER_TICK) {
     if (damage >= enemyHp) {
       // Enemy dies — carry over remaining damage
@@ -162,7 +185,7 @@ export function computeCombatTick(
   }
 
   return {
-    newState: { ...state, stage, enemyHp: Math.round(enemyHp), enemyMaxHp },
+    newState: { ...state, stage, enemyHp: Math.max(1, Math.round(enemyHp)), enemyMaxHp },
     kills,
     bossesKilled,
     eliteKills

@@ -44,7 +44,7 @@ describe("matchesQuery", () => {
   });
 });
 
-describe("filterGuides — category filter", () => {
+describe("filterGuides - category filter", () => {
   it("'all' returns every guide", () => {
     const result = filterGuides(libraryGuides, { ...EMPTY_LIBRARY_FILTER });
     expect(result.length).toBe(libraryGuides.length);
@@ -70,7 +70,7 @@ describe("filterGuides — category filter", () => {
   });
 });
 
-describe("filterGuides — search", () => {
+describe("filterGuides - search", () => {
   it("matches by title term", () => {
     const result = filterGuides(libraryGuides, { ...EMPTY_LIBRARY_FILTER, query: "star force" });
     expect(result.length).toBeGreaterThan(0);
@@ -102,7 +102,7 @@ describe("filterGuides — search", () => {
   });
 });
 
-describe("filterGuides — difficulty filter", () => {
+describe("filterGuides - difficulty filter", () => {
   it("Beginner returns only Beginner guides", () => {
     const result = filterGuides(libraryGuides, { ...EMPTY_LIBRARY_FILTER, difficulty: "Beginner" });
     expect(result.every((g) => g.difficulty === "Beginner")).toBe(true);
@@ -115,7 +115,7 @@ describe("filterGuides — difficulty filter", () => {
   });
 });
 
-describe("filterGuides — region filter", () => {
+describe("filterGuides - region filter", () => {
   it("'GMS' returns only GMS-tagged guides", () => {
     const result = filterGuides(libraryGuides, { ...EMPTY_LIBRARY_FILTER, region: "GMS" });
     expect(result.every((g) => g.region === "GMS")).toBe(true);
@@ -130,7 +130,7 @@ describe("filterGuides — region filter", () => {
   });
 });
 
-describe("filterGuides — tag filter", () => {
+describe("filterGuides - tag filter", () => {
   it("'progression' returns guides tagged progression", () => {
     const result = filterGuides(libraryGuides, { ...EMPTY_LIBRARY_FILTER, tag: "progression" });
     expect(result.length).toBeGreaterThan(0);
@@ -143,7 +143,7 @@ describe("filterGuides — tag filter", () => {
   });
 });
 
-describe("guideMatches — composite filters", () => {
+describe("guideMatches - composite filters", () => {
   const guide = sample();
 
   it("passes when all filters match", () => {

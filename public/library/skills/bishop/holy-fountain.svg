@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Holy Fountain">
+  <rect width="64" height="64" rx="12" fill="#18394a"/>
+  <path d="M20 51h24l4-15H16z" fill="#7ee4ff"/>
+  <path d="M32 10c-9 12-9 20 0 28 9-8 9-16 0-28z" fill="#fff5a8"/>
+  <path d="M18 31c4-8 9-12 14-13M46 31c-4-8-9-12-14-13" fill="none" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".75"/>
+  <circle cx="32" cy="43" r="7" fill="#fff"/>
+</svg>

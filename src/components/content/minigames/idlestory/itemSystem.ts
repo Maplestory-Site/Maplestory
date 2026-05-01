@@ -56,26 +56,51 @@ export type IdleItemStats = {
 
 export type IdleItemInstance = {
   id: string;
+  databaseId?: string;
+  mapleId?: string;
   name: string;
+  description?: string;
+  icon?: string;
+  image?: string;
+  fallbackIcon?: string;
   type: IdleItemType;
   category: IdleItemCategory;
+  slot?: IdleItemType;
   rarity: IdleItemRarity;
   level: number;
   levelRequirement: number;
   zoneIndex: number;
   baseStats: IdleItemStats;
+  bonusStats?: Partial<IdleItemStats>;
   affixes: IdleItemAffix[];
   stats: IdleItemStats;
   value: number;
+  sellValue?: number;
   setId?: string;
+  setName?: string;
   element?: IdleElement;
   prefix?: string;
   suffix?: string;
+  upgradeLevel?: number;
+  enhancementLevel?: number;
+  starForce?: number;
+  potentialLines?: string[];
   isUnique?: boolean;
   isRareDrop?: boolean;
+  isNew?: boolean;
+  isLocked?: boolean;
+  isFavorite?: boolean;
+  tradeable?: boolean;
+  bound?: boolean;
   qualityRoll?: number;
   collectionKey?: string;
   collectionName?: string;
+  source?: string;
+  dropSource?: string;
+  databaseCategory?: string;
+  databaseType?: string;
+  databaseUrl?: string;
+  tags?: string[];
   enhanceLevel: number;
   rerollCount: number;
   droppedFrom?: string;
@@ -675,6 +700,29 @@ export function normalizeItemAffix(value: unknown): IdleItemAffix | null {
   };
 }
 
+function normalizeOptionalString(value: unknown): string | undefined {
+  return typeof value === "string" && value.trim() ? value.trim() : undefined;
+}
+
+function normalizeStringList(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) return undefined;
+  const list = value
+    .map((entry) => normalizeOptionalString(entry))
+    .filter((entry): entry is string => Boolean(entry));
+  return list.length ? Array.from(new Set(list)) : undefined;
+}
+
+function normalizeOptionalStats(value: unknown): Partial<IdleItemStats> | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const source = value as Partial<IdleItemStats>;
+  const normalized = normalizeItemStats(source);
+  const result: Partial<IdleItemStats> = {};
+  for (const key of Object.keys(getEmptyStats()) as Array<keyof IdleItemStats>) {
+    if (normalized[key] > 0) result[key] = normalized[key];
+  }
+  return Object.keys(result).length ? result : undefined;
+}
+
 export function normalizeItemInstance(input: unknown): IdleItemInstance {
   const parsed = (input && typeof input === "object" ? input : {}) as Partial<IdleItemInstance>;
   const type = normalizeItemType(parsed.type);
@@ -682,7 +730,10 @@ export function normalizeItemInstance(input: unknown): IdleItemInstance {
   const levelRequirement = toPositiveInt(parsed.levelRequirement ?? parsed.level, 1);
   const level = toPositiveInt(parsed.level ?? parsed.levelRequirement, levelRequirement);
   const zoneIndex = toPositiveInt(parsed.zoneIndex, 1);
-  const enhanceLevel = Math.max(0, Math.floor(toFiniteNumber(parsed.enhanceLevel, 0)));
+  const enhanceLevel = Math.max(
+    0,
+    Math.floor(toFiniteNumber(parsed.enhanceLevel ?? parsed.enhancementLevel ?? parsed.upgradeLevel, 0))
+  );
   const rerollCount = clampRerollCount(parsed.rerollCount);
   const category = parsed.category && ["weapon", "armor", "accessory"].includes(parsed.category)
     ? parsed.category
@@ -708,26 +759,51 @@ export function normalizeItemInstance(input: unknown): IdleItemInstance {
     id: typeof parsed.id === "string" && parsed.id.trim()
       ? parsed.id
       : `${type}-${rarity}-${Date.now()}-${randomToken(7)}`,
+    databaseId: normalizeOptionalString(parsed.databaseId),
+    mapleId: normalizeOptionalString(parsed.mapleId),
     name: typeof parsed.name === "string" && parsed.name.trim() ? parsed.name : buildItemName(type, rarity, parsedAffixes),
+    description: normalizeOptionalString(parsed.description),
+    icon: normalizeOptionalString(parsed.icon),
+    image: normalizeOptionalString(parsed.image),
+    fallbackIcon: normalizeOptionalString(parsed.fallbackIcon),
     type,
     category,
+    slot: type,
     rarity,
     level,
     levelRequirement,
     zoneIndex,
     baseStats,
+    bonusStats: normalizeOptionalStats(parsed.bonusStats),
     affixes: parsedAffixes,
     stats,
     value,
+    sellValue: Math.max(1, Math.floor(toFiniteNumber(parsed.sellValue ?? parsed.value, value))),
     setId: normalizeItemSetId(typeof parsed.setId === "string" ? parsed.setId : undefined),
+    setName: normalizeOptionalString(parsed.setName),
     element: parsed.element ?? "neutral",
     prefix: typeof parsed.prefix === "string" ? parsed.prefix : undefined,
     suffix: typeof parsed.suffix === "string" ? parsed.suffix : undefined,
+    upgradeLevel: enhanceLevel,
+    enhancementLevel: enhanceLevel,
+    starForce: Math.max(0, Math.floor(toFiniteNumber(parsed.starForce, enhanceLevel))),
+    potentialLines: normalizeStringList(parsed.potentialLines),
     isUnique: Boolean(parsed.isUnique),
     isRareDrop: Boolean(parsed.isRareDrop),
+    isNew: Boolean(parsed.isNew),
+    isLocked: Boolean(parsed.isLocked),
+    isFavorite: Boolean(parsed.isFavorite),
+    tradeable: parsed.tradeable !== false,
+    bound: Boolean(parsed.bound),
     qualityRoll: Number(toFiniteNumber(parsed.qualityRoll, 1).toFixed(3)),
     collectionKey: typeof parsed.collectionKey === "string" ? parsed.collectionKey : undefined,
     collectionName: typeof parsed.collectionName === "string" ? parsed.collectionName : undefined,
+    source: normalizeOptionalString(parsed.source ?? parsed.dropSource ?? parsed.droppedFrom),
+    dropSource: normalizeOptionalString(parsed.dropSource ?? parsed.droppedFrom),
+    databaseCategory: normalizeOptionalString(parsed.databaseCategory),
+    databaseType: normalizeOptionalString(parsed.databaseType),
+    databaseUrl: normalizeOptionalString(parsed.databaseUrl),
+    tags: normalizeStringList(parsed.tags),
     enhanceLevel,
     rerollCount,
     droppedFrom: typeof parsed.droppedFrom === "string" ? parsed.droppedFrom : undefined,
@@ -1093,7 +1169,5 @@ export function craftItemFromRecipe(
 export function normalizeItemArray(items: unknown): IdleItemInstance[] {
   return normalizeItemList(items);
 }
-
-
 
 

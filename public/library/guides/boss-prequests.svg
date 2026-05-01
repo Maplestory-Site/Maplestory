@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" role="img" aria-label="Boss pre-quests guide art">
+  <defs><linearGradient id="bg" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#1d2434"/><stop offset=".55" stop-color="#3b1f38"/><stop offset="1" stop-color="#0e1118"/></linearGradient></defs>
+  <rect width="880" height="440" fill="url(#bg)"/>
+  <path d="M0 330c160-46 308-34 450-12 166 26 292 2 430-54v176H0z" fill="#121821"/>
+  <g transform="translate(548 80)">
+    <rect x="0" y="0" width="214" height="264" rx="28" fill="#0b0f17" stroke="#704bff" stroke-width="6"/>
+    <circle cx="68" cy="72" r="42" fill="#5545d6"/><path d="M42 72h52M68 46v52" stroke="#fff" stroke-width="12" stroke-linecap="round"/>
+    <rect x="38" y="150" width="138" height="22" rx="11" fill="#ff725e"/>
+    <rect x="38" y="194" width="92" height="18" rx="9" fill="#ffbe55"/>
+  </g>
+  <g transform="translate(118 120)" fill="#222b3a" stroke="#ffbe55" stroke-width="5">
+    <rect width="86" height="86" rx="16"/><rect x="112" width="86" height="86" rx="16"/><rect x="224" width="86" height="86" rx="16"/><rect x="336" width="86" height="86" rx="16"/>
+  </g>
+  <path d="M164 206v54h520" fill="none" stroke="#ffbe55" stroke-width="10" stroke-linecap="round" stroke-dasharray="16 20"/>
+  <g fill="#fff" font-family="Verdana, Arial, sans-serif" font-weight="900">
+    <text x="54" y="72" font-size="38">BOSS PRE-QUESTS</text>
+    <text x="54" y="112" font-size="22" opacity=".82">Unlock clears without side-task chaos.</text>
+  </g>
+</svg>

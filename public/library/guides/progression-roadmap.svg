@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" role="img" aria-label="Progression roadmap guide art">
+  <defs>
+    <linearGradient id="sky" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#8fe7ff"/><stop offset=".56" stop-color="#78d88a"/><stop offset="1" stop-color="#244a2e"/></linearGradient>
+    <linearGradient id="gold" x1="0" x2="1"><stop stop-color="#ffe690"/><stop offset="1" stop-color="#ff9c3d"/></linearGradient>
+  </defs>
+  <rect width="880" height="440" fill="url(#sky)"/>
+  <circle cx="710" cy="78" r="48" fill="#fff0a8" opacity=".9"/>
+  <path d="M0 312c150-62 260-60 390-22s304 30 490-42v192H0z" fill="#204c34"/>
+  <path d="M0 350c170-44 320-36 488-10 128 20 243 2 392-45v145H0z" fill="#123526" opacity=".9"/>
+  <path d="M88 326c120-116 250-82 364-30 110 50 236 60 344-68" fill="none" stroke="#f7d76b" stroke-width="18" stroke-linecap="round" stroke-dasharray="20 28"/>
+  <g transform="translate(104 152)">
+    <rect x="0" y="72" width="118" height="98" rx="16" fill="#293d50"/>
+    <path d="M-18 82 58 28l78 54z" fill="#ff9c55"/>
+    <rect x="38" y="118" width="40" height="52" rx="8" fill="#162635"/>
+  </g>
+  <g transform="translate(574 116)">
+    <rect x="0" y="72" width="138" height="112" rx="18" fill="#2d4760"/>
+    <path d="M-22 84 68 16l92 68z" fill="#ffcf66"/>
+    <rect x="48" y="124" width="44" height="60" rx="8" fill="#182838"/>
+    <circle cx="68" cy="68" r="18" fill="url(#gold)"/>
+  </g>
+  <g fill="#fff" font-family="Verdana, Arial, sans-serif" font-weight="900">
+    <text x="52" y="72" font-size="38">PROGRESSION</text>
+    <text x="52" y="112" font-size="22" opacity=".85">Level. Gear. Boss. Repeat.</text>
+  </g>
+</svg>

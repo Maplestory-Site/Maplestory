@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Mystic Door">
+  <rect width="64" height="64" rx="12" fill="#17243b"/>
+  <path d="M18 55V25c0-10 7-17 14-17s14 7 14 17v30z" fill="#6f4df4"/>
+  <path d="M24 55V28c0-7 4-12 8-12s8 5 8 12v27z" fill="#0e1328"/>
+  <path d="M32 4v12M20 13l8 8M44 13l-8 8" stroke="#fff5a4" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="38" cy="38" r="3" fill="#ffd957"/>
+</svg>

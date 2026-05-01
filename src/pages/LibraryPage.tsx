@@ -1,9 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import "../styles/library.css";
+import "../styles/library-extras.css";
 import { usePageMeta } from "../app/usePageMeta";
+import { LibraryCategoryTabs } from "../components/content/LibraryCategoryTabs";
+import { LibraryFeaturedGuides } from "../components/content/LibraryFeaturedGuides";
 import { LibraryGuideCard } from "../components/content/LibraryGuideCard";
 import { LibraryGuideModal } from "../components/content/LibraryGuideModal";
+import { LibraryHero } from "../components/content/LibraryHero";
+import { LibraryResourceLinks } from "../components/content/LibraryResourceLinks";
+import { LibrarySearchFilters } from "../components/content/LibrarySearchFilters";
+import { LibraryClassBrowser } from "../components/library/LibraryClassBrowser";
 import { SectionHeader } from "../components/ui/SectionHeader";
 import {
   libraryCategories,
@@ -14,8 +21,15 @@ import {
   type LibraryGuide,
   type LibraryRegion
 } from "../data/libraryGuides";
-import { createLibraryPageModel } from "../lib/libraryPageModel";
+import { createLibraryPageModel, type LibrarySortMode } from "../lib/libraryPageModel";
 import type { LibraryCategoryFilter } from "../lib/libraryGuides";
+
+const SORT_OPTIONS: { value: LibrarySortMode; label: string }[] = [
+  { value: "featured", label: "Featured" },
+  { value: "recent",   label: "Recently Updated" },
+  { value: "beginner", label: "Beginner Friendly" },
+  { value: "az",       label: "A-Z" }
+];
 
 export function LibraryPage() {
   usePageMeta(
@@ -24,13 +38,14 @@ export function LibraryPage() {
   );
 
   const navigate = useNavigate();
-  const { guideId } = useParams<{ guideId?: string }>();
+  const { guideId, classId } = useParams<{ guideId?: string; classId?: string }>();
 
   const [activeCategory, setActiveCategory] = useState<LibraryCategoryFilter>("all");
   const [query, setQuery] = useState("");
   const [difficulty, setDifficulty] = useState<LibraryDifficulty | null>(null);
   const [region, setRegion] = useState<LibraryRegion | null>(null);
   const [tag, setTag] = useState<string | null>(null);
+  const [sort, setSort] = useState<LibrarySortMode>("featured");
 
   const model = useMemo(
     () =>
@@ -41,18 +56,17 @@ export function LibraryPage() {
           difficulty,
           region,
           tag,
-          guideId
+          guideId,
+          sort
         },
         libraryGuides
       ),
-    [activeCategory, query, difficulty, guideId, region, tag]
+    [activeCategory, query, difficulty, guideId, region, tag, sort]
   );
 
-  // Open / close handlers — keep URL in sync so deep links work.
   const openGuide = (guide: LibraryGuide) => navigate(`/library/${guide.id}`);
   const closeGuide = () => navigate("/library");
 
-  // If the URL has an unknown guideId, redirect back to /library cleanly.
   useEffect(() => {
     if (model.unknownGuideId) {
       navigate("/library", { replace: true });
@@ -69,101 +83,63 @@ export function LibraryPage() {
 
   return (
     <>
-      <section className="section section--page-start" data-reveal>
+      <section className="section section--page-start library-page" data-reveal>
         <div className="container">
-          <SectionHeader
-            description="Original guides on progression, classes, equipment, events, and trusted resources."
-            eyebrow="Library"
-            title="Maple Library"
+          <LibraryHero
+            beginnerGuides={model.beginnerGuides}
+            onSelectGuide={openGuide}
+            totalGuides={model.totalGuides}
           />
 
-          <div className="library-toolbar card">
-            <label className="library-toolbar__search">
-              <span>Search</span>
-              <input
-                aria-label="Search guides"
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search by title, tag, or topic"
-                type="search"
-                value={query}
-              />
-            </label>
+          <LibrarySearchFilters
+            difficulties={libraryDifficulties}
+            difficulty={difficulty}
+            onClear={clearFilters}
+            onDifficultyChange={setDifficulty}
+            onQueryChange={setQuery}
+            onRegionChange={setRegion}
+            onTagChange={setTag}
+            query={query}
+            region={region}
+            regions={libraryRegions}
+            tag={tag}
+            tags={model.tags}
+          />
 
-            <div className="library-toolbar__filters" role="group" aria-label="Filter guides">
-              <label>
-                <span>Difficulty</span>
-                <select
-                  onChange={(event) => setDifficulty((event.target.value || null) as LibraryDifficulty | null)}
-                  value={difficulty ?? ""}
-                >
-                  <option value="">Any</option>
-                  {libraryDifficulties.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                <span>Region</span>
-                <select
-                  onChange={(event) => setRegion((event.target.value || null) as LibraryRegion | null)}
-                  value={region ?? ""}
-                >
-                  <option value="">Any</option>
-                  {libraryRegions.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              <label>
-                <span>Tag</span>
-                <select onChange={(event) => setTag(event.target.value || null)} value={tag ?? ""}>
-                  <option value="">Any</option>
-                  {model.tags.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-              </label>
-              {difficulty || region || tag || query ? (
-                <button className="library-toolbar__clear" onClick={clearFilters} type="button">
-                  Clear filters
-                </button>
-              ) : null}
-            </div>
-          </div>
-
-          <nav className="library-tabs" aria-label="Library categories">
-            {libraryCategories.map((category) => (
-              <button
-                aria-pressed={activeCategory === category.key}
-                className={`library-tabs__button ${activeCategory === category.key ? "is-active" : ""}`}
-                key={category.key}
-                onClick={() => setActiveCategory(category.key)}
-                type="button"
-              >
-                <span>{category.label}</span>
-                <small>{model.counts[category.key] ?? 0}</small>
-              </button>
-            ))}
-          </nav>
+          <LibraryCategoryTabs
+            activeCategory={activeCategory}
+            categories={libraryCategories}
+            counts={model.counts}
+            onChange={setActiveCategory}
+          />
 
           {model.showFeatured ? (
-            <section className="library-featured" aria-label="Featured guides">
-              <SectionHeader description="Hand-picked starting points." eyebrow="Featured" title="Start Here" />
-              <div className="library-grid library-grid--featured">
-                {model.featured.map((guide) => (
-                  <LibraryGuideCard featured guide={guide} key={guide.id} onSelect={openGuide} />
-                ))}
-              </div>
-            </section>
+            <LibraryFeaturedGuides guides={model.featured} onSelectGuide={openGuide} />
           ) : null}
 
-          <section aria-label="All guides">
+          <section aria-label="All guides" className="library-results">
+            <div className="library-results__head">
+              <SectionHeader
+                description="Searchable guide cards with difficulty, region, and topic tags."
+                eyebrow="Guide index"
+                title={model.empty ? "No Matching Guides" : `${model.filtered.length} Guides`}
+              />
+              <label className="library-results__sort">
+                <span>Sort by</span>
+                <select
+                  aria-label="Sort guides"
+                  onChange={(event) => setSort(event.target.value as LibrarySortMode)}
+                  value={sort}
+                >
+                  {SORT_OPTIONS.map((option) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
+
             {model.empty ? (
               <div className="content-empty-state card library-empty-state">
                 <strong>No guides match those filters.</strong>
@@ -180,6 +156,13 @@ export function LibraryPage() {
               </div>
             )}
           </section>
+
+          <LibraryClassBrowser
+            onSelectClass={(nextClassId) => navigate(`/library/classes/${nextClassId}`)}
+            selectedClassId={classId}
+          />
+
+          <LibraryResourceLinks links={model.resourceLinks} />
         </div>
       </section>
 

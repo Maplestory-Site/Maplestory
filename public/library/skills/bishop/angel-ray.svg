@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Angel Ray">
+  <defs><linearGradient id="g" x1="8" y1="58" x2="58" y2="8"><stop stop-color="#fff6a8"/><stop offset=".52" stop-color="#f7cc45"/><stop offset="1" stop-color="#5be7ff"/></linearGradient></defs>
+  <rect width="64" height="64" rx="12" fill="#1b1740"/>
+  <path d="M10 43c15-20 29-28 44-32-7 12-16 23-29 34z" fill="url(#g)"/>
+  <path d="M22 45c8-6 16-8 28-9-9 8-19 13-31 16z" fill="#fff" opacity=".55"/>
+  <circle cx="24" cy="22" r="7" fill="#fff" opacity=".85"/>
+  <path d="M32 8l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#fff"/>
+</svg>

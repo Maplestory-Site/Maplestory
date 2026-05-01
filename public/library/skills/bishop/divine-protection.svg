@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Divine Protection">
+  <rect width="64" height="64" rx="12" fill="#13293a"/>
+  <path d="M32 6l22 9v16c0 14-8 23-22 28C18 54 10 45 10 31V15z" fill="#65ddff"/>
+  <path d="M32 13l14 6v11c0 9-5 16-14 20-9-4-14-11-14-20V19z" fill="#fff" opacity=".54"/>
+  <path d="M25 34l5 5 11-15" stroke="#ffe46d" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+</svg>

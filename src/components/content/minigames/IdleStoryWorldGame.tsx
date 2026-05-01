@@ -442,15 +442,21 @@ function IdleStoryWorldGameContent({ initialState }: { initialState: IdleGameSta
     playReward,
     playLevelUp,
     playSuccess,
-    setToast
+    setToast,
+    showTickDamageNumbers: false
   });
 
-  const { playerHpDisplay, enemyAttackProgress, enemyHitPulse } = useCombatTimingLoops({
+  const { playerHpDisplay, enemyAttackProgress, enemyHitPulse, visualAttack } = useCombatTimingLoops({
     stage: state.stage,
     playerMaxHp,
     enemyAttackIntervalMs,
     enemyAttackPerSecond,
+    dps,
+    enemyHpPct,
+    encounterType: enemyEncounterType,
     spawnDmg,
+    playHit,
+    playCrit,
     pushCombatFeed,
     setState,
     monsters,
@@ -741,6 +747,10 @@ function IdleStoryWorldGameContent({ initialState }: { initialState: IdleGameSta
     surgeActive ? "is-surge-fx" : "",
     isBossHitShake ? "is-boss-shake" : "",
     isLevelUpFlash ? "is-levelup-fx" : "",
+    visualAttack.phase !== "idle" ? `is-attack-${visualAttack.phase}` : "",
+    visualAttack.kind === "crit" ? "is-attack-crit" : "",
+    visualAttack.kind === "boss" ? "is-attack-boss" : "",
+    visualAttack.kind === "kill" ? "is-attack-kill" : "",
   ].filter(Boolean).join(" ");
 
   useEffect(() => {
@@ -839,6 +849,24 @@ function IdleStoryWorldGameContent({ initialState }: { initialState: IdleGameSta
           <div className="isw-arena__impact-ring" />
           <div className="isw-arena__loot-sparks" />
           <div className="isw-arena__boss-warning" />
+          <AnimatePresence>
+            {visualAttack.phase !== "idle" && (
+              <motion.div
+                key={`visual-attack-${visualAttack.sequence}-${visualAttack.phase}`}
+                className={`isw-attack-fx is-${visualAttack.phase} is-${visualAttack.kind}${visualAttack.projectile ? " has-projectile" : ""}`}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.12 }}
+                aria-hidden="true"
+              >
+                <span className="isw-attack-fx__wind" />
+                <span className="isw-attack-fx__slash" />
+                {visualAttack.projectile && <span className="isw-attack-fx__projectile" />}
+                <span className="isw-attack-fx__impact" />
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {/* Floating damage numbers */}
           <div className="isw-dmg-layer">
@@ -1010,7 +1038,7 @@ function IdleStoryWorldGameContent({ initialState }: { initialState: IdleGameSta
             <div className="isw-arena__enemy">
               <motion.div
                 key={`${state.zone}-${state.stage}-${enemyName}`}
-                className={`isw-arena__enemy-sprite${isHit ? " is-hit" : ""}${isElite ? " is-elite" : ""}`}
+                className={`isw-arena__enemy-sprite${isHit || visualAttack.phase === "impact" ? " is-hit" : ""}${isElite ? " is-elite" : ""}${visualAttack.phase === "impact" ? " is-visual-impact" : ""}${visualAttack.kind === "crit" ? " is-visual-crit" : ""}${visualAttack.kind === "elite" ? " is-visual-elite" : ""}${visualAttack.kind === "kill" ? " is-visual-kill" : ""}`}
                 initial={{ opacity: 0, y: 14, scale: 0.82, filter: "blur(4px)" }}
                 animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
                 transition={{ type: "spring", stiffness: 340, damping: 20 }}
@@ -1205,7 +1233,7 @@ function IdleStoryWorldGameContent({ initialState }: { initialState: IdleGameSta
                     enemyHp={displayEnemyHp}
                     enemyMaxHp={displayEnemyMaxHp}
                     stage={activeDungeonRun?.wave ?? state.stage}
-                    isHit={isHit}
+                    isHit={isHit || visualAttack.phase === "impact"}
                     onRaid={handleRaidBoss}
                     onHunt={handleHunt}
                     rewardMesos={Math.round(mesosPerSecond * 8)}

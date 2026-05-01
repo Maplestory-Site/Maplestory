@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 440" role="img" aria-label="Level content guide art">
+  <defs><linearGradient id="bg" x1="0" x2="1"><stop stop-color="#6bdcff"/><stop offset=".55" stop-color="#79d4a0"/><stop offset="1" stop-color="#173f31"/></linearGradient></defs>
+  <rect width="880" height="440" fill="url(#bg)"/>
+  <circle cx="136" cy="86" r="42" fill="#fff" opacity=".35"/><circle cx="208" cy="92" r="32" fill="#fff" opacity=".25"/>
+  <path d="M0 286h880v154H0z" fill="#123827"/>
+  <path d="M0 286c120-52 248-52 380 0s288 52 500-20" fill="#5cb46d"/>
+  <g transform="translate(104 174)">
+    <rect width="130" height="84" rx="16" fill="#25394f"/><path d="M-16 12h162v20H-16z" fill="#90e86b"/>
+  </g>
+  <g transform="translate(374 132)">
+    <rect width="154" height="126" rx="18" fill="#2b4860"/><path d="M-18 10h190v22H-18z" fill="#90e86b"/>
+  </g>
+  <g transform="translate(656 92)">
+    <rect width="148" height="166" rx="18" fill="#2d5467"/><path d="M-20 12h188v22H-20z" fill="#90e86b"/>
+  </g>
+  <g fill="#fff" font-family="Verdana, Arial, sans-serif" font-weight="900">
+    <text x="54" y="74" font-size="38">LEVEL CONTENT</text>
+    <text x="54" y="114" font-size="22" opacity=".82">Know what matters at each level band.</text>
+  </g>
+</svg>

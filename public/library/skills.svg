@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 640" role="img" aria-label="Skill guide artwork">
+  <defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#171144"/><stop offset=".5" stop-color="#4933ad"/><stop offset="1" stop-color="#ff7fcb"/></linearGradient></defs>
+  <rect width="1200" height="640" rx="44" fill="url(#bg)"/>
+  <g transform="translate(282 160)"><rect width="150" height="150" rx="30" fill="#ff7f6a"/><rect x="172" width="150" height="150" rx="30" fill="#7bd9ff"/><rect x="344" width="150" height="150" rx="30" fill="#75e2a6"/><rect x="516" width="150" height="150" rx="30" fill="#f6c66a"/><path d="M75 34l22 46 51 7-37 35 9 50-45-24-45 24 9-50L2 87l51-7Z" fill="#fff"/><path d="M248 42v90M203 87h90" stroke="#fff" stroke-width="18" stroke-linecap="round"/><circle cx="419" cy="86" r="52" fill="#fff"/><path d="M590 40l60 50-60 50-60-50Z" fill="#fff"/></g>
+  <text x="82" y="108" fill="#fff" font-family="Verdana,Arial,sans-serif" font-size="50" font-weight="900">SKILLS AND ROTATIONS</text>
+  <text x="86" y="162" fill="#ffe4fb" font-family="Verdana,Arial,sans-serif" font-size="25">Buffs, burst windows, binds, and cooldown planning</text>
+</svg>
