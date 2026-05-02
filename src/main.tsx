@@ -7,7 +7,7 @@ import { I18nProvider } from "./i18n/I18nProvider";
 import { ComingSoonPage } from "./pages/ComingSoonPage";
 import "./styles.css";
 
-const SHOW_COMING_SOON = true;
+const SHOW_COMING_SOON = import.meta.env.VITE_SHOW_COMING_SOON === "true";
 
 if (import.meta.env.PROD) {
   import("@vercel/analytics")
