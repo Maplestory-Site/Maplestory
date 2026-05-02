@@ -21950,7 +21950,8 @@ body.maple-ui .site-header__cta-group {
 }
 
 .patch-change-list,
-.patch-warning-list {
+.patch-warning-list,
+.news-section-list {
   display: grid;
   gap: 0.55rem;
   margin: 1rem 0 0;
@@ -21959,7 +21960,8 @@ body.maple-ui .site-header__cta-group {
 }
 
 .patch-change-list li,
-.patch-warning-list li {
+.patch-warning-list li,
+.news-section-list li {
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 14px;
   background: rgba(255, 255, 255, 0.055);
@@ -21979,6 +21981,68 @@ body.maple-ui .site-header__cta-group {
   margin-right: 0.5rem;
   color: #ffcf5a;
   font-weight: 950;
+}
+
+.news-section-list li::before {
+  content: "-";
+  margin-right: 0.5rem;
+  color: rgba(116, 233, 255, 0.9);
+  font-weight: 950;
+}
+
+.news-commerce-list {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 1rem;
+}
+
+.news-commerce-list__item {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+  border: 1px solid rgba(255, 194, 78, 0.2);
+  border-radius: 16px;
+  background:
+    linear-gradient(135deg, rgba(255, 191, 74, 0.1), rgba(255, 255, 255, 0.035)),
+    rgba(8, 10, 16, 0.66);
+  padding: 0.8rem 0.9rem;
+}
+
+.news-commerce-list__icon {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffd66d, #ff8f42);
+  color: #2b1704;
+  font-size: 0.78rem;
+  font-weight: 950;
+  box-shadow: 0 10px 24px rgba(255, 151, 48, 0.18);
+}
+
+.news-commerce-list__item strong {
+  display: block;
+  color: #fff4c4;
+  line-height: 1.35;
+}
+
+.news-commerce-list__details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.45rem;
+}
+
+.news-commerce-list__details span {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.75);
+  padding: 0.28rem 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 800;
 }
 
 .patch-reward-grid {

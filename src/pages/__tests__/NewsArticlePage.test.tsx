@@ -57,6 +57,25 @@ describe("NewsArticlePage", () => {
     expect(html).toContain("Event Ring Coupon");
   });
 
+  it("renders cash shop price lists as compact commerce rows", () => {
+    const html = renderToString(
+      <ArticleSection
+        isPatchNotes
+        section={{
+          id: "cash-shop",
+          title: "New Damage Skin",
+          content: "Attack your enemies in style.",
+          type: "highlight",
+          items: ["Water Balloon Price: 5,000 NX 2,500 NX Duration: Permanent"]
+        }}
+      />
+    );
+
+    expect(html).toContain("news-commerce-list");
+    expect(html).not.toContain("patch-reward-grid");
+    expect(html).toContain("Water Balloon");
+  });
+
   it("renders the missing article empty state", () => {
     const html = renderNewsArticleRoute("/news/not-real");
 

@@ -221,7 +221,17 @@ function buildFallbackSections(item: NewsItem): NewsSection[] {
 function inferSectionType(title: string, body: string, item: NewsItem): NewsSectionType {
   const haystack = `${title} ${body} ${item.title}`.toLowerCase();
 
-  if (/(reward|rewards|prize|coupon|gift|box|claim|item)/.test(haystack)) {
+  if (item.category === "cash-shop") {
+    if (/(warning|important|maintenance|known issue|issue|restriction)/.test(haystack)) {
+      return "warning";
+    }
+    if (/(gachapon|update|new|sale|deal|shop|available|mount|chair|damage skin|daily|ongoing)/.test(haystack)) {
+      return "highlight";
+    }
+    return "default";
+  }
+
+  if (/(reward|rewards|prize|gift|claim)/.test(haystack)) {
     return "reward";
   }
 

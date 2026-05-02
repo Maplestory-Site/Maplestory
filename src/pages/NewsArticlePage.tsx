@@ -242,6 +242,8 @@ function ArticleToc({
 export function ArticleSection({ isPatchNotes, section }: { isPatchNotes: boolean; section: NewsSection }) {
   const type = section.type ?? "default";
   const paragraphs = section.content.split(/\n{2,}/).map((paragraph) => paragraph.trim()).filter(Boolean);
+  const isCommerceList = Boolean(section.items?.some(isCommerceLine));
+  const shouldUseRewardGrid = type === "reward" && !isCommerceList && Number(section.items?.length ?? 0) <= 12;
 
   return (
     <section className={`news-section-block news-section-block--${type} ${isPatchNotes ? "news-section-block--patch" : ""}`} id={section.id}>
@@ -255,18 +257,24 @@ export function ArticleSection({ isPatchNotes, section }: { isPatchNotes: boolea
       ))}
 
       {section.items?.length ? (
-        type === "reward" ? (
+        shouldUseRewardGrid ? (
           <div className="patch-reward-grid">
             {section.items.map((item, index) => (
               <div className="patch-reward-card" key={`${section.id}-reward-${index}`}>
                 <span className="patch-reward-card__icon">$</span>
                 <strong>{item}</strong>
-                <small>Reward detail</small>
+                <small>Reward</small>
               </div>
             ))}
           </div>
+        ) : isCommerceList ? (
+          <div className="news-commerce-list">
+            {section.items.map((item, index) => (
+              <CommerceListItem item={item} key={`${section.id}-shop-${index}`} />
+            ))}
+          </div>
         ) : (
-          <ul className={type === "warning" ? "patch-warning-list" : "patch-change-list"}>
+          <ul className={type === "warning" ? "patch-warning-list" : "news-section-list"}>
             {section.items.map((item, index) => (
               <li key={`${section.id}-item-${index}`}>{item}</li>
             ))}
@@ -283,4 +291,46 @@ export function ArticleSection({ isPatchNotes, section }: { isPatchNotes: boolea
       ) : null}
     </section>
   );
+}
+
+function CommerceListItem({ item }: { item: string }) {
+  const parsed = parseCommerceLine(item);
+
+  return (
+    <div className="news-commerce-list__item">
+      <span className="news-commerce-list__icon">$</span>
+      <div>
+        <strong>{parsed.title}</strong>
+        {parsed.details.length ? (
+          <div className="news-commerce-list__details">
+            {parsed.details.map((detail) => (
+              <span key={detail}>{detail}</span>
+            ))}
+          </div>
+        ) : null}
+      </div>
+    </div>
+  );
+}
+
+function parseCommerceLine(value: string) {
+  const text = value.replace(/\s+/g, " ").trim();
+  const markerMatch = /\b(?:Price|Duration|Sale Duration|Water Balloon Price|Paper Plane Price|Energy Ball Price|Super Star Price|Football Price):/i.exec(text);
+  const title = markerMatch && markerMatch.index > 0 ? text.slice(0, markerMatch.index).trim() : text;
+  const detailSource = markerMatch && markerMatch.index > 0 ? text.slice(markerMatch.index).trim() : "";
+  const details = detailSource
+    ? detailSource
+        .split(/(?=\b(?:Price|Duration|Sale Duration|Water Balloon Price|Paper Plane Price|Energy Ball Price|Super Star Price|Football Price):)/i)
+        .map((detail) => detail.trim())
+        .filter(Boolean)
+    : [];
+
+  return {
+    title: title || "Cash Shop Item",
+    details
+  };
+}
+
+function isCommerceLine(value: string) {
+  return /\b(?:price|duration|nx|available in all worlds|sale duration):/i.test(value);
 }

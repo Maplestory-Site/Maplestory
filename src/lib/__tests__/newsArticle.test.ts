@@ -85,6 +85,34 @@ describe("newsArticle", () => {
     expect(changes?.items?.join(" ")).toContain("Punch King");
   });
 
+  it("does not classify cash shop price lists as reward grids", () => {
+    const baseItem = fallbackNewsFeed.items.find((entry) => entry.id === "39630") as NewsItem;
+    expect(baseItem).toBeTruthy();
+
+    const article = buildNewsArticleFromPayload(baseItem, {
+      title: baseItem.title,
+      sourceName: baseItem.sourceName,
+      sourceUrl: baseItem.sourceUrl,
+      summary: baseItem.summary,
+      sections: [
+        {
+          title: "New Damage Skin",
+          summary: "Attack your enemies in style with the following new damage skin.",
+          details: [
+            {
+              type: "list",
+              items: ["Water Balloon Price: 5,000 NX 2,500 NX Duration: Permanent"]
+            }
+          ],
+          topic: { key: "items", label: "Items" }
+        }
+      ]
+    });
+
+    const shopSection = article.sections.find((section) => section.title === "New Damage Skin");
+    expect(shopSection?.type).toBe("highlight");
+  });
+
   it("returns adjacent articles for next and previous navigation", () => {
     const item = fallbackNewsFeed.items[2];
     const adjacent = getAdjacentNewsArticles(item.id);
