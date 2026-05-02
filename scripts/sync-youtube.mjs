@@ -12,16 +12,28 @@ const MAX_VIDEOS = 24;
 function inferCategory(title = "", description = "") {
   const text = `${title} ${description}`.toLowerCase();
 
-  if (/(boss|lotus|damien|lucid|will|kalos|seren|gloom|vhilla|verus|weekly boss)/.test(text)) {
-    return "Bossing";
+  if (/(patch|v\.\d+|v\s*\d+|update preview|patch notes|maple university)/.test(text)) {
+    return "Patch Notes";
   }
 
-  if (/(progress|fragment|upgrade|gear|cubing|meso|reboot|account|arcane|hexa|symbol)/.test(text)) {
+  if (/(inkwell|note|contest|community|summer is here|announcement)/.test(text)) {
+    return "News";
+  }
+
+  if (/(live|stream|chill stream|lets cheat|come lets)/.test(text)) {
+    return "Live Stream";
+  }
+
+  if (/(progress|zero to hero|fragment|upgrade|gear|cubing|meso|reboot|account|arcane|hexa|symbol)/.test(text)) {
     return "Progression";
   }
 
-  if (/(guide|preview|explained|what'?s next|update|remaster|tips|how to)/.test(text)) {
+  if (/(guide|preview|explained|what'?s next|update|remaster|tips|how to|skill|class|build)/.test(text)) {
     return "Guides";
+  }
+
+  if (/(boss|lotus|damien|lucid|will|kalos|seren|gloom|vhilla|verus|weekly boss)/.test(text)) {
+    return "Bossing";
   }
 
   return "Highlights";

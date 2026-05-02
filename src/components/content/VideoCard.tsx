@@ -1,5 +1,5 @@
 import type { VideoItem } from "../../data/siteContent";
-import { inferContentTags } from "../../lib/contentDiscovery";
+import { getVideoDisplayDescription, inferContentTags, inferDisplayCategory } from "../../lib/contentDiscovery";
 import { ShareActions } from "./ShareActions";
 import { Button } from "../ui/Button";
 import { useI18n } from "../../i18n/I18nProvider";
@@ -10,26 +10,29 @@ type VideoCardProps = {
 
 export function VideoCard({ item }: VideoCardProps) {
   const { t, td } = useI18n();
-  const tags = inferContentTags(item).slice(0, 2);
+  const displayCategory = inferDisplayCategory(item);
+  const displayDescription = getVideoDisplayDescription(item);
+  const tags = inferContentTags({ ...item, category: displayCategory, description: displayDescription }).slice(0, 2);
+  const durationLabel = item.duration?.trim();
 
   return (
     <article className={`card video-card ${item.featured ? "video-card--featured" : ""}`}>
       <div className="video-card__thumb" aria-hidden="true">
         {item.thumbnail ? <img alt="" className="video-card__thumb-image" decoding="async" loading="lazy" src={item.thumbnail} /> : null}
         <div className="video-card__thumb-top">
-          <span className="video-card__thumb-tag">{td(item.category)}</span>
+          <span className="video-card__thumb-tag">{td(displayCategory)}</span>
           {item.featured ? <span className="video-card__thumb-featured">{t("Featured")}</span> : null}
         </div>
-        <span className="video-card__thumb-duration">{item.duration}</span>
+        {durationLabel ? <span className="video-card__thumb-duration">⏱ {durationLabel}</span> : null}
         <span className="video-card__thumb-play">{t("Play")}</span>
       </div>
       <div className="video-card__body">
         <div className="video-card__eyebrow">
-          <span>{td(item.category)}</span>
+          <span>{td(displayCategory)}</span>
           <span>{item.published}</span>
         </div>
         <h3>{td(item.title)}</h3>
-        <p>{td(item.description)}</p>
+        <p>{td(displayDescription)}</p>
         {tags.length ? (
           <div className="content-tag-row" aria-label={t("Video tags")}>
             {tags.map((tag) => (

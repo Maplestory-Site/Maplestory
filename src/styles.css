@@ -3886,9 +3886,12 @@ body.is-rtl .language-switcher__menu {
   position: absolute;
   left: 14px;
   bottom: 14px;
-  background: rgba(255, 255, 255, 0.92);
-  color: var(--accent-deep);
-  box-shadow: 0 10px 24px rgba(24, 18, 15, 0.12);
+  min-width: 58px;
+  background: rgba(9, 12, 18, 0.84);
+  border: 1px solid rgba(255, 214, 122, 0.46);
+  color: #ffe7a6;
+  box-shadow: 0 10px 24px rgba(24, 18, 15, 0.28);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
 }
 
 .video-card__thumb-featured {
@@ -3911,6 +3914,10 @@ body.is-rtl .language-switcher__menu {
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: #e4edff;
+}
+
+.video-card__thumb .video-card__thumb-duration {
+  color: #ffe7a6;
 }
 
 .video-card__body,
@@ -11619,7 +11626,7 @@ textarea {
 }
 
 .video-card__thumb .video-card__thumb-duration {
-  color: var(--accent-deep);
+  color: #ffe7a6;
 }
 
 .recommendation-card,
