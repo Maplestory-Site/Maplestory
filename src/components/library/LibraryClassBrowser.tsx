@@ -181,16 +181,6 @@ export function LibraryClassBrowser({ selectedClassId, onSelectClass }: LibraryC
                   </div>
                 </section>
 
-                <section>
-                  <h4>Other Resources</h4>
-                  <div className="library-class-resources">
-                    {["MapleStory Wiki", "Community Guide", "Class Discord", "Class Doc"].map((label) => (
-                      <a href="/library/resources-official-sites" key={label}>
-                        {label}
-                      </a>
-                    ))}
-                  </div>
-                </section>
               </aside>
 
               <div className="library-class-detail__right">

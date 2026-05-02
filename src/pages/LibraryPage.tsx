@@ -8,7 +8,6 @@ import { LibraryFeaturedGuides } from "../components/content/LibraryFeaturedGuid
 import { LibraryGuideCard } from "../components/content/LibraryGuideCard";
 import { LibraryGuideModal } from "../components/content/LibraryGuideModal";
 import { LibraryHero } from "../components/content/LibraryHero";
-import { LibraryResourceLinks } from "../components/content/LibraryResourceLinks";
 import { LibrarySearchFilters } from "../components/content/LibrarySearchFilters";
 import { LibraryClassBrowser } from "../components/library/LibraryClassBrowser";
 import { SectionHeader } from "../components/ui/SectionHeader";
@@ -161,8 +160,6 @@ export function LibraryPage() {
             onSelectClass={(nextClassId) => navigate(`/library/classes/${nextClassId}`)}
             selectedClassId={classId}
           />
-
-          <LibraryResourceLinks links={model.resourceLinks} />
         </div>
       </section>
 
