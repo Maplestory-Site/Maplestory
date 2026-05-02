@@ -51,6 +51,40 @@ describe("newsArticle", () => {
     expect(article.sections.some((section) => section.type === "event")).toBe(true);
   });
 
+  it("builds full maintenance text from live GMS parser payloads", () => {
+    const baseItem = fallbackNewsFeed.items.find((entry) => entry.id === "40437") as NewsItem;
+    expect(baseItem).toBeTruthy();
+
+    const article = buildNewsArticleFromPayload(baseItem, {
+      title: baseItem.title,
+      sourceName: baseItem.sourceName,
+      sourceUrl: baseItem.sourceUrl,
+      summary: baseItem.summary,
+      sections: [
+        {
+          title: "Changes and Updates",
+          summary: "MapleStory will be updated to v.268.3.0.",
+          details: [
+            {
+              type: "list",
+              items: [
+                "MapleStory will be updated to v.268.3.0.",
+                "Monthly Windows update.",
+                "Resolved an issue where some players were unable to participate in the Punch King event.",
+                "Resolved an issue where certain boss names appeared incorrectly in the Campus Life Internship event UI."
+              ]
+            }
+          ],
+          topic: { key: "fixes", label: "Fixes" }
+        }
+      ]
+    });
+
+    const changes = article.sections.find((section) => section.title === "Changes and Updates");
+    expect(changes?.items?.length).toBe(4);
+    expect(changes?.items?.join(" ")).toContain("Punch King");
+  });
+
   it("returns adjacent articles for next and previous navigation", () => {
     const item = fallbackNewsFeed.items[2];
     const adjacent = getAdjacentNewsArticles(item.id);

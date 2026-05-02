@@ -20,6 +20,7 @@ export function NewsArticlePage() {
   const fallbackArticle = useMemo(() => getNewsArticleById(newsId), [newsId]);
   const [liveArticle, setLiveArticle] = useState<NewsArticle | null>(null);
   const [articleError, setArticleError] = useState<string | null>(null);
+  const hasBundledFullArticle = Boolean(feedItem?.gmsBreakdown?.sections?.length || feedItem?.kmsBreakdown?.sections?.length);
   const article = liveArticle ?? fallbackArticle;
   const adjacent = useMemo(() => getAdjacentNewsArticles(newsId), [newsId]);
   const [activeSection, setActiveSection] = useState(article?.sections[0]?.id ?? "");
@@ -28,7 +29,10 @@ export function NewsArticlePage() {
   usePageMeta(article?.title ?? "News Article", article?.summary ?? "Full MapleStory article.");
 
   useEffect(() => {
-    if (!feedItem?.sourceUrl || fallbackArticle?.sections.length && fallbackArticle.sections.length > 2) {
+    setLiveArticle(null);
+    setArticleError(null);
+
+    if (!feedItem?.sourceUrl || hasBundledFullArticle) {
       setLiveArticle(null);
       setArticleError(null);
       return;
@@ -67,7 +71,7 @@ export function NewsArticlePage() {
     void loadFullArticle();
 
     return () => controller.abort();
-  }, [fallbackArticle?.sections.length, feedItem]);
+  }, [feedItem, hasBundledFullArticle]);
 
   useEffect(() => {
     if (!article?.sections.length || typeof IntersectionObserver === "undefined") {
