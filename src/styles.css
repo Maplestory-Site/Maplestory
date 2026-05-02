@@ -21818,9 +21818,28 @@ body.maple-ui .site-header__cta-group {
   top: 96px;
   display: grid;
   gap: 0.85rem;
+  max-height: calc(100vh - 128px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 1rem;
   background: rgba(9, 15, 24, 0.82);
   border-color: rgba(116, 233, 255, 0.14);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(116, 233, 255, 0.45) rgba(255, 255, 255, 0.06);
+}
+
+.news-article-toc::-webkit-scrollbar {
+  width: 8px;
+}
+
+.news-article-toc::-webkit-scrollbar-track {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.news-article-toc::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(116, 233, 255, 0.45);
 }
 
 .news-article-mobile-toc {
@@ -21876,6 +21895,7 @@ body.maple-ui .site-header__cta-group {
 .news-article-content {
   display: grid;
   gap: 1rem;
+  padding-bottom: 3rem;
 }
 
 .news-section-block {
