@@ -137,7 +137,7 @@ export function getXpTarget(level: number): number {
   //   Lv 10->11: ~22K XP  (was 14K)   - reachable in several hours
   //   Lv 40+:   exponent steepens so end-game prestige is a real milestone.
   if (safeLevel <= 10) {
-    return Math.floor(140 * Math.pow(safeLevel, 2.20));
+    return Math.floor(320 * Math.pow(safeLevel, 2.28));
   }
   if (safeLevel <= 40) {
     return Math.floor(420 * Math.pow(safeLevel, 2.15));
@@ -346,8 +346,8 @@ export function getMesosPerSecond(
   //   Pass 2:   (1.85+dps*0.10)    DPS 10 -> 2.85/s, DPS 100 -> 12/s
   //   Pass 3:   (0.5 + dps*0.07) with sqrt-softened DPS term once dps > 200.
   // Effect at game start (DPS ~5): 0.85/s base. At DPS 100: 7.5/s. At DPS 10k: ~14/s.
-  const dpsTerm = dps <= 200 ? dps * 0.07 : 200 * 0.07 + Math.sqrt(dps - 200) * 0.45;
-  return (0.5 + dpsTerm) * zone.rewardBoost * farmBoost * lootBoost * marketBoost
+  const dpsTerm = dps <= 200 ? dps * 0.035 : 200 * 0.035 + Math.sqrt(dps - 200) * 0.28;
+  return (0.18 + dpsTerm) * zone.rewardBoost * farmBoost * lootBoost * marketBoost
     * globalGoldMult * relicGoldMult * milestoneMesosMult * talentGoldMult * equipmentGoldMult;
 }
 

@@ -637,11 +637,11 @@ function normalizeMonster(
       : type === "elite"
         ? map.levelRequirement + 7
         : map.levelRequirement + Math.floor(slotIndex);
-  const baseHp = 38 * Math.pow(Math.max(1, map.levelRequirement), 1.34) + 75 * Math.pow(mapIndex, 1.48);
+  const baseHp = 98 * Math.pow(Math.max(1, map.levelRequirement), 1.34) + 180 * Math.pow(mapIndex, 1.48);
   const baseAttack = 5 * Math.pow(Math.max(1, map.levelRequirement), 1.1) + mapIndex * 3.5;
   const baseDefense = 2 * Math.pow(Math.max(1, map.levelRequirement), 1.03) + mapIndex * 2;
   const slotBump = 1 + slotIndex * 0.055;
-  const rewardBase = 2.8 + Math.pow(mapIndex, 1.22) * 2.35 + map.levelRequirement * 0.16;
+  const rewardBase = 1.5 + Math.pow(mapIndex, 1.18) * 1.45 + map.levelRequirement * 0.08;
   const variantReward = variant.rewardBias ?? 1;
   const monsterName = formatVariantName(seed, variant);
   const mechanics = type === "boss" ? buildBossMechanics(seed, map) : [];

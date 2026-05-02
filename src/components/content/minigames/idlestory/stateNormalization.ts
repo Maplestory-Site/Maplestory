@@ -151,7 +151,7 @@ export function createEngagementObjective(level: number, stage: number, completi
 // ─── Default state ────────────────────────────────────────────────────────────
 
 export const DEFAULT_STATE: IdleGameState = {
-  mesos: 15, // Pass 3: heavy early throttle. First Snailguard upgrade should take 2-4 min, not seconds.
+  mesos: 5, // Strict idle pacing: first upgrade is a long-term early goal, not an instant click.
   crystals: 0,
   fame: 0,
   materials: EMPTY_CRAFTING_MATERIALS,
@@ -168,9 +168,9 @@ export const DEFAULT_STATE: IdleGameState = {
   lastLootDrops: [],
   zone: "henesys",
   stage: 1,
-  // Henesys stage 1: getZoneBaseHp({ requirement:1 }) = 80 + 1*40 = 120
-  enemyHp: 120,
-  enemyMaxHp: 120,
+  // Henesys stage 1 starts around a one-minute clear at baseline DPS.
+  enemyHp: 278,
+  enemyMaxHp: 278,
   classId: null,
   resource: 0,
   skillCooldowns: {},

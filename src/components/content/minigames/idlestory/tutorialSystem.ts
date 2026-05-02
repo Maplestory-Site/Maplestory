@@ -158,7 +158,10 @@ export function getNewPlayerDpsMult(totalPlayTimeSeconds: number): number {
  * 180+         →  1×
  */
 export function getNewPlayerXpMult(totalPlayTimeSeconds: number): number {
-  void totalPlayTimeSeconds;
+  if (totalPlayTimeSeconds <= 300) return 0.45;
+  if (totalPlayTimeSeconds <= 900) return 0.55;
+  if (totalPlayTimeSeconds <= 1800) return 0.72;
+  if (totalPlayTimeSeconds <= 3600) return 0.88;
   return 1.0;
 }
 
@@ -176,14 +179,14 @@ export function getNewPlayerMesosMult(totalPlayTimeSeconds: number): number {
   // first upgrade takes 25–30 s instead of ~5 s.  This is a deliberate
   // anti-rush mechanic — the tutorial should feel earned, not skipped.
   // Multiplier curves back up to 1.0 by 120 s.
-  if (totalPlayTimeSeconds <= 30) return 0.38;
-  if (totalPlayTimeSeconds <= 60) return 0.46;
-  if (totalPlayTimeSeconds <= 120) return 0.58;
-  if (totalPlayTimeSeconds <= 300) return 0.72;
+  if (totalPlayTimeSeconds <= 300) return 0.18;
+  if (totalPlayTimeSeconds <= 900) return 0.34;
+  if (totalPlayTimeSeconds <= 1800) return 0.56;
+  if (totalPlayTimeSeconds <= 3600) return 0.78;
   return 1.0;
 }
 
 /** True if this player is still in the "new player" window (< 3 minutes). */
 export function isNewPlayer(totalPlayTimeSeconds: number): boolean {
-  return totalPlayTimeSeconds < 180;
+  return totalPlayTimeSeconds < 3600;
 }

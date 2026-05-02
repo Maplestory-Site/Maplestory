@@ -34,7 +34,7 @@ function simulateSeconds(seconds: number, overrides: Partial<IdleGameState> = {}
 function secondsUntilFirstKill(): number {
   let state = freshState();
   const startStage = state.stage;
-  for (let seconds = 1; seconds <= 900; seconds += 1) {
+  for (let seconds = 1; seconds <= 7200; seconds += 1) {
     state = gameTick(state, 1, TICK_CONTEXT, () => 0.99);
     if (state.stage > startStage) return seconds;
   }
@@ -43,7 +43,7 @@ function secondsUntilFirstKill(): number {
 
 function secondsUntilFirstUpgradeAffordable(): number {
   let state = freshState();
-  for (let seconds = 0; seconds <= 900; seconds += 1) {
+  for (let seconds = 0; seconds <= 7200; seconds += 1) {
     const cost = getHeroCost("snailguard", state.heroLevels.snailguard);
     if (state.mesos >= cost) return seconds;
     state = gameTick(state, 1, TICK_CONTEXT, () => 0.99);
@@ -58,38 +58,36 @@ describe("IdleStory early combat pacing", () => {
     expect(dps).toBeLessThanOrEqual(5.5);
   });
 
-  it("first enemy time-to-kill is in the 20-35 second window", () => {
+  it("first enemy time-to-kill is in the 40-70 second window", () => {
     const firstEnemyHp = getEnemyMaxHp(1, HENESYS);
     const dps = getHeroDps("snailguard", 1) * getNewPlayerDpsMult(0);
     const analyticTtk = firstEnemyHp / dps;
     const simulatedTtk = secondsUntilFirstKill();
 
-    expect(analyticTtk).toBeGreaterThanOrEqual(20);
-    expect(analyticTtk).toBeLessThanOrEqual(35);
-    expect(simulatedTtk).toBeGreaterThanOrEqual(20);
-    expect(simulatedTtk).toBeLessThanOrEqual(35);
+    expect(analyticTtk).toBeGreaterThanOrEqual(50);
+    expect(analyticTtk).toBeLessThanOrEqual(70);
+    expect(simulatedTtk).toBeGreaterThanOrEqual(40);
+    expect(simulatedTtk).toBeLessThanOrEqual(70);
   });
 
-  it("first Snailguard upgrade takes 2-4 minutes (120-240 seconds)", () => {
+  it("first Snailguard upgrade takes 40-60 minutes", () => {
     const seconds = secondsUntilFirstUpgradeAffordable();
-    expect(seconds).toBeGreaterThanOrEqual(120);
-    expect(seconds).toBeLessThanOrEqual(240);
+    expect(seconds).toBeGreaterThanOrEqual(2400);
+    expect(seconds).toBeLessThanOrEqual(3600);
   });
 
-  it("new-player multipliers no longer speed up DPS or XP", () => {
+  it("new-player multipliers slow XP and mesos during the first hour", () => {
     expect(getNewPlayerDpsMult(0)).toBe(1);
-    expect(getNewPlayerXpMult(0)).toBe(1);
-    expect(getNewPlayerMesosMult(0)).toBeCloseTo(0.38, 2);
-    expect(getNewPlayerMesosMult(301)).toBe(1);
+    expect(getNewPlayerXpMult(0)).toBeCloseTo(0.45, 2);
+    expect(getNewPlayerMesosMult(0)).toBeCloseTo(0.18, 2);
+    expect(getNewPlayerMesosMult(3601)).toBe(1);
   });
 
   it("passive mesos is heavily throttled during the first minute", () => {
     const dps = getHeroDps("snailguard", 1);
     const mps = getMesosPerSecond(freshState(), HENESYS, null, dps) * getNewPlayerMesosMult(0);
-    // Pass 3: target ~0.3-0.6 mps with tutorial mult; the formula is now
-    // 0.5 + dps*0.07 base, then heavily reduced by the tutorial mult.
-    expect(mps).toBeGreaterThan(0.15);
-    expect(mps).toBeLessThan(0.55);
+    expect(mps).toBeGreaterThan(0.04);
+    expect(mps).toBeLessThan(0.11);
   });
 });
 
@@ -97,27 +95,25 @@ describe("IdleStory early simulation windows", () => {
   it("after 60 seconds player is still level 1 and cannot spam upgrades", () => {
     const state60 = simulateSeconds(60);
     expect(state60.level).toBe(1);
-    expect(state60.stage).toBeLessThanOrEqual(4);
+    expect(state60.stage).toBeLessThanOrEqual(2);
     expect(state60.mesos).toBeLessThan(SNAILGUARD_LV2_COST);
   });
 
-  it("after 5 minutes progression is modest and boss is still a milestone", () => {
+  it("after 5 minutes progression is still early and boss is not rushed", () => {
     const state300 = simulateSeconds(300);
-    const fiveUpgradeCombo = [1, 2, 3, 4, 5]
-      .reduce((sum, level) => sum + getHeroCost("snailguard", level), 0);
 
-    expect(state300.level).toBeLessThanOrEqual(2);
-    expect(state300.stage).toBeGreaterThanOrEqual(7);
-    expect(state300.stage).toBeLessThanOrEqual(10);
-    expect(state300.mesos).toBeLessThan(fiveUpgradeCombo);
+    expect(state300.level).toBe(1);
+    expect(state300.stage).toBeGreaterThanOrEqual(4);
+    expect(state300.stage).toBeLessThanOrEqual(6);
+    expect(state300.mesos).toBeLessThan(180);
   });
 
-  it("after 15 minutes progression grows but does not explode", () => {
+  it("after 15 minutes the first boss remains a meaningful milestone", () => {
     const state900 = simulateSeconds(900);
-    expect(state900.level).toBeGreaterThanOrEqual(1);
-    expect(state900.level).toBeLessThanOrEqual(3);
-    expect(state900.stage).toBeGreaterThanOrEqual(14);
-    expect(state900.stage).toBeLessThanOrEqual(24);
+    expect(state900.level).toBe(1);
+    expect(state900.stage).toBeGreaterThanOrEqual(8);
+    expect(state900.stage).toBeLessThanOrEqual(10);
+    expect(state900.mesos).toBeLessThan(SNAILGUARD_LV2_COST);
   });
 });
 
@@ -148,6 +144,6 @@ describe("IdleStory combat carryover limits", () => {
 
     const result = computeCombatTick(highPowerOfflineState, HENESYS, 3600, 1000, { mode: "offline" });
     expect(result.kills).toBeGreaterThan(1);
-    expect(result.kills).toBeLessThanOrEqual(3000);
+    expect(result.kills).toBeLessThanOrEqual(240);
   });
 });

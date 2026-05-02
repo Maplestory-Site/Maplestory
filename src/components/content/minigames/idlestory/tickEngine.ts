@@ -288,8 +288,8 @@ export function gameTick(
       : normalKills * (normalRewardMonster?.goldReward ?? (18 + combatState.stage * 4)) +
         eliteKills * (eliteRewardMonster?.goldReward ?? (54 + combatState.stage * 12)) +
         bossesKilled * (bossRewardMonster?.goldReward ?? (180 + combatState.stage * 40));
-  const earlyKillRewardMult = combatState.totalPlayTime < 300
-    ? 0.36 + (combatState.totalPlayTime / 300) * 0.44
+  const earlyKillRewardMult = combatState.totalPlayTime < 3600
+    ? 0.12 + (combatState.totalPlayTime / 3600) * 0.58
     : 1;
   const killMesos  = baseKillMesos * context.zone.rewardBoost * capFactor * earlyKillRewardMult;
   const fameGain   = dungeonRun ? 0 : getFamePerSecond(combatState, context.monster) * safeSeconds;

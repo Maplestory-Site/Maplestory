@@ -118,10 +118,14 @@ export type CombatTickOptions = {
 
 function getMaxKillsPerTick(deltaSeconds: number, state: IdleGameState, mode: CombatTickMode): number {
   if (mode === "offline") {
-    return Math.min(3000, Math.max(6, Math.ceil(deltaSeconds * 6)));
+    const isEarlyOffline = state.totalPlayTime < 3600 || state.level < 8 || state.stage < 30;
+    if (isEarlyOffline) {
+      return Math.min(240, Math.max(1, Math.ceil(deltaSeconds * 0.08)));
+    }
+    return Math.min(3000, Math.max(3, Math.ceil(deltaSeconds * 2.5)));
   }
 
-  const isEarlyOnline = state.totalPlayTime < 300 || state.level < 5 || state.stage < 20;
+  const isEarlyOnline = state.totalPlayTime < 3600 || state.level < 8 || state.stage < 30;
   if (isEarlyOnline) return 1;
 
   if (state.level < 15 || state.stage < 60) {
