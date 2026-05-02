@@ -19,6 +19,8 @@ type IdleStoryStartScreenProps = {
   onRegister: () => void;
 };
 
+const START_SCREEN_IMAGE = "/idlestory/start-screen-maple-idle-adventure.png";
+
 function formatSaveDate(timestamp: number | null) {
   if (!timestamp) return "Unknown save time";
   return new Intl.DateTimeFormat(undefined, {
@@ -52,101 +54,62 @@ export function IdleStoryStartScreen({
 
   return (
     <div className="isw-start">
-      <div className="isw-start__chrome">
-        <span>English</span>
-      </div>
-
-      <motion.header
-        className="isw-start__hero"
-        initial={{ opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.36, ease: "easeOut" }}
+      <motion.div
+        className="isw-start__showcase"
+        initial={{ opacity: 0, scale: 1.015 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.42, ease: "easeOut" }}
       >
-        <p className="isw-start__eyebrow">Maple idle adventure</p>
-        <h1>IdleStory World</h1>
-        <p>Build. Fight. Become Legend.</p>
-      </motion.header>
+        <img
+          className="isw-start__showcase-image"
+          src={START_SCREEN_IMAGE}
+          alt="Maple Idle Adventure welcome screen"
+          draggable={false}
+        />
 
-      <main className="isw-start__options" aria-label="IdleStory start options">
-        <motion.section
-          className={`isw-start-card isw-start-card--continue ${config.primaryAction === "continue" ? "is-primary" : ""} ${!config.continueEnabled ? "is-disabled" : ""}`}
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28, delay: 0.04 }}
+        <button
+          type="button"
+          className="isw-start-hotspot isw-start-hotspot--continue"
+          disabled={!config.continueEnabled}
+          aria-label={config.continueEnabled ? "Continue Game" : "Continue Game unavailable, no local save found"}
+          onClick={onContinue}
         >
-          <div className="isw-start-card__icon">SAVE</div>
-          <h2>Continue Game</h2>
-          <p>Continue your adventure from where you left off.</p>
-          <div className={`isw-save-badge ${config.hasValidLocalSave ? "is-found" : "is-empty"}`}>
-            <strong>{config.hasValidLocalSave ? "Local Save Found" : "No Save Yet"}</strong>
-            <span>{saveDetails}</span>
-            <small>{formatSaveDate(saveStatus.lastSavedAt)}</small>
-          </div>
-          <motion.button
-            type="button"
-            className="isw-start-btn isw-start-btn--continue"
-            disabled={!config.continueEnabled}
-            whileHover={config.continueEnabled ? { y: -2 } : undefined}
-            whileTap={config.continueEnabled ? { scale: 0.97 } : undefined}
-            onClick={onContinue}
-          >
-            Continue
-          </motion.button>
-        </motion.section>
+          <span>Continue Game</span>
+        </button>
 
-        <motion.section
-          className={`isw-start-card isw-start-card--new ${config.primaryAction === "new" ? "is-primary" : ""}`}
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28, delay: 0.1 }}
+        <button
+          type="button"
+          className="isw-start-hotspot isw-start-hotspot--new"
+          aria-label="Start New Game"
+          onClick={onStartNew}
         >
-          <div className="isw-start-card__icon">NEW</div>
-          <h2>Start New Game</h2>
-          <p>Begin a fresh IdleStory World adventure.</p>
-          <div className="isw-start-card__note">
-            Starting a new game asks first when an existing save is found.
-          </div>
-          <motion.button
-            type="button"
-            className="isw-start-btn isw-start-btn--new"
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={onStartNew}
-          >
-            New Game
-          </motion.button>
-        </motion.section>
+          <span>Start New Game</span>
+        </button>
 
-        <motion.section
-          className="isw-start-card isw-start-card--auth"
-          initial={{ opacity: 0, y: 24 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.28, delay: 0.16 }}
+        <button
+          type="button"
+          className="isw-start-hotspot isw-start-hotspot--auth"
+          aria-label="Register or Sign In"
+          onClick={onRegister}
         >
-          <div className="isw-start-card__icon">ID</div>
-          <h2>Register / Sign In</h2>
-          <p>Protect your progress with cloud save support.</p>
-          <ul className="isw-start-list">
-            <li>Cloud save protection</li>
-            <li>Cross-device progress</li>
-            <li>Future leaderboards and social</li>
-          </ul>
-          <motion.button
-            type="button"
-            className="isw-start-btn isw-start-btn--auth"
-            whileHover={{ y: -2 }}
-            whileTap={{ scale: 0.97 }}
-            onClick={onRegister}
-          >
-            Sign In
-          </motion.button>
-        </motion.section>
-      </main>
+          <span>Register / Sign In</span>
+        </button>
 
-      <footer className="isw-start__save-note">
-        <strong>{isSignedIn ? "Signed in save protection is active." : "Local saves work on this device."}</strong>
-        <span>Sign in to protect your progress and never lose your adventure.</span>
-      </footer>
+        <div className={`isw-start__save-overlay ${config.hasValidLocalSave ? "is-found" : "is-empty"}`}>
+          <strong>{config.hasValidLocalSave ? "Local Save Found" : "No Save Yet"}</strong>
+          <span>{saveDetails}</span>
+          <small>
+            {config.hasValidLocalSave
+              ? formatSaveDate(saveStatus.lastSavedAt)
+              : "Start a new adventure."}
+          </small>
+        </div>
+
+        <p className="isw-start__device-note">
+          <strong>{isSignedIn ? "Cloud save protection is active." : "Local saves work on this device."}</strong>
+          <span>Sign in to protect your progress and never lose your adventure.</span>
+        </p>
+      </motion.div>
 
       <AnimatePresence>
         {startScreenMode !== "menu" ? (
