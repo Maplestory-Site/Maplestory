@@ -12,6 +12,7 @@ const HomePage = lazy(() => import("../pages/HomePage").then((module) => ({ defa
 const LibraryPage = lazy(() => import("../pages/LibraryPage").then((module) => ({ default: module.LibraryPage })));
 const LivePage = lazy(() => import("../pages/LivePage").then((module) => ({ default: module.LivePage })));
 const MonstersPage = lazy(() => import("../pages/MonstersPage").then((module) => ({ default: module.MonstersPage })));
+const NewsArticlePage = lazy(() => import("../pages/NewsArticlePage").then((module) => ({ default: module.NewsArticlePage })));
 const NewsPage = lazy(() => import("../pages/NewsPage").then((module) => ({ default: module.NewsPage })));
 const ProfilePage = lazy(() => import("../pages/ProfilePage").then((module) => ({ default: module.ProfilePage })));
 const VideosPage = lazy(() => import("../pages/VideosPage").then((module) => ({ default: module.VideosPage })));
@@ -44,6 +45,7 @@ export const router = createBrowserRouter([
       { path: "database/:section", element: routeElement(MonstersPage) },
       { path: "monsters", element: <Navigate replace to="/database/monster" /> },
       { path: "news", element: routeElement(NewsPage) },
+      { path: "news/:newsId", element: routeElement(NewsArticlePage) },
       { path: "library", element: routeElement(LibraryPage) },
       { path: "library/classes/:classId", element: routeElement(LibraryPage) },
       { path: "library/:guideId", element: routeElement(LibraryPage) },

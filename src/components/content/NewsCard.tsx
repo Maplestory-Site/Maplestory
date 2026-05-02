@@ -51,8 +51,8 @@ export function NewsCard({ item, featured = false, onSelect }: NewsCardProps) {
               {t("Read Breakdown")}
             </Button>
           ) : (
-            <Button href={item.sourceUrl} variant={featured ? "primary" : "ghost"}>
-              {t("Read Original")}
+            <Button href={`/news/${item.id}`} variant={featured ? "primary" : "ghost"}>
+              {t("Read Full Article")}
             </Button>
           )}
         </div>

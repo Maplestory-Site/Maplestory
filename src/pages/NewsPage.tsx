@@ -1,11 +1,8 @@
 import { useMemo, useState } from "react";
 import { usePageMeta } from "../app/usePageMeta";
-import { GmsArticleModal } from "../components/content/GmsArticleModal";
-import { KmsArticleModal } from "../components/content/KmsArticleModal";
 import { NewsCard } from "../components/content/NewsCard";
 import { SectionHeader } from "../components/ui/SectionHeader";
 import { newsCategories, newsRegions, type NewsCategory, type NewsRegion } from "../data/newsHub";
-import type { NewsItem } from "../data/newsHub";
 import { useNewsFeed } from "../hooks/useNewsFeed";
 import { formatNewsMetaDate } from "../lib/newsHub";
 import { useI18n } from "../i18n/I18nProvider";
@@ -16,8 +13,6 @@ export function NewsPage() {
   const [activeCategory, setActiveCategory] = useState<NewsCategory>("all");
   const [query, setQuery] = useState("");
   const [activeRegion, setActiveRegion] = useState<NewsRegion>("gms");
-  const [kmsArticle, setKmsArticle] = useState<NewsItem | null>(null);
-  const [gmsArticle, setGmsArticle] = useState<NewsItem | null>(null);
   const {
     categoryCounts,
     error,
@@ -32,7 +27,6 @@ export function NewsPage() {
     meta,
     refresh
   } = useNewsFeed(activeCategory, query, activeRegion);
-  const handleSelectNews = activeRegion === "kms" ? setKmsArticle : setGmsArticle;
   const hasSearch = query.trim().length > 0;
   const showGroupedLanes = activeCategory === "all" && !hasSearch && !isLoading;
   const newsLanes = useMemo(() => {
@@ -166,7 +160,6 @@ export function NewsPage() {
               <NewsCard
                 featured
                 item={featuredItem}
-                onSelect={handleSelectNews}
               />
             </div>
           ) : null}
@@ -195,7 +188,7 @@ export function NewsPage() {
                   </div>
                   <div className="news-lane__grid">
                     {lane.items.map((item) => (
-                      <NewsCard item={item} key={item.id} onSelect={handleSelectNews} />
+                      <NewsCard item={item} key={item.id} />
                     ))}
                   </div>
                 </section>
@@ -204,7 +197,7 @@ export function NewsPage() {
           ) : (
             <div className="news-grid">
               {gridItems.map((item) => (
-                <NewsCard item={item} key={item.id} onSelect={handleSelectNews} />
+                <NewsCard item={item} key={item.id} />
               ))}
             </div>
           )}
@@ -217,8 +210,6 @@ export function NewsPage() {
           ) : null}
         </div>
       </section>
-      <KmsArticleModal item={kmsArticle} onClose={() => setKmsArticle(null)} />
-      <GmsArticleModal item={gmsArticle} onClose={() => setGmsArticle(null)} />
     </>
   );
 }
