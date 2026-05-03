@@ -39,12 +39,12 @@ export type StreamDetails = {
 
 export const navigationItems: NavItem[] = [
   { label: "Home", href: "/" },
-  { label: "Classes", href: "/classes" },
   { label: "News", href: "/news" },
-  { label: "Library", href: "/library" },
   { label: "Videos", href: "/videos" },
-  { label: "Community", href: "/community" },
+  { label: "Library", href: "/library" },
   { label: "Games", href: "/games" },
+  { label: "Classes", href: "/classes" },
+  { label: "Community", href: "/community" },
   {
     label: "DataBase",
     href: "/database/monster",

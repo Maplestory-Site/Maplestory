@@ -12,8 +12,8 @@ type HeaderProps = {
   primaryCta: { label: string; href: string };
 };
 
-const PRIMARY_NAV_LABELS = new Set(["Home", "News", "Library", "Games"]);
-const SECONDARY_NAV_LABELS = new Set(["Classes", "Videos", "Community", "DataBase"]);
+const PRIMARY_NAV_LABELS = ["Home", "News", "Videos", "Library", "Games"];
+const PRIMARY_NAV_LABEL_SET = new Set(PRIMARY_NAV_LABELS);
 
 export function Header({
   navItems,
@@ -24,8 +24,10 @@ export function Header({
   const location = useLocation();
   const { t } = useI18n();
   const { user, isAuthenticated, openAuth, logout } = useMockAuth();
-  const primaryNavItems = navItems.filter((item) => PRIMARY_NAV_LABELS.has(item.label));
-  const moreNavItems = navItems.filter((item) => SECONDARY_NAV_LABELS.has(item.label));
+  const primaryNavItems = PRIMARY_NAV_LABELS
+    .map((label) => navItems.find((item) => item.label === label))
+    .filter((item): item is NavItem => Boolean(item));
+  const moreNavItems = navItems.filter((item) => !PRIMARY_NAV_LABEL_SET.has(item.label));
 
   function isDatabaseItem(item: NavItem) {
     return item.href === "/database/monster";
