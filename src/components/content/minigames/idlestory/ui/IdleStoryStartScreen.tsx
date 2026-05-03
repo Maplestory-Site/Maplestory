@@ -78,9 +78,6 @@ export function IdleStoryStartScreen({
   const sparkles = useMemo(() => createParticles("spark", SPARKLE_COUNT, 7, 10), []);
   const leaves = useMemo(() => createParticles("leaf", LEAF_COUNT, 10, 12), []);
   const config = getStartScreenConfig(saveStatus);
-  const saveDetails = config.hasValidLocalSave
-    ? `Lv.${saveStatus.level ?? 1} - Stage ${saveStatus.stage ?? 1}`
-    : "No local save found";
 
   useEffect(() => {
     const handleVisibilityChange = () => {
@@ -183,7 +180,7 @@ export function IdleStoryStartScreen({
 
         <button
           type="button"
-          className="isw-start-hotspot isw-start-hotspot--continue isw-start-hotspot--card"
+          className="isw-start-hotspot isw-start-hotspot--continue"
           disabled={!config.continueEnabled}
           aria-label={config.continueEnabled ? "Continue Game" : "Continue Game unavailable, no local save found"}
           onClick={onContinue}
@@ -193,7 +190,7 @@ export function IdleStoryStartScreen({
 
         <button
           type="button"
-          className="isw-start-hotspot isw-start-hotspot--new isw-start-hotspot--card"
+          className="isw-start-hotspot isw-start-hotspot--new"
           aria-label="Start New Game"
           onClick={onStartNew}
         >
@@ -202,22 +199,18 @@ export function IdleStoryStartScreen({
 
         <button
           type="button"
-          className="isw-start-hotspot isw-start-hotspot--auth isw-start-hotspot--card"
+          className="isw-start-hotspot isw-start-hotspot--auth"
           aria-label="Register or Sign In"
           onClick={onRegister}
         >
           <span>Register / Sign In</span>
         </button>
 
-        <div className={`isw-start__save-overlay ${config.hasValidLocalSave ? "is-found" : "is-empty"}`}>
-          <strong>{config.hasValidLocalSave ? "Local Save Found" : "No Save Yet"}</strong>
-          <span>{saveDetails}</span>
-          <small>
-            {config.hasValidLocalSave
-              ? formatSaveDate(saveStatus.lastSavedAt)
-              : "Start a new adventure."}
-          </small>
-        </div>
+        <span className="isw-start__sr-save-status">
+          {config.hasValidLocalSave
+            ? `Local save found. Level ${saveStatus.level ?? 1}, stage ${saveStatus.stage ?? 1}, saved ${formatSaveDate(saveStatus.lastSavedAt)}.`
+            : "No local save found."}
+        </span>
 
         <p className="isw-start__device-note">
           <strong>{isSignedIn ? "Cloud save protection is active." : "Local saves work on this device."}</strong>
