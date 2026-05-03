@@ -212,6 +212,47 @@ export function IdleStoryStartScreen({
             : "No local save found."}
         </span>
 
+        <motion.div
+          className="isw-start-mobile-panel"
+          initial={{ opacity: 0, y: 24 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.32, ease: "easeOut", delay: 0.12 }}
+        >
+          <div className={`isw-start-mobile-save ${config.hasValidLocalSave ? "is-found" : "is-empty"}`}>
+            <strong>{config.hasValidLocalSave ? "Local Save Found" : "No Save Yet"}</strong>
+            <span>
+              {config.hasValidLocalSave
+                ? `Lv.${saveStatus.level ?? 1} - Stage ${saveStatus.stage ?? 1}`
+                : "Start a new adventure"}
+            </span>
+          </div>
+
+          <div className="isw-start-mobile-actions" aria-label="IdleStory mobile start options">
+            <button
+              type="button"
+              className="isw-start-mobile-btn isw-start-mobile-btn--continue"
+              disabled={!config.continueEnabled}
+              onClick={onContinue}
+            >
+              Continue
+            </button>
+            <button
+              type="button"
+              className="isw-start-mobile-btn isw-start-mobile-btn--new"
+              onClick={onStartNew}
+            >
+              New Game
+            </button>
+            <button
+              type="button"
+              className="isw-start-mobile-btn isw-start-mobile-btn--auth"
+              onClick={onRegister}
+            >
+              Sign In
+            </button>
+          </div>
+        </motion.div>
+
         <p className="isw-start__device-note">
           <strong>{isSignedIn ? "Cloud save protection is active." : "Local saves work on this device."}</strong>
           <span>Sign in to protect your progress and never lose your adventure.</span>
