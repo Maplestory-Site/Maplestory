@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState, type CSSProperties, type PointerEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import "./IdleStoryStartScreen.css";
 import type { LocalSaveStatus } from "../gameEngine";
@@ -20,6 +21,31 @@ type IdleStoryStartScreenProps = {
 };
 
 const START_SCREEN_IMAGE = "/idlestory/start-screen-maple-idle-adventure.png";
+const PARTICLE_COUNT = 30;
+const SPARKLE_COUNT = 14;
+const LEAF_COUNT = 10;
+
+type StartParticle = {
+  id: string;
+  left: number;
+  top: number;
+  delay: number;
+  duration: number;
+  size: number;
+  drift: number;
+};
+
+function createParticles(prefix: string, count: number, sizeBase: number, sizeVariance: number): StartParticle[] {
+  return Array.from({ length: count }, (_, index) => ({
+    id: `${prefix}-${index}`,
+    left: (index * 37 + 11) % 100,
+    top: (index * 53 + 17) % 100,
+    delay: (index * 0.37) % 5,
+    duration: 3.2 + ((index * 0.61) % 4.8),
+    size: sizeBase + ((index * 7) % sizeVariance),
+    drift: -18 + ((index * 19) % 37)
+  }));
+}
 
 function formatSaveDate(timestamp: number | null) {
   if (!timestamp) return "Unknown save time";
@@ -47,29 +73,117 @@ export function IdleStoryStartScreen({
   onCancelModal,
   onRegister
 }: IdleStoryStartScreenProps) {
+  const [isAnimationPaused, setIsAnimationPaused] = useState(false);
+  const particles = useMemo(() => createParticles("glow", PARTICLE_COUNT, 4, 8), []);
+  const sparkles = useMemo(() => createParticles("spark", SPARKLE_COUNT, 7, 10), []);
+  const leaves = useMemo(() => createParticles("leaf", LEAF_COUNT, 10, 12), []);
   const config = getStartScreenConfig(saveStatus);
   const saveDetails = config.hasValidLocalSave
     ? `Lv.${saveStatus.level ?? 1} - Stage ${saveStatus.stage ?? 1}`
     : "No local save found";
 
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      setIsAnimationPaused(document.hidden);
+    };
+
+    handleVisibilityChange();
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  const handlePointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType === "touch") return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const x = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const y = (event.clientY - bounds.top) / bounds.height - 0.5;
+    event.currentTarget.style.setProperty("--isw-parallax-x", `${(-x * 10).toFixed(2)}px`);
+    event.currentTarget.style.setProperty("--isw-parallax-y", `${(-y * 8).toFixed(2)}px`);
+  };
+
+  const handlePointerLeave = (event: PointerEvent<HTMLDivElement>) => {
+    event.currentTarget.style.setProperty("--isw-parallax-x", "0px");
+    event.currentTarget.style.setProperty("--isw-parallax-y", "0px");
+  };
+
   return (
-    <div className="isw-start">
+    <div className={`isw-start ${isAnimationPaused ? "is-animation-paused" : ""}`}>
       <motion.div
         className="isw-start__showcase"
+        onPointerMove={handlePointerMove}
+        onPointerLeave={handlePointerLeave}
         initial={{ opacity: 0, scale: 1.015 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.42, ease: "easeOut" }}
       >
-        <img
-          className="isw-start__showcase-image"
-          src={START_SCREEN_IMAGE}
-          alt="Maple Idle Adventure welcome screen"
-          draggable={false}
-        />
+        <div className="isw-start__parallax-layer">
+          <img
+            className="isw-start__showcase-image"
+            src={START_SCREEN_IMAGE}
+            alt="IdleStory World animated welcome screen"
+            draggable={false}
+          />
+        </div>
+
+        <div className="isw-start__vignette" aria-hidden="true" />
+
+        <div className="isw-start__particles" aria-hidden="true">
+          {particles.map((particle) => (
+            <i
+              key={particle.id}
+              className="isw-start-particle isw-start-particle--dot"
+              style={{
+                left: `${particle.left}%`,
+                top: `${particle.top}%`,
+                width: `${particle.size}px`,
+                height: `${particle.size}px`,
+                animationDelay: `${particle.delay}s`,
+                animationDuration: `${particle.duration}s`,
+                "--particle-drift": `${particle.drift}px`
+              } as CSSProperties}
+            />
+          ))}
+          {sparkles.map((particle) => (
+            <i
+              key={particle.id}
+              className="isw-start-particle isw-start-particle--spark"
+              style={{
+                left: `${28 + (particle.left % 46)}%`,
+                top: `${6 + (particle.top % 32)}%`,
+                width: `${particle.size}px`,
+                height: `${particle.size}px`,
+                animationDelay: `${particle.delay}s`,
+                animationDuration: `${particle.duration * 0.72}s`
+              }}
+            />
+          ))}
+          {leaves.map((particle) => (
+            <i
+              key={particle.id}
+              className="isw-start-particle isw-start-particle--leaf"
+              style={{
+                left: `${particle.left}%`,
+                top: `${particle.top}%`,
+                width: `${particle.size}px`,
+                height: `${Math.max(8, particle.size - 4)}px`,
+                animationDelay: `${particle.delay}s`,
+                animationDuration: `${particle.duration + 4}s`,
+                "--particle-drift": `${particle.drift * 2}px`
+              } as CSSProperties}
+            />
+          ))}
+        </div>
+
+        <div className="isw-start__title-aura" aria-hidden="true" />
+        <div className="isw-start__creature-glow isw-start__creature-glow--slime" aria-hidden="true" />
+        <div className="isw-start__creature-glow isw-start__creature-glow--hero" aria-hidden="true" />
 
         <button
           type="button"
-          className="isw-start-hotspot isw-start-hotspot--continue"
+          className="isw-start-hotspot isw-start-hotspot--continue isw-start-hotspot--card"
           disabled={!config.continueEnabled}
           aria-label={config.continueEnabled ? "Continue Game" : "Continue Game unavailable, no local save found"}
           onClick={onContinue}
@@ -79,7 +193,7 @@ export function IdleStoryStartScreen({
 
         <button
           type="button"
-          className="isw-start-hotspot isw-start-hotspot--new"
+          className="isw-start-hotspot isw-start-hotspot--new isw-start-hotspot--card"
           aria-label="Start New Game"
           onClick={onStartNew}
         >
@@ -88,7 +202,7 @@ export function IdleStoryStartScreen({
 
         <button
           type="button"
-          className="isw-start-hotspot isw-start-hotspot--auth"
+          className="isw-start-hotspot isw-start-hotspot--auth isw-start-hotspot--card"
           aria-label="Register or Sign In"
           onClick={onRegister}
         >
