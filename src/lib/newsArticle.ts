@@ -300,12 +300,38 @@ function dedupeTextBlocks(values: string[]) {
 
 function dedupeDetails(details: NewsArticleDetail[]) {
   const seen = new Set<string>();
-  return details.filter((detail) => {
-    const key = getDetailDedupeKey(detail);
-    if (!key || seen.has(key)) return false;
+  const result: NewsArticleDetail[] = [];
+
+  details.forEach((detail) => {
+    const normalizedDetail = dedupeDetailContent(detail);
+    if (!normalizedDetail) return;
+
+    const key = getDetailDedupeKey(normalizedDetail);
+    if (!key || seen.has(key)) return;
     seen.add(key);
-    return true;
+    result.push(normalizedDetail);
   });
+
+  return result;
+}
+
+function dedupeDetailContent(detail: NewsArticleDetail): NewsArticleDetail | null {
+  if (detail.type !== "list") return detail;
+
+  const seenItems = new Set<string>();
+  const items = detail.items
+    .map((item) => ({
+      text: cleanText(item.text),
+      children: dedupeTextBlocks(item.children ?? [])
+    }))
+    .filter((item) => {
+      const key = normalizeForCompare(`${item.text} ${item.children.join(" ")}`);
+      if (!key || seenItems.has(key)) return false;
+      seenItems.add(key);
+      return true;
+    });
+
+  return items.length ? { type: "list", items } : null;
 }
 
 function isTextRepresentedByDetails(value: string, details: NewsArticleDetail[]) {

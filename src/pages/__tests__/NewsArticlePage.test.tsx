@@ -99,6 +99,29 @@ describe("NewsArticlePage", () => {
     expect(html).toContain("Official source");
   });
 
+  it("does not render duplicate structured text details", () => {
+    const repeated = "Take a load off with these new chairs!";
+    const html = renderToString(
+      <ArticleSection
+        isPatchNotes
+        section={{
+          id: "new-chairs",
+          title: "New Chairs",
+          content: "",
+          type: "highlight",
+          details: [
+            { type: "text", value: repeated },
+            { type: "text", value: repeated },
+            { type: "text", value: "My Secret Sanctuary" }
+          ]
+        }}
+      />
+    );
+
+    expect(html.match(/Take a load off with these new chairs!/g)).toHaveLength(1);
+    expect(html).toContain("My Secret Sanctuary");
+  });
+
   it("renders a live-feed loading state for ids missing from the bundled feed", () => {
     const html = renderNewsArticleRoute("/news/not-real");
 

@@ -374,9 +374,11 @@ export function ArticleSection({ isPatchNotes, section }: { isPatchNotes: boolea
 }
 
 function ArticleDetails({ details, sectionId }: { details: NewsArticleDetail[]; sectionId: string }) {
+  const renderableDetails = dedupeRenderableDetails(details);
+
   return (
     <div className="news-detail-flow">
-      {details.map((detail, index) => (
+      {renderableDetails.map((detail, index) => (
         <ArticleDetail detail={detail} key={`${sectionId}-detail-${index}`} />
       ))}
     </div>
@@ -496,4 +498,41 @@ function parseCommerceLine(value: string) {
 
 function isCommerceLine(value: string) {
   return /\b(?:price|duration|nx|available in all worlds|sale duration):/i.test(value);
+}
+
+function dedupeRenderableDetails(details: NewsArticleDetail[]) {
+  const seen = new Set<string>();
+  return details.filter((detail) => {
+    const key = getRenderableDetailKey(detail);
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function getRenderableDetailKey(detail: NewsArticleDetail) {
+  if (detail.type === "text" || detail.type === "subheading") {
+    return normalizeRenderedText(detail.value);
+  }
+
+  if (detail.type === "list") {
+    return detail.items
+      .map((item) => normalizeRenderedText(`${item.text} ${item.children.join(" ")}`))
+      .filter(Boolean)
+      .join("|");
+  }
+
+  if (detail.type === "table") {
+    return [...detail.headers, ...detail.rows.flat()].map(normalizeRenderedText).filter(Boolean).join("|");
+  }
+
+  if (detail.type === "image") {
+    return `image:${detail.src}`;
+  }
+
+  return `link:${detail.href}:${normalizeRenderedText(detail.label)}`;
+}
+
+function normalizeRenderedText(value: string) {
+  return value.toLowerCase().replace(/\s+/g, " ").trim();
 }
