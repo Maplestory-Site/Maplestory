@@ -2,7 +2,39 @@ import newsFeedJson from "./newsFeed.json";
 
 export type NewsCategory = "all" | "patch-notes" | "events" | "cash-shop" | "notices" | "updates";
 export type NewsRegion = "gms" | "kms";
+/**
+ * Region selector used by NewsPage region tabs. Adds an "all" option that
+ * the underlying NewsItem.region field cannot have — kept as a separate type.
+ */
+export type NewsRegionFilter = NewsRegion | "all";
 export type NewsCategoryKey = Exclude<NewsCategory, "all">;
+
+export type NewsListItem =
+  | string
+  | {
+      text?: string;
+      children?: string[];
+    };
+
+export type NewsDetail =
+  | string
+  | { type: "text"; value: string }
+  | { type: "image"; src: string; alt?: string; caption?: string }
+  | { type: "list"; items: NewsListItem[] }
+  | { type: "subheading"; value: string }
+  | { type: "link"; href: string; label: string }
+  | { type: "table"; headers?: string[]; rows: string[][]; caption?: string };
+
+export type NewsBreakdownSection = {
+  title: string;
+  summary: string;
+  details: NewsDetail[];
+  impact?: string;
+  topic: {
+    key: string;
+    label: string;
+  };
+};
 
 export type NewsItem = {
   id: string;
@@ -28,22 +60,7 @@ export type NewsItem = {
     highlights: string[];
     keyChanges: string[];
     audience: string;
-    sections: {
-      title: string;
-      summary: string;
-      details: Array<
-        | { type: "text"; value: string }
-        | { type: "image"; src: string; alt?: string }
-        | { type: "list"; items: string[] }
-        | { type: "subheading"; value: string }
-        | string
-      >;
-      impact: string;
-      topic: {
-        key: string;
-        label: string;
-      };
-    }[];
+    sections: Array<NewsBreakdownSection & { impact: string }>;
     categories?: Array<{ key: string; label: string; sections: unknown[] }>;
   };
   gmsBreakdown?: {
@@ -53,21 +70,7 @@ export type NewsItem = {
     summary: string;
     keyPoints: string[];
     heroImage?: string;
-    sections: {
-      title: string;
-      summary: string;
-      details: Array<
-        | { type: "text"; value: string }
-        | { type: "image"; src: string; alt?: string }
-        | { type: "list"; items: string[] }
-        | { type: "subheading"; value: string }
-        | string
-      >;
-      topic: {
-        key: string;
-        label: string;
-      };
-    }[];
+    sections: NewsBreakdownSection[];
     categories?: Array<{ key: string; label: string; sections: unknown[] }>;
   };
 };
@@ -79,6 +82,9 @@ export type NewsFeedMeta = {
   sourceStatus: "mock" | "cached" | "fresh" | "stale" | "error";
   itemCount: number;
   freshItemCount?: number;
+  gmsCount?: number;
+  kmsCount?: number;
+  kmsLimit?: number;
   canAutoSync: boolean;
   sourceName?: string;
   bundledFallback?: boolean;
@@ -98,7 +104,8 @@ export const newsCategories: Array<{ key: NewsCategory; label: string }> = [
   { key: "updates", label: "Updates" }
 ];
 
-export const newsRegions: Array<{ key: NewsRegion; label: string }> = [
+export const newsRegions: Array<{ key: NewsRegionFilter; label: string }> = [
+  { key: "all", label: "All Regions" },
   { key: "gms", label: "GMS" },
   { key: "kms", label: "KMS" }
 ];

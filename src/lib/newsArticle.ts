@@ -1,4 +1,4 @@
-import { fallbackNewsFeed, type NewsItem } from "../data/newsHub";
+import { fallbackNewsFeed, type NewsDetail, type NewsItem, type NewsListItem } from "../data/newsHub";
 
 export type NewsSectionType = "default" | "highlight" | "warning" | "reward" | "event";
 
@@ -9,7 +9,16 @@ export type NewsSection = {
   type?: NewsSectionType;
   items?: string[];
   images?: Array<{ src: string; alt: string }>;
+  details?: NewsArticleDetail[];
 };
+
+export type NewsArticleDetail =
+  | { type: "text"; value: string }
+  | { type: "image"; src: string; alt: string; caption?: string }
+  | { type: "list"; items: Array<{ text: string; children: string[] }> }
+  | { type: "subheading"; value: string }
+  | { type: "link"; href: string; label: string }
+  | { type: "table"; headers: string[]; rows: string[][]; caption?: string };
 
 export type NewsArticle = {
   id: string;
@@ -43,13 +52,7 @@ export type NewsArticlePayload = {
 export type BreakdownSection = {
   title: string;
   summary: string;
-  details: Array<
-    | { type: "text"; value: string }
-    | { type: "image"; src: string; alt?: string }
-    | { type: "list"; items: string[] }
-    | { type: "subheading"; value: string }
-    | string
-  >;
+  details: NewsDetail[];
   impact?: string;
   topic?: {
     key: string;
@@ -87,11 +90,12 @@ export function buildNewsArticle(item: NewsItem): NewsArticle {
     id: "overview",
     title: "Overview",
     content: cleanText(breakdown?.summary || item.summary),
-    type: inferSectionType("Overview", item.summary, item)
+    type: inferSectionType("Overview", item.summary, item),
+    details: [{ type: "text", value: cleanText(breakdown?.summary || item.summary) }]
   };
 
   const normalizedSections = [introSection, ...sections]
-    .filter((section) => section.content.trim() || section.items?.length || section.images?.length)
+    .filter((section) => section.content.trim() || section.items?.length || section.images?.length || section.details?.length)
     .map((section, index, list) => ({
       ...section,
       id: uniqueSectionId(section.id || slugify(section.title), index, list)
@@ -101,7 +105,7 @@ export function buildNewsArticle(item: NewsItem): NewsArticle {
     id: item.id,
     title: cleanText(item.title),
     summary: cleanText(breakdown?.summary || item.summary),
-    image: item.image || breakdown?.heroImage,
+    image: breakdown?.heroImage || item.image,
     date: item.gmsBreakdown?.date || item.kmsBreakdown?.date || item.publishedAt,
     author: item.sourceName,
     sections: normalizedSections,
@@ -133,18 +137,22 @@ export function buildNewsArticleFromPayload(item: NewsItem, payload: NewsArticle
     title: "Overview",
     content: cleanText(payload.summary || item.summary),
     type: inferSectionType("Overview", payload.summary || item.summary, item),
-    items: overviewItems
+    items: overviewItems,
+    details: [
+      { type: "text", value: cleanText(payload.summary || item.summary) },
+      ...(overviewItems.length ? [{ type: "list" as const, items: overviewItems.map((text) => ({ text, children: [] })) }] : [])
+    ]
   };
 
   return {
     id: item.id,
     title: cleanText(payload.title || item.title),
     summary: cleanText(payload.summary || item.summary),
-    image: item.image || payload.heroImage,
+    image: payload.heroImage || item.image,
     date: payload.date || item.publishedAt,
     author: payload.sourceName || item.sourceName,
     sections: [introSection, ...sections]
-      .filter((section) => section.content.trim() || section.items?.length || section.images?.length)
+      .filter((section) => section.content.trim() || section.items?.length || section.images?.length || section.details?.length)
       .map((section, index, list) => ({
         ...section,
         id: uniqueSectionId(section.id || slugify(section.title), index, list)
@@ -161,43 +169,40 @@ function buildSection(section: BreakdownSection, index: number, item: NewsItem):
   const textParts: string[] = [];
   const listItems: string[] = [];
   const images: Array<{ src: string; alt: string }> = [];
+  const details: NewsArticleDetail[] = [];
 
-  if (section.summary) {
-    textParts.push(cleanText(section.summary));
-  }
-
+  const summary = cleanText(section.summary);
   section.details.forEach((detail) => {
-    if (typeof detail === "string") {
-      textParts.push(cleanText(detail));
+    const normalized = normalizeDetail(detail, section.title);
+    if (!normalized) {
       return;
     }
+    details.push(normalized);
 
-    if (detail.type === "text" || detail.type === "subheading") {
-      textParts.push(cleanText(detail.value));
-      return;
-    }
-
-    if (detail.type === "list") {
-      listItems.push(...detail.items.map(cleanText).filter(Boolean));
-      return;
-    }
-
-    if (detail.type === "image" && detail.src) {
-      images.push({ src: detail.src, alt: cleanText(detail.alt || section.title) });
-    }
+    if (normalized.type === "text") textParts.push(normalized.value);
+    if (normalized.type === "list") listItems.push(...normalized.items.map((entry) => entry.text).filter(Boolean));
+    if (normalized.type === "image") images.push({ src: normalized.src, alt: normalized.alt });
   });
 
+  if (summary && !isTextRepresentedByDetails(summary, details)) {
+    textParts.unshift(summary);
+    details.unshift({ type: "text", value: summary });
+  }
+
   if (section.impact) {
-    textParts.push(`Player impact: ${cleanText(section.impact)}`);
+    const impact = `Player impact: ${cleanText(section.impact)}`;
+    textParts.push(impact);
+    details.push({ type: "text", value: impact });
   }
 
   return {
     id: slugify(section.title) || `section-${index + 1}`,
     title: cleanText(section.title || `Section ${index + 1}`),
-    content: textParts.join("\n\n"),
+    content: dedupeTextBlocks(textParts).join("\n\n"),
     type: inferSectionType(section.title, `${section.summary} ${listItems.join(" ")}`, item),
     items: listItems,
-    images
+    images,
+    details: dedupeDetails(details)
   };
 }
 
@@ -207,15 +212,133 @@ function buildFallbackSections(item: NewsItem): NewsSection[] {
       id: "update-summary",
       title: item.category === "patch-notes" ? "Update Summary" : "Story Details",
       content: cleanText(item.summary),
-      type: item.category === "patch-notes" ? "highlight" : "default"
+      type: item.category === "patch-notes" ? "highlight" : "default",
+      details: [{ type: "text", value: cleanText(item.summary) }]
     },
     {
       id: "source-details",
       title: "Official Source",
       content: `This article is sourced from ${item.sourceName}. Open the official source for the original announcement and any final service-specific details.`,
-      type: "default"
+      type: "default",
+      details: [
+        {
+          type: "text",
+          value: `This article is sourced from ${item.sourceName}. Open the official source for the original announcement and any final service-specific details.`
+        },
+        { type: "link", href: item.sourceUrl, label: "Open official source" }
+      ]
     }
   ];
+}
+
+function normalizeDetail(detail: NewsDetail, fallbackTitle: string): NewsArticleDetail | null {
+  if (typeof detail === "string") {
+    const value = cleanText(detail);
+    return value ? { type: "text", value } : null;
+  }
+
+  if (detail.type === "text") {
+    const value = cleanText(detail.value);
+    return value ? { type: "text", value } : null;
+  }
+
+  if (detail.type === "subheading") {
+    const value = cleanText(detail.value);
+    return value ? { type: "subheading", value } : null;
+  }
+
+  if (detail.type === "image" && detail.src) {
+    return {
+      type: "image",
+      src: detail.src,
+      alt: cleanText(detail.alt || fallbackTitle),
+      caption: cleanText(detail.caption || "")
+    };
+  }
+
+  if (detail.type === "link" && detail.href) {
+    const label = cleanText(detail.label || detail.href);
+    return label ? { type: "link", href: detail.href, label } : null;
+  }
+
+  if (detail.type === "table" && detail.rows?.length) {
+    return {
+      type: "table",
+      headers: (detail.headers ?? []).map(cleanText).filter(Boolean),
+      rows: detail.rows.map((row) => row.map(cleanText)).filter((row) => row.some(Boolean)),
+      caption: cleanText(detail.caption || "")
+    };
+  }
+
+  if (detail.type === "list") {
+    const items = detail.items.map(normalizeListItem).filter((entry) => entry.text);
+    return items.length ? { type: "list", items } : null;
+  }
+
+  return null;
+}
+
+function normalizeListItem(item: NewsListItem): { text: string; children: string[] } {
+  if (typeof item === "string") {
+    return { text: cleanText(item), children: [] };
+  }
+  return {
+    text: cleanText(item.text ?? ""),
+    children: (item.children ?? []).map(cleanText).filter(Boolean)
+  };
+}
+
+function dedupeTextBlocks(values: string[]) {
+  const seen = new Set<string>();
+  return values.filter((value) => {
+    const normalized = normalizeForCompare(value);
+    if (!normalized || seen.has(normalized)) return false;
+    seen.add(normalized);
+    return true;
+  });
+}
+
+function dedupeDetails(details: NewsArticleDetail[]) {
+  const seen = new Set<string>();
+  return details.filter((detail) => {
+    const key = getDetailDedupeKey(detail);
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function isTextRepresentedByDetails(value: string, details: NewsArticleDetail[]) {
+  const normalizedValue = normalizeForCompare(value);
+  if (!normalizedValue) return true;
+  return details.some((detail) => {
+    const detailText = normalizeForCompare(getDetailText(detail));
+    return detailText === normalizedValue || detailText.startsWith(normalizedValue) || normalizedValue.startsWith(detailText);
+  });
+}
+
+function getDetailDedupeKey(detail: NewsArticleDetail) {
+  if (detail.type === "text" || detail.type === "subheading") {
+    return `${detail.type}:${normalizeForCompare(detail.value)}`;
+  }
+  if (detail.type === "list") {
+    return `list:${detail.items.map((item) => normalizeForCompare(`${item.text} ${(item.children ?? []).join(" ")}`)).join("|")}`;
+  }
+  if (detail.type === "table") {
+    return `table:${[...detail.headers, ...detail.rows.flat()].map(normalizeForCompare).join("|")}`;
+  }
+  if (detail.type === "image") {
+    return `image:${detail.src}`;
+  }
+  return `link:${detail.href}:${normalizeForCompare(detail.label)}`;
+}
+
+function getDetailText(detail: NewsArticleDetail) {
+  if (detail.type === "text" || detail.type === "subheading") return detail.value;
+  if (detail.type === "list") return detail.items.map((item) => `${item.text} ${(item.children ?? []).join(" ")}`).join(" ");
+  if (detail.type === "table") return [...detail.headers, ...detail.rows.flat()].join(" ");
+  if (detail.type === "image") return `${detail.alt} ${detail.caption ?? ""}`;
+  return `${detail.label} ${detail.href}`;
 }
 
 function inferSectionType(title: string, body: string, item: NewsItem): NewsSectionType {
@@ -259,6 +382,10 @@ function slugify(value: string) {
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function normalizeForCompare(value: string) {
+  return cleanText(value).toLowerCase().replace(/\s+/g, " ").trim();
 }
 
 function uniqueSectionId(id: string, index: number, sections: NewsSection[]) {

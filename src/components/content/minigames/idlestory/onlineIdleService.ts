@@ -5,6 +5,7 @@ import type {
   ShadowSnapshot,
   WeeklyRankingEntry
 } from "./gameEngine";
+import { authHeaders } from "../shared/onlineAccounts";
 
 export type OnlineUser = {
   id: string;
@@ -218,7 +219,7 @@ async function safeFetchJson<T>(url: string, options: SafeFetchJsonOptions<T>): 
 export async function loadIdleCloudSave(userId: string): Promise<IdleCloudSave | null> {
   const response = await safeFetchJson<{ progress?: IdleCloudSave | null }>(
     `/api/progress?userId=${encodeURIComponent(getIdleUserKey(userId))}`,
-    { fallback: {} }
+    { fallback: {}, headers: authHeaders() }
   );
   if (!response.ok) return null;
   return response.data.progress ?? null;
@@ -229,7 +230,7 @@ export async function saveIdleCloudSave(userId: string, state: IdleGameState, sc
   const response = await safeFetchJson<Record<string, never>>("/api/progress", {
     fallback: {},
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({
       userId: getIdleUserKey(userId),
       progress: { gameId: "idlestory-world", state, score }
@@ -242,7 +243,7 @@ export async function submitIdleLeaderboard(userId: string, username: string, sc
   const response = await safeFetchJson<Record<string, never>>("/api/leaderboard", {
     fallback: {},
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ userId, username, gameId: "idlestory-world", score })
   });
   return response.ok;
@@ -258,7 +259,7 @@ export async function createGuild(userId: string, username: string, name: string
   const response = await safeFetchJson<{ guild?: Guild }>("/api/guilds", {
     fallback: {},
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ action: "create", userId, username, name })
   });
   if (!response.ok) return null;
@@ -269,7 +270,7 @@ export async function joinGuild(userId: string, username: string, guildId: strin
   const response = await safeFetchJson<{ guild?: Guild }>("/api/guilds", {
     fallback: {},
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ action: "join", userId, username, guildId })
   });
   if (!response.ok) return null;
@@ -286,7 +287,7 @@ export async function sendGlobalChat(userId: string, username: string, message: 
   const response = await safeFetchJson<Record<string, never>>("/api/chat", {
     fallback: {},
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ userId, username, message })
   });
   return response.ok;
@@ -295,7 +296,7 @@ export async function sendGlobalChat(userId: string, username: string, message: 
 export async function fetchIdleSocialSnapshot(userId: string): Promise<SocialSnapshot | null> {
   const response = await safeFetchJson<SocialSnapshot | null>(
     `/api/social?userId=${encodeURIComponent(userId)}`,
-    { fallback: null }
+    { fallback: null, headers: authHeaders() }
   );
   if (!response.ok) return null;
   return response.data;
@@ -321,7 +322,7 @@ export async function syncIdleSocialProfile(
   const response = await safeFetchJson<Record<string, never>>("/api/social", {
     fallback: {},
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({
       action: "sync",
       userId,
@@ -342,7 +343,7 @@ export async function createIdleGuild(
   const response = await safeFetchJson<{ guild?: SocialGuild }>("/api/social", {
     fallback: {},
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({
       action: "guild-create",
       userId,
@@ -362,7 +363,7 @@ export async function joinIdleGuild(
   const response = await safeFetchJson<{ guild?: SocialGuild }>("/api/social", {
     fallback: {},
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({
       action: "guild-join",
       userId,
@@ -378,7 +379,7 @@ export async function leaveIdleGuild(userId: string, username: string): Promise<
   const response = await safeFetchJson<Record<string, never>>("/api/social", {
     fallback: {},
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({
       action: "guild-leave",
       userId,
@@ -396,7 +397,7 @@ export async function contributeIdleGuildRaid(
   const response = await safeFetchJson<{ guild?: SocialGuild }>("/api/social", {
     fallback: {},
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({
       action: "guild-raid",
       userId,
@@ -416,7 +417,7 @@ export async function submitIdleShadowBattle(
   const response = await safeFetchJson<Record<string, never>>("/api/social", {
     fallback: {},
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({
       action: "shadow-battle",
       userId,

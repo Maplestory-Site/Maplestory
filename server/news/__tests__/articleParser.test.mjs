@@ -42,7 +42,7 @@ describe("articleParser", () => {
     expect(parsed.sections[0]?.details[0]).toMatchObject({ type: "image", src: "https://example.com/notice.jpg" });
   });
 
-  it("converts tables into readable list details", () => {
+  it("preserves tables as structured rows and headers", () => {
     const parsed = parseArticleHtml(
       `
         <main>
@@ -56,9 +56,37 @@ describe("articleParser", () => {
       "https://example.com/"
     );
 
-    const list = parsed.sections[0]?.details.find((detail) => detail.type === "list");
-    expect(list?.items).toContain("Item | Cost");
-    expect(list?.items).toContain("Coupon | 100 coins");
+    const table = parsed.sections[0]?.details.find((detail) => detail.type === "table");
+    expect(table?.headers).toEqual(["Item", "Cost"]);
+    expect(table?.rows).toEqual([["Coupon", "100 coins"]]);
+  });
+
+  it("preserves links, captions, and nested list children", () => {
+    const parsed = parseArticleHtml(
+      `
+        <main>
+          <h2>Event Details</h2>
+          <figure><img src="/event.png" alt="Event art"><figcaption>Event rewards preview</figcaption></figure>
+          <p>Read the <a href="/guide">official guide</a> before participating.</p>
+          <ul><li>Mission one<ul><li>Clear monsters</li></ul></li></ul>
+        </main>
+      `,
+      "https://example.com/news/"
+    );
+
+    const details = parsed.sections[0]?.details ?? [];
+    expect(details.find((detail) => detail.type === "image")).toMatchObject({
+      src: "https://example.com/event.png",
+      caption: "Event rewards preview"
+    });
+    expect(details.find((detail) => detail.type === "link")).toMatchObject({
+      href: "https://example.com/guide",
+      label: "official guide"
+    });
+    expect(details.find((detail) => detail.type === "list")?.items[0]).toMatchObject({
+      text: "Mission one",
+      children: ["Clear monsters"]
+    });
   });
 
   it("categorizes patch-note style content without crashing", () => {

@@ -1,0 +1,43 @@
+{
+  "dada@gggg.com-1777828012440": {
+    "xp": 0,
+    "level": 1,
+    "coins": 0,
+    "ownedItems": [],
+    "lootBoxes": 0,
+    "highScores": {
+      "reaction-test": 0,
+      "maple-training": 0,
+      "maple-survival": 0,
+      "boss-dodge": 0,
+      "tap-dodge": 0,
+      "reaction-timer-pro": 0,
+      "stack-builder": 0,
+      "aim-trainer": 0,
+      "neo-snake": 0,
+      "bomb-defuse": 0,
+      "memory-flash": 0,
+      "lane-switch-runner": 0,
+      "ice-slide-puzzle": 0,
+      "boss-clicker": 0,
+      "idlestory-world": 0
+    },
+    "updatedAt": "2026-05-03T17:06:52.444Z"
+  },
+  "auth-test-1777836897176": {
+    "score": 1234,
+    "updatedAt": "2026-05-03T19:34:57.178Z"
+  },
+  "auth-test-1777837421929": {
+    "score": 1234,
+    "updatedAt": "2026-05-03T19:43:41.932Z"
+  },
+  "auth-test-1777974874637": {
+    "score": 1234,
+    "updatedAt": "2026-05-05T09:54:34.642Z"
+  },
+  "auth-test-1777981287880": {
+    "score": 1234,
+    "updatedAt": "2026-05-05T11:41:27.889Z"
+  }
+}

@@ -45,7 +45,37 @@ async function fetchJson(url) {
   return response.json();
 }
 
-function buildMeta({ status, itemCount, freshItemCount = 0, updatedAt, lastSuccessfulSync, bundled = false }) {
+function normalizeDedupeText(value = "") {
+  return String(value || "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .replace(/[^\p{L}\p{N}\s:/.-]/gu, "")
+    .trim();
+}
+
+export function dedupeNewsItems(items = []) {
+  const byId = new Set();
+  const bySourceOrTitle = new Set();
+  const deduped = [];
+
+  items.forEach((item) => {
+    if (!item?.id) return;
+    const id = String(item.id);
+    const sourceKey = normalizeDedupeText(item.sourceUrl || "");
+    const titleDateKey = `${normalizeDedupeText(item.region || "")}:${normalizeDedupeText(item.title || "")}:${normalizeDedupeText((item.publishedAt || "").slice(0, 10))}`;
+    const contentKey = sourceKey || titleDateKey;
+    if (byId.has(id) || (contentKey && bySourceOrTitle.has(contentKey))) {
+      return;
+    }
+    byId.add(id);
+    if (contentKey) bySourceOrTitle.add(contentKey);
+    deduped.push(item);
+  });
+
+  return deduped;
+}
+
+function buildMeta({ status, itemCount, freshItemCount = 0, updatedAt, lastSuccessfulSync, bundled = false, gmsCount = 0, kmsCount = 0, kmsLimit = 0 }) {
   return {
     lastUpdated: updatedAt,
     lastSuccessfulSync,
@@ -53,6 +83,9 @@ function buildMeta({ status, itemCount, freshItemCount = 0, updatedAt, lastSucce
     sourceStatus: status,
     itemCount,
     freshItemCount,
+    gmsCount,
+    kmsCount,
+    kmsLimit,
     canAutoSync: true,
     sourceName: OFFICIAL_SOURCE.sourceName,
     bundledFallback: bundled
@@ -108,35 +141,28 @@ async function refreshNewsFeed({ persistBundled = false } = {}) {
       .map((item) => String(item.id))
   );
 
-  const deduped = new Map();
+  const collected = [];
 
   kmsRssItems.forEach((item) => {
     const normalized = normalizeKmsItem(item, previousIds, fetchedAt);
-    if (normalized?.id && !deduped.has(normalized.id)) {
-      deduped.set(normalized.id, normalized);
+    if (normalized?.id) {
+      collected.push(normalized);
     }
   });
 
   [...newsItems, ...archivedItems].forEach((item) => {
-    if (!item?.id || deduped.has(String(item.id))) {
+    if (!item?.id) {
       return;
     }
-
-    deduped.set(String(item.id), normalizeNewsItem(item, featuredIds, previousIds, fetchedAt));
+    collected.push(normalizeNewsItem(item, featuredIds, previousIds, fetchedAt));
   });
 
-  const enrichedItems = await enrichKmsCardImages([...deduped.values()]);
+  const enrichedItems = await enrichKmsCardImages(dedupeNewsItems(collected));
   const sortedItems = sortNewsItems(enrichedItems);
-  const grouped = sortedItems.reduce(
-    (acc, item) => {
-      const key = item.region === "kms" ? "kms" : "gms";
-      acc[key].push(item);
-      return acc;
-    },
-    { gms: [], kms: [] }
-  );
-
-  const items = [...grouped.gms.slice(0, MAX_ITEMS), ...grouped.kms.slice(0, MAX_ITEMS)];
+  const maxReturnedItems = Math.max(MAX_ITEMS * 2, MAX_ITEMS);
+  const items = sortedItems.slice(0, maxReturnedItems);
+  const gmsCount = items.filter((item) => item.region === "gms").length;
+  const kmsCount = items.filter((item) => item.region === "kms").length;
   const freshItemCount = items.filter((item) => item.isNew).length;
 
   const payload = {
@@ -146,7 +172,10 @@ async function refreshNewsFeed({ persistBundled = false } = {}) {
       itemCount: items.length,
       freshItemCount,
       updatedAt: fetchedAt,
-      lastSuccessfulSync: fetchedAt
+      lastSuccessfulSync: fetchedAt,
+      gmsCount,
+      kmsCount,
+      kmsLimit: kmsRssItems.length
     })
   };
 

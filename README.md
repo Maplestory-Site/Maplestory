@@ -1,73 +1,92 @@
-# React + TypeScript + Vite
+# SnailSlayer MapleStory Creator Hub
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite frontend with Vercel-style API handlers under `api/`.
+The site includes NEWS, Maple Library, database pages, videos, community pages,
+and IdleStory World.
 
-Currently, two official plugins are available:
+## Setup
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
-
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
+npm run dev
+npm test
+npm run lint
+npx tsc -b --pretty false
+npm run build
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+`npm run build` is deterministic and offline-safe by default. The `prebuild`
+hook only prints a skip message unless `SYNC_REMOTE_ON_BUILD=true`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Scripts
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+- `dev`: Vite dev server with local `/api/*` middleware.
+- `build`: `tsc -b && vite build`.
+- `test`: full Vitest suite.
+- `lint`: ESLint flat config.
+- `check:public-assets`: verifies every static `/library/**` and `/idlestory/**` source reference exists in `public`.
+- `sync:*`: explicit feed refresh scripts for news, videos, and database feeds.
+
+## API And Auth
+
+`/api/auth` issues an HMAC session token. The browser stores only the public
+user profile plus the token in `snailslayer-session`; passwords and password
+hashes are not stored in localStorage.
+
+Private/mutating cloud calls send `Authorization: Bearer <token>`. API handlers
+derive the user id from the verified token and ignore client-supplied `userId`
+for protected mutations.
+
+Set `SESSION_SECRET` to a long random value in any shared or production
+environment.
+
+## Storage
+
+Server storage goes through `server/storage/index.mjs`.
+
+- Dev/test can use the local JSON adapter.
+- Production fails loudly unless durable storage env vars are configured, or
+  `ALLOW_LOCAL_JSON_STORAGE=true` is explicitly set as a temporary fallback.
+
+Supported env markers are listed in `.env.example`.
+
+## External Sync
+
+Remote sync is opt-in:
+
+```bash
+SYNC_REMOTE_ON_BUILD=true npm run sync:items
 ```
+
+Feed guards prevent an empty remote response from overwriting a non-empty cached
+feed. This protects `public/*-feed.json` during upstream outages.
+
+## SSRF Restrictions
+
+`api/content?resource=fetch-html` is disabled unless
+`ALLOW_RAW_HTML_FETCH=true`. When enabled it:
+
+- allows only configured Maple/news hosts
+- rejects localhost/private/link-local/metadata IPs after DNS resolution
+- validates redirects manually
+- caps HTML responses to 2 MB
+- requires HTML/XML content types
+
+## Validation Status
+
+Current production-readiness checks expected to pass:
+
+```bash
+npm test
+npm run lint
+npx tsc -b --pretty false
+npm run build
+npm run check:public-assets
+npm audit --json
+```
+
+Known non-blocking warnings:
+
+- Some React Hook dependency warnings remain in older mini-games.
+- Library/catalog chunks are large and should be further split in a dedicated
+  performance pass.

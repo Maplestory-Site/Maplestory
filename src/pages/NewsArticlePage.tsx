@@ -2,7 +2,9 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { usePageMeta } from "../app/usePageMeta";
 import { Button } from "../components/ui/Button";
-import { getAdjacentNewsArticles, getNewsArticleById, getNewsItemById, buildNewsArticleFromPayload, type NewsArticle, type NewsArticlePayload, type NewsSection } from "../lib/newsArticle";
+import { getAdjacentNewsArticles, getNewsArticleById, getNewsItemById, buildNewsArticleFromPayload, type NewsArticle, type NewsArticleDetail, type NewsArticlePayload, type NewsSection } from "../lib/newsArticle";
+import type { NewsItem, NewsFeed } from "../data/newsHub";
+import { loadNewsFeed } from "../lib/newsFeedClient";
 import { formatNewsMetaDate } from "../lib/newsHub";
 import { safeFetchJson } from "../lib/safeJsonFetch";
 
@@ -16,13 +18,17 @@ const sectionIcons: Record<NonNullable<NewsSection["type"]>, string> = {
 
 export function NewsArticlePage() {
   const { newsId = "" } = useParams();
-  const feedItem = useMemo(() => getNewsItemById(newsId), [newsId]);
+  const bundledFeedItem = useMemo(() => getNewsItemById(newsId), [newsId]);
+  const [liveFeedItem, setLiveFeedItem] = useState<NewsItem | null>(null);
+  const [liveFeedItems, setLiveFeedItems] = useState<NewsItem[] | null>(null);
+  const [isResolvingItem, setIsResolvingItem] = useState(!bundledFeedItem);
+  const feedItem = bundledFeedItem ?? liveFeedItem;
   const fallbackArticle = useMemo(() => getNewsArticleById(newsId), [newsId]);
   const [liveArticle, setLiveArticle] = useState<NewsArticle | null>(null);
   const [articleError, setArticleError] = useState<string | null>(null);
   const hasBundledFullArticle = Boolean(feedItem?.gmsBreakdown?.sections?.length || feedItem?.kmsBreakdown?.sections?.length);
   const article = liveArticle ?? fallbackArticle;
-  const adjacent = useMemo(() => getAdjacentNewsArticles(newsId), [newsId]);
+  const adjacent = useMemo(() => getAdjacentNewsArticles(newsId, liveFeedItems ?? undefined), [liveFeedItems, newsId]);
   const [activeSection, setActiveSection] = useState(article?.sections[0]?.id ?? "");
   const [copied, setCopied] = useState(false);
 
@@ -72,6 +78,51 @@ export function NewsArticlePage() {
 
     return () => controller.abort();
   }, [feedItem, hasBundledFullArticle]);
+  // When the bundled feed has no record for this id, fetch the live /api/news
+  // feed and look up by id. Avoids the 'Article not found' state for items
+  // sourced from a remote sync that isn't in src/data/newsFeed.json yet.
+  useEffect(() => {
+    setLiveFeedItem(null);
+    setLiveFeedItems(null);
+    setIsResolvingItem(!bundledFeedItem);
+    if (bundledFeedItem || !newsId) return;
+    const controller = new AbortController();
+    let cancelled = false;
+    void (async () => {
+      try {
+        const directResult = await safeFetchJson<NewsItem | { item?: NewsItem } | null>(`/api/news/${encodeURIComponent(newsId)}`, {
+          cache: "no-store",
+          fallback: null,
+          signal: controller.signal,
+          timeoutMs: 10000
+        });
+        if (cancelled || controller.signal.aborted) return;
+        const directItem = extractNewsItemPayload(directResult.data);
+        if (directResult.ok && directItem?.id) {
+          setLiveFeedItem(directItem);
+          setLiveFeedItems([directItem]);
+          return;
+        }
+
+        const result = await loadNewsFeed({ signal: controller.signal });
+        if (cancelled || controller.signal.aborted) return;
+        const feed = result.feed as NewsFeed;
+        const match = feed.items.find((item) => item.id === newsId) ?? null;
+        setLiveFeedItem(match);
+        setLiveFeedItems(feed.items);
+      } catch {
+        // Network failure already surfaces via loadNewsFeed's fallback path.
+        if (!cancelled) setLiveFeedItem(null);
+      } finally {
+        if (!cancelled) setIsResolvingItem(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [bundledFeedItem, newsId]);
+
 
   useEffect(() => {
     if (!article?.sections.length || typeof IntersectionObserver === "undefined") {
@@ -109,13 +160,27 @@ export function NewsArticlePage() {
     setActiveSection(article?.sections[0]?.id ?? "");
   }, [article?.id, article?.sections]);
 
+  if (!article && isResolvingItem) {
+    return (
+      <section className="section section--page-start news-article-page">
+        <div className="container">
+          <div className="news-article-loading card">
+            <span className="news-article-loading__pulse" />
+            <strong>Loading full article...</strong>
+            <p>Checking the live news feed for the latest article data.</p>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
   if (!article) {
     return (
       <section className="section section--page-start news-article-page">
         <div className="container">
           <div className="content-empty-state card">
             <strong>Article not found.</strong>
-            <p>This news item is not available in the local feed yet.</p>
+            <p>This news item is not available in the local or live feed yet.</p>
             <Button href="/news" variant="secondary">
               Back to News
             </Button>
@@ -239,11 +304,22 @@ function ArticleToc({
   );
 }
 
+function extractNewsItemPayload(payload: NewsItem | { item?: NewsItem } | null): NewsItem | null {
+  if (!payload) return null;
+  if (isNewsItem(payload)) return payload;
+  return payload.item ?? null;
+}
+
+function isNewsItem(payload: NewsItem | { item?: NewsItem }): payload is NewsItem {
+  return "id" in payload && "title" in payload && "region" in payload;
+}
+
 export function ArticleSection({ isPatchNotes, section }: { isPatchNotes: boolean; section: NewsSection }) {
   const type = section.type ?? "default";
   const paragraphs = section.content.split(/\n{2,}/).map((paragraph) => paragraph.trim()).filter(Boolean);
   const isCommerceList = Boolean(section.items?.some(isCommerceLine));
   const shouldUseRewardGrid = type === "reward" && !isCommerceList && Number(section.items?.length ?? 0) <= 12;
+  const hasStructuredDetails = Boolean(section.details?.length);
 
   return (
     <section className={`news-section-block news-section-block--${type} ${isPatchNotes ? "news-section-block--patch" : ""}`} id={section.id}>
@@ -252,11 +328,15 @@ export function ArticleSection({ isPatchNotes, section }: { isPatchNotes: boolea
         <h2>{section.title}</h2>
       </div>
 
-      {paragraphs.map((paragraph, index) => (
-        <p key={`${section.id}-p-${index}`}>{paragraph}</p>
-      ))}
+      {hasStructuredDetails ? (
+        <ArticleDetails details={section.details ?? []} sectionId={section.id} />
+      ) : (
+        paragraphs.map((paragraph, index) => (
+          <p key={`${section.id}-p-${index}`}>{paragraph}</p>
+        ))
+      )}
 
-      {section.items?.length ? (
+      {!hasStructuredDetails && section.items?.length ? (
         shouldUseRewardGrid ? (
           <div className="patch-reward-grid">
             {section.items.map((item, index) => (
@@ -282,7 +362,7 @@ export function ArticleSection({ isPatchNotes, section }: { isPatchNotes: boolea
         )
       ) : null}
 
-      {section.images?.length ? (
+      {!hasStructuredDetails && section.images?.length ? (
         <div className="news-section-images">
           {section.images.map((image) => (
             <img alt={image.alt} decoding="async" key={image.src} loading="lazy" src={image.src} />
@@ -290,6 +370,89 @@ export function ArticleSection({ isPatchNotes, section }: { isPatchNotes: boolea
         </div>
       ) : null}
     </section>
+  );
+}
+
+function ArticleDetails({ details, sectionId }: { details: NewsArticleDetail[]; sectionId: string }) {
+  return (
+    <div className="news-detail-flow">
+      {details.map((detail, index) => (
+        <ArticleDetail detail={detail} key={`${sectionId}-detail-${index}`} />
+      ))}
+    </div>
+  );
+}
+
+function ArticleDetail({ detail }: { detail: NewsArticleDetail }) {
+  if (detail.type === "text") {
+    return <p>{detail.value}</p>;
+  }
+
+  if (detail.type === "subheading") {
+    return <h3 className="news-detail-subheading">{detail.value}</h3>;
+  }
+
+  if (detail.type === "image") {
+    return (
+      <figure className="news-detail-figure">
+        <img alt={detail.alt} decoding="async" loading="lazy" src={detail.src} />
+        {detail.caption ? <figcaption>{detail.caption}</figcaption> : null}
+      </figure>
+    );
+  }
+
+  if (detail.type === "link") {
+    return (
+      <a className="news-detail-link" href={detail.href} rel="noreferrer" target="_blank">
+        <span>Official link</span>
+        <strong>{detail.label}</strong>
+      </a>
+    );
+  }
+
+  if (detail.type === "table") {
+    return (
+      <div className="news-detail-table-wrap">
+        {detail.caption ? <strong className="news-detail-table-caption">{detail.caption}</strong> : null}
+        <table className="news-detail-table">
+          {detail.headers.length ? (
+            <thead>
+              <tr>
+                {detail.headers.map((header, index) => (
+                  <th key={`${header}-${index}`}>{header}</th>
+                ))}
+              </tr>
+            </thead>
+          ) : null}
+          <tbody>
+            {detail.rows.map((row, rowIndex) => (
+              <tr key={`row-${rowIndex}`}>
+                {row.map((cell, cellIndex) => (
+                  <td key={`${rowIndex}-${cellIndex}`}>{cell}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
+  return (
+    <ul className="news-detail-list">
+      {detail.items.map((item, index) => (
+        <li key={`${item.text}-${index}`}>
+          <span>{item.text}</span>
+          {item.children.length ? (
+            <ul>
+              {item.children.map((child) => (
+                <li key={child}>{child}</li>
+              ))}
+            </ul>
+          ) : null}
+        </li>
+      ))}
+    </ul>
   );
 }
 

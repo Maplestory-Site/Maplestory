@@ -1,4 +1,5 @@
 import type { GameId } from "./gameMeta";
+import { authHeaders } from "./onlineAccounts";
 
 export type RoomPlayer = {
   userId: string;
@@ -17,7 +18,7 @@ export type GameRoom = {
 export async function createRoom(gameId: GameId, userId: string, username: string) {
   const response = await fetch("/api/rooms", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ action: "create", gameId, userId, username })
   });
   if (!response.ok) throw new Error("Failed to create room");
@@ -27,7 +28,7 @@ export async function createRoom(gameId: GameId, userId: string, username: strin
 export async function joinRoom(roomId: string, userId: string, username: string) {
   const response = await fetch("/api/rooms", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ action: "join", roomId, userId, username })
   });
   if (!response.ok) throw new Error("Failed to join room");
@@ -37,7 +38,7 @@ export async function joinRoom(roomId: string, userId: string, username: string)
 export async function startRoom(roomId: string) {
   const response = await fetch("/api/rooms", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ action: "start", roomId })
   });
   if (!response.ok) throw new Error("Failed to start room");
@@ -47,7 +48,7 @@ export async function startRoom(roomId: string) {
 export async function updateRoom(roomId: string, userId: string, payload: { score?: number; ready?: boolean }) {
   const response = await fetch("/api/rooms", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ action: "update", roomId, userId, ...payload })
   });
   if (!response.ok) throw new Error("Failed to update room");
@@ -57,7 +58,7 @@ export async function updateRoom(roomId: string, userId: string, payload: { scor
 export async function leaveRoom(roomId: string, userId: string) {
   const response = await fetch("/api/rooms", {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ action: "leave", roomId, userId })
   });
   if (!response.ok) throw new Error("Failed to leave room");

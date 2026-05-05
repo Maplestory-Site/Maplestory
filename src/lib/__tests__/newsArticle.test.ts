@@ -51,6 +51,59 @@ describe("newsArticle", () => {
     expect(article.sections.some((section) => section.type === "event")).toBe(true);
   });
 
+  it("preserves structured tables, links, and nested lists from parser payloads", () => {
+    const baseItem = fallbackNewsFeed.items[0] as NewsItem;
+    const article = buildNewsArticleFromPayload(baseItem, {
+      title: "Structured article",
+      sourceName: baseItem.sourceName,
+      sourceUrl: baseItem.sourceUrl,
+      summary: "Structured summary.",
+      sections: [
+        {
+          title: "Event Shop",
+          summary: "Shop details.",
+          details: [
+            { type: "table", headers: ["Item", "Cost"], rows: [["Coupon", "100 coins"]] },
+            { type: "link", href: "https://example.com/shop", label: "Shop details" },
+            { type: "list", items: [{ text: "Daily mission", children: ["Clear 500 monsters"] }] }
+          ],
+          topic: { key: "events", label: "Events" }
+        }
+      ]
+    });
+
+    const section = article.sections.find((entry) => entry.title === "Event Shop");
+    expect(section?.details?.some((detail) => detail.type === "table")).toBe(true);
+    expect(section?.details?.some((detail) => detail.type === "link")).toBe(true);
+    expect(section?.details?.some((detail) => detail.type === "list")).toBe(true);
+  });
+
+  it("does not duplicate a section summary when the first detail repeats it", () => {
+    const baseItem = fallbackNewsFeed.items[0] as NewsItem;
+    const repeated = "Take a load off with these new chairs!";
+    const article = buildNewsArticleFromPayload(baseItem, {
+      title: "Cash Shop",
+      sourceName: baseItem.sourceName,
+      sourceUrl: baseItem.sourceUrl,
+      summary: "Cash shop summary.",
+      sections: [
+        {
+          title: "New Chairs",
+          summary: repeated,
+          details: [
+            { type: "text", value: repeated },
+            { type: "text", value: "Council of Elders Chair" }
+          ],
+          topic: { key: "cash-shop", label: "Cash Shop" }
+        }
+      ]
+    });
+
+    const section = article.sections.find((entry) => entry.title === "New Chairs");
+    const textDetails = section?.details?.filter((detail) => detail.type === "text").map((detail) => detail.value) ?? [];
+    expect(textDetails.filter((value) => value === repeated)).toHaveLength(1);
+  });
+
   it("builds full maintenance text from live GMS parser payloads", () => {
     const baseItem = fallbackNewsFeed.items.find((entry) => entry.id === "40437") as NewsItem;
     expect(baseItem).toBeTruthy();

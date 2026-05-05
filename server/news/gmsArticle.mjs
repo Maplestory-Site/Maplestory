@@ -4,7 +4,7 @@ import { sanitizeText } from "./normalize.mjs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-const PARSER_VERSION = 6;
+const PARSER_VERSION = 7;
 
 function extractIdFromUrl(url = "") {
   const match = /\/news\/[^/]+\/(\d+)/.exec(url);
@@ -37,9 +37,19 @@ function normalizeInlineTitle(value = "") {
 }
 
 function pickSectionSummary(details = []) {
+  const firstListText = details
+    .find((detail) => detail?.type === "list" && detail.items?.length)
+    ?.items?.map((item) => (typeof item === "string" ? item : item.text || ""))
+    .find(Boolean);
+  const firstTableText = details
+    .find((detail) => detail?.type === "table" && detail.rows?.length)
+    ?.rows?.[0]?.join(" ");
+  const firstLinkText = details.find((detail) => detail?.type === "link" && detail.label)?.label;
   return (
     details.find((detail) => detail?.type === "text" && detail.value && !isTitleLike(detail.value) && detail.value.length > 50)?.value ||
-    details.find((detail) => detail?.type === "list" && detail.items?.length)?.items?.[0] ||
+    firstListText ||
+    firstTableText ||
+    firstLinkText ||
     details.find((detail) => detail?.type === "text" && detail.value)?.value ||
     ""
   );
@@ -163,10 +173,18 @@ function buildKeyPoints(sections = []) {
         }
       }
       if (detail?.type === "list" && detail.items?.length) {
-        const firstItem = sanitizeText(detail.items[0] || "");
+        const rawItem = detail.items[0];
+        const firstItem = sanitizeText(typeof rawItem === "string" ? rawItem : rawItem?.text || "");
         if (firstItem.length > 45 && !seen.has(firstItem)) {
           seen.add(firstItem);
           points.push(firstItem);
+        }
+      }
+      if (detail?.type === "table" && detail.rows?.length) {
+        const firstRow = sanitizeText(detail.rows[0].join(" "));
+        if (firstRow.length > 45 && !seen.has(firstRow)) {
+          seen.add(firstRow);
+          points.push(firstRow);
         }
       }
     });

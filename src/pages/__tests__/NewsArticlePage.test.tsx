@@ -76,10 +76,33 @@ describe("NewsArticlePage", () => {
     expect(html).toContain("Water Balloon");
   });
 
-  it("renders the missing article empty state", () => {
+  it("renders structured article details including tables and links", () => {
+    const html = renderToString(
+      <ArticleSection
+        isPatchNotes
+        section={{
+          id: "structured",
+          title: "Structured Details",
+          content: "",
+          type: "highlight",
+          details: [
+            { type: "table", headers: ["Item", "Cost"], rows: [["Coupon", "100 coins"]] },
+            { type: "link", href: "https://example.com/source", label: "Official source" }
+          ]
+        }}
+      />
+    );
+
+    expect(html).toContain("news-detail-table");
+    expect(html).toContain("Coupon");
+    expect(html).toContain("news-detail-link");
+    expect(html).toContain("Official source");
+  });
+
+  it("renders a live-feed loading state for ids missing from the bundled feed", () => {
     const html = renderNewsArticleRoute("/news/not-real");
 
-    expect(html).toContain("Article not found.");
-    expect(html).toContain("Back to News");
+    expect(html).toContain("Loading full article...");
+    expect(html).toContain("Checking the live news feed");
   });
 });

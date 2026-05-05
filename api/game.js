@@ -1,26 +1,24 @@
-import fs from "node:fs/promises";
-import path from "node:path";
+import { hashPassword, isPlaintextLegacy, verifyPassword } from "../server/security/passwords.mjs";
+import { extractBearerToken, issueSessionToken, verifySessionToken } from "../server/security/sessionToken.mjs";
+import { storage } from "../server/storage/index.mjs";
 
-const LEADERBOARD_FILE = path.join(process.cwd(), "server", "data", "leaderboard.json");
-const PROGRESS_FILE = path.join(process.cwd(), "server", "data", "cloud-progress.json");
-const ROOMS_FILE = path.join(process.cwd(), "server", "data", "rooms.json");
-const USERS_FILE = path.join(process.cwd(), "server", "data", "users.json");
-const GUILDS_FILE = path.join(process.cwd(), "server", "data", "guilds.json");
-const CHAT_FILE = path.join(process.cwd(), "server", "data", "global-chat.json");
-const SOCIAL_FILE = path.join(process.cwd(), "server", "data", "social-state.json");
+const LEADERBOARD_FILE = "leaderboard";
+const PROGRESS_FILE = "cloud-progress";
+const ROOMS_FILE = "rooms";
+const USERS_FILE = "users";
+const GUILDS_FILE = "guilds";
+const CHAT_FILE = "global-chat";
+const SOCIAL_FILE = "social-state";
+const MAX_SCORE = 1_000_000_000;
+const MAX_PROGRESS_BYTES = 512_000;
+const MAX_RAID_DAMAGE = 10_000_000;
 
 async function readStore(file) {
-  try {
-    const raw = await fs.readFile(file, "utf8");
-    return JSON.parse(raw);
-  } catch {
-    return {};
-  }
+  return storage.get(file, {});
 }
 
 async function writeStore(file, payload) {
-  await fs.mkdir(path.dirname(file), { recursive: true });
-  await fs.writeFile(file, JSON.stringify(payload, null, 2), "utf8");
+  await storage.set(file, payload);
 }
 
 function buildRankings(entries, userId) {
@@ -65,6 +63,35 @@ function publicUser(user) {
 
 function sanitizeText(value, fallback = "") {
   return String(value ?? fallback).trim().slice(0, 180);
+}
+
+function sanitizeName(value, fallback = "Player", maxLength = 32) {
+  return sanitizeText(value, fallback).replace(/\s+/g, " ").slice(0, maxLength) || fallback;
+}
+
+function boundedNumber(value, fallback = 0, min = 0, max = MAX_SCORE) {
+  const next = Number(value);
+  if (!Number.isFinite(next)) return fallback;
+  return Math.min(max, Math.max(min, next));
+}
+
+function payloadSizeBytes(value) {
+  return Buffer.byteLength(JSON.stringify(value ?? {}), "utf8");
+}
+
+function requireAuthUser(req, res) {
+  const userId = getAuthUserId(req);
+  if (!userId) {
+    res.status(401).json({ error: "Authentication required." });
+    return null;
+  }
+  return userId;
+}
+
+function idleProgressKeyFor(userId, requestedKey) {
+  return String(requestedKey ?? "").startsWith("idlestory-world:")
+    ? `idlestory-world:${userId}`
+    : userId;
 }
 
 function getWeekKey(now = Date.now()) {
@@ -128,7 +155,7 @@ function ensureSocialStore(store = {}) {
     guilds: guilds.map((guild) => ({
       id: guild.id,
       name: guild.name,
-      icon: guild.icon ?? "🛡️",
+      icon: guild.icon ?? "shield",
       level: guild.level ?? 1,
       xp: guild.xp ?? 0,
       buffs: Array.isArray(guild.buffs) ? guild.buffs : ["battle-standard"],
@@ -203,8 +230,11 @@ async function handleLeaderboard(req, res) {
   }
 
   if (req.method === "POST") {
-    const { userId, username, gameId, score } = req.body ?? {};
-    if (!userId || !username || !gameId || typeof score !== "number") {
+    const userId = requireAuthUser(req, res);
+    if (!userId) return;
+    const { username, gameId, score } = req.body ?? {};
+    const safeScore = boundedNumber(score);
+    if (!username || !gameId || !Number.isFinite(Number(score))) {
       res.status(400).json({ error: "Missing leaderboard payload." });
       return;
     }
@@ -214,16 +244,16 @@ async function handleLeaderboard(req, res) {
     const existing = entries.find((entry) => entry.userId === userId);
 
     if (existing) {
-      if (score > existing.score) {
-        existing.score = score;
-        existing.username = username;
+      if (safeScore > existing.score) {
+        existing.score = safeScore;
+        existing.username = sanitizeName(username);
         existing.updatedAt = new Date().toISOString();
       }
     } else {
       entries.push({
         userId,
-        username,
-        score,
+        username: sanitizeName(username),
+        score: safeScore,
         createdAt: new Date().toISOString()
       });
     }
@@ -238,12 +268,10 @@ async function handleLeaderboard(req, res) {
 }
 
 async function handleProgress(req, res) {
-  const { userId } = req.method === "GET" ? req.query : req.body ?? {};
-
-  if (!userId || typeof userId !== "string") {
-    res.status(400).json({ error: "Missing userId." });
-    return;
-  }
+  const authUserId = requireAuthUser(req, res);
+  if (!authUserId) return;
+  const requestedUserId = req.method === "GET" ? req.query?.userId : req.body?.userId;
+  const userId = idleProgressKeyFor(authUserId, requestedUserId);
 
   if (req.method === "GET") {
     const store = await readStore(PROGRESS_FILE);
@@ -255,6 +283,10 @@ async function handleProgress(req, res) {
     const { progress } = req.body ?? {};
     if (!progress) {
       res.status(400).json({ error: "Missing progress payload." });
+      return;
+    }
+    if (payloadSizeBytes(progress) > MAX_PROGRESS_BYTES) {
+      res.status(413).json({ error: "Progress payload too large." });
       return;
     }
 
@@ -283,39 +315,79 @@ async function handleAuth(req, res) {
   const users = await readStore(USERS_FILE);
   const entries = Array.isArray(users.entries) ? users.entries : [];
 
+  // Common payload validation
+  if (!safeEmail || typeof password !== "string" || password.length === 0) {
+    res.status(400).json({ error: "Missing signup payload." });
+    return;
+  }
+  if (password.length > 256) {
+    res.status(400).json({ error: "Password too long." });
+    return;
+  }
+
   if (action === "signup") {
-    if (!safeEmail || !password) {
-      res.status(400).json({ error: "Missing signup payload." });
-      return;
-    }
     if (entries.some((user) => user.email === safeEmail)) {
       res.status(409).json({ error: "Account already exists." });
       return;
     }
+    const passwordHash = await hashPassword(password);
     const user = {
       id: `${safeEmail}-${Date.now()}`,
       username: safeName,
       email: safeEmail,
-      password: String(password),
+      // Hash only — never plaintext.
+      passwordHash,
       createdAt: new Date().toISOString()
     };
     entries.push(user);
     await writeStore(USERS_FILE, { entries });
-    res.status(200).json({ user: publicUser(user) });
+    const token = issueSessionToken(user.id);
+    res.status(200).json({ user: publicUser(user), token });
     return;
   }
 
   if (action === "login") {
-    const user = entries.find((entry) => entry.email === safeEmail && entry.password === String(password));
+    const user = entries.find((entry) => entry.email === safeEmail);
     if (!user) {
       res.status(401).json({ error: "Invalid login." });
       return;
     }
-    res.status(200).json({ user: publicUser(user) });
+    // Migration path: legacy plaintext rows compare directly, then re-hash
+    // on first successful login. New rows use scrypt only.
+    let ok = false;
+    if (typeof user.passwordHash === "string" && user.passwordHash.length > 0) {
+      ok = await verifyPassword(password, user.passwordHash);
+    } else if (typeof user.password === "string" && isPlaintextLegacy(user.password)) {
+      // Legacy plaintext field — compare-then-migrate.
+      if (user.password === String(password)) {
+        ok = true;
+        user.passwordHash = await hashPassword(password);
+        delete user.password;
+        await writeStore(USERS_FILE, { entries });
+      }
+    }
+    if (!ok) {
+      res.status(401).json({ error: "Invalid login." });
+      return;
+    }
+    const token = issueSessionToken(user.id);
+    res.status(200).json({ user: publicUser(user), token });
     return;
   }
 
   res.status(400).json({ error: "Unknown auth action." });
+}
+
+/**
+ * Resolve the authenticated user from `Authorization: Bearer <token>`.
+ * Returns the userId on success, or null when the token is missing/invalid.
+ */
+function getAuthUserId(req) {
+  const header = req.headers?.authorization ?? req.headers?.Authorization;
+  const token = extractBearerToken(typeof header === "string" ? header : null);
+  if (!token) return null;
+  const verified = verifySessionToken(token);
+  return verified ? verified.userId : null;
 }
 
 async function handleGuilds(req, res) {
@@ -332,15 +404,18 @@ async function handleGuilds(req, res) {
     return;
   }
 
-  const { action, userId, username, guildId, name } = req.body ?? {};
+  const userId = requireAuthUser(req, res);
+  if (!userId) return;
+  const { action, username, guildId, name } = req.body ?? {};
+  const safeUsername = sanitizeName(username);
 
   if (action === "create") {
-    const guildName = sanitizeText(name, "Maple Guild").slice(0, 32) || "Maple Guild";
+    const guildName = sanitizeName(name, "Maple Guild");
     const guild = {
       id: `${guildName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`,
       name: guildName,
       ownerId: userId,
-      members: [{ userId, username: sanitizeText(username, "Player") }],
+      members: [{ userId, username: safeUsername }],
       createdAt: new Date().toISOString()
     };
     guilds.push(guild);
@@ -356,7 +431,7 @@ async function handleGuilds(req, res) {
       return;
     }
     if (!guild.members.some((member) => member.userId === userId)) {
-      guild.members.push({ userId, username: sanitizeText(username, "Player") });
+      guild.members.push({ userId, username: safeUsername });
     }
     await writeStore(GUILDS_FILE, { guilds });
     res.status(200).json({ guild });
@@ -380,9 +455,11 @@ async function handleChat(req, res) {
     return;
   }
 
-  const { userId, username, message } = req.body ?? {};
-  const safeMessage = sanitizeText(message);
-  if (!userId || !safeMessage) {
+  const userId = requireAuthUser(req, res);
+  if (!userId) return;
+  const { username, message } = req.body ?? {};
+  const safeMessage = sanitizeText(message).slice(0, 180);
+  if (!safeMessage) {
     res.status(400).json({ error: "Missing chat payload." });
     return;
   }
@@ -390,7 +467,7 @@ async function handleChat(req, res) {
   messages.push({
     id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
     userId,
-    username: sanitizeText(username, "Player"),
+    username: sanitizeName(username),
     message: safeMessage,
     createdAt: new Date().toISOString()
   });
@@ -417,12 +494,14 @@ async function handleRooms(req, res) {
     return;
   }
 
+  const authUserId = requireAuthUser(req, res);
+  if (!authUserId) return;
   const { action } = req.body ?? {};
   const store = await readStore(ROOMS_FILE);
 
   if (action === "create") {
-    const { gameId, userId, username } = req.body ?? {};
-    if (!gameId || !userId || !username) {
+    const { gameId, username } = req.body ?? {};
+    if (!gameId || !username) {
       res.status(400).json({ error: "Missing room payload." });
       return;
     }
@@ -432,7 +511,7 @@ async function handleRooms(req, res) {
       id: roomId,
       gameId,
       status: "lobby",
-      players: [normalizePlayer({ userId, username })],
+      players: [normalizePlayer({ userId: authUserId, username: sanitizeName(username) })],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString()
     };
@@ -444,7 +523,7 @@ async function handleRooms(req, res) {
   }
 
   if (action === "join") {
-    const { roomId, userId, username } = req.body ?? {};
+    const { roomId, username } = req.body ?? {};
     const room = store[roomId];
 
     if (!room) {
@@ -452,7 +531,7 @@ async function handleRooms(req, res) {
       return;
     }
 
-    if (room.players.some((player) => player.userId === userId)) {
+    if (room.players.some((player) => player.userId === authUserId)) {
       res.status(200).json({ room });
       return;
     }
@@ -462,7 +541,7 @@ async function handleRooms(req, res) {
       return;
     }
 
-    room.players.push(normalizePlayer({ userId, username }));
+    room.players.push(normalizePlayer({ userId: authUserId, username: sanitizeName(username) }));
     room.updatedAt = new Date().toISOString();
     store[roomId] = room;
     await writeStore(ROOMS_FILE, store);
@@ -471,7 +550,7 @@ async function handleRooms(req, res) {
   }
 
   if (action === "update") {
-    const { roomId, userId, score, ready } = req.body ?? {};
+    const { roomId, score, ready } = req.body ?? {};
     const room = store[roomId];
 
     if (!room) {
@@ -479,8 +558,13 @@ async function handleRooms(req, res) {
       return;
     }
 
-    const next = withUpdatedRoom(room, userId, {
-      ...(typeof score === "number" ? { score } : {}),
+    if (!room.players.some((player) => player.userId === authUserId)) {
+      res.status(403).json({ error: "Player is not in this room." });
+      return;
+    }
+
+    const next = withUpdatedRoom(room, authUserId, {
+      ...(typeof score === "number" ? { score: boundedNumber(score) } : {}),
       ...(typeof ready === "boolean" ? { ready } : {})
     });
 
@@ -503,6 +587,10 @@ async function handleRooms(req, res) {
       res.status(400).json({ error: "Need two players." });
       return;
     }
+    if (!room.players.some((player) => player.userId === authUserId)) {
+      res.status(403).json({ error: "Player is not in this room." });
+      return;
+    }
 
     room.status = "running";
     room.updatedAt = new Date().toISOString();
@@ -513,7 +601,7 @@ async function handleRooms(req, res) {
   }
 
   if (action === "leave") {
-    const { roomId, userId } = req.body ?? {};
+    const { roomId } = req.body ?? {};
     const room = store[roomId];
 
     if (!room) {
@@ -521,7 +609,7 @@ async function handleRooms(req, res) {
       return;
     }
 
-    room.players = room.players.filter((player) => player.userId !== userId);
+    room.players = room.players.filter((player) => player.userId !== authUserId);
     room.updatedAt = new Date().toISOString();
 
     if (!room.players.length) {
@@ -625,7 +713,8 @@ async function handleSocial(req, res) {
   const store = ensureSocialStore(rawStore);
 
   if (req.method === "GET") {
-    const userId = typeof req.query?.userId === "string" ? req.query.userId : "";
+    const userId = requireAuthUser(req, res);
+    if (!userId) return;
     const profiles = Object.values(store.profiles);
     const currentUser = userId ? store.profiles[userId] ?? null : null;
     const { leaderboards, currentRanks } = buildLeaderboards(profiles, userId);
@@ -652,13 +741,9 @@ async function handleSocial(req, res) {
   }
 
   const action = String(req.body?.action ?? "sync");
-  const userId = sanitizeText(req.body?.userId);
-  const username = sanitizeText(req.body?.username, "Idle Hero") || "Idle Hero";
-
-  if (!userId) {
-    res.status(400).json({ error: "Missing userId." });
-    return;
-  }
+  const userId = requireAuthUser(req, res);
+  if (!userId) return;
+  const username = sanitizeName(req.body?.username, "Idle Hero");
 
   if (action === "sync") {
     const profile = req.body?.profile ?? {};
@@ -668,18 +753,18 @@ async function handleSocial(req, res) {
       username,
       guildId: profile.guildId ?? store.profiles[userId]?.guildId ?? null,
       guildName: profile.guildName ?? store.profiles[userId]?.guildName ?? null,
-      level: Number(profile.level) || 1,
-      power: Number(profile.power) || 0,
-      stage: Number(profile.stage) || 1,
-      bossKills: Number(profile.bossKills) || 0,
-      goldEarned: Number(profile.goldEarned) || 0,
-      weeklyStage: Number(profile.weeklyStage) || 1,
-      weeklyBossClears: Number(profile.weeklyBossClears) || 0,
+      level: boundedNumber(profile.level, 1, 1, 10000),
+      power: boundedNumber(profile.power, 0),
+      stage: boundedNumber(profile.stage, 1, 1, 1000000),
+      bossKills: boundedNumber(profile.bossKills, 0),
+      goldEarned: boundedNumber(profile.goldEarned, 0),
+      weeklyStage: boundedNumber(profile.weeklyStage, 1, 1, 1000000),
+      weeklyBossClears: boundedNumber(profile.weeklyBossClears, 0),
       updatedAt: new Date().toISOString(),
       pvp: {
-        rating: Number(req.body?.pvp?.rating) || store.profiles[userId]?.pvp?.rating || 1000,
-        wins: Number(req.body?.pvp?.wins) || store.profiles[userId]?.pvp?.wins || 0,
-        losses: Number(req.body?.pvp?.losses) || store.profiles[userId]?.pvp?.losses || 0
+        rating: boundedNumber(req.body?.pvp?.rating, store.profiles[userId]?.pvp?.rating || 1000, 0, 100000),
+        wins: boundedNumber(req.body?.pvp?.wins, store.profiles[userId]?.pvp?.wins || 0),
+        losses: boundedNumber(req.body?.pvp?.losses, store.profiles[userId]?.pvp?.losses || 0)
       },
       shadow: {
         dps: Number(req.body?.shadow?.dps) || Number(profile.power) || 1,
@@ -698,8 +783,8 @@ async function handleSocial(req, res) {
   }
 
   if (action === "guild-create") {
-    const name = sanitizeText(req.body?.name, "Idle Guild").slice(0, 32) || "Idle Guild";
-    const icon = sanitizeText(req.body?.icon, "🛡️") || "🛡️";
+    const name = sanitizeName(req.body?.name, "Idle Guild");
+    const icon = sanitizeText(req.body?.icon, "shield") || "shield";
     const guild = {
       id: `${name.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${Date.now()}`,
       name,
@@ -707,7 +792,7 @@ async function handleSocial(req, res) {
       level: 1,
       xp: 0,
       buffs: ["battle-standard"],
-      members: [{ userId, username, role: "leader", power: Number(req.body?.power) || 0, level: Number(req.body?.level) || 1, contribution: 0 }],
+      members: [{ userId, username, role: "leader", power: boundedNumber(req.body?.power, 0), level: boundedNumber(req.body?.level, 1, 1, 10000), contribution: 0 }],
       raid: {
         bossName: "Ancient Guild Slime",
         maxHp: 250000,
@@ -740,8 +825,8 @@ async function handleSocial(req, res) {
       userId,
       username,
       role: "member",
-      power: Number(req.body?.power) || 0,
-      level: Number(req.body?.level) || 1,
+      power: boundedNumber(req.body?.power, 0),
+      level: boundedNumber(req.body?.level, 1, 1, 10000),
       contribution: 0
     });
     if (store.profiles[userId]) {
@@ -768,10 +853,14 @@ async function handleSocial(req, res) {
 
   if (action === "guild-raid") {
     const guildId = sanitizeText(req.body?.guildId);
-    const damage = Math.max(1, Number(req.body?.damage) || 0);
+    const damage = boundedNumber(req.body?.damage, 0, 0, MAX_RAID_DAMAGE);
     const guild = store.guilds.find((entry) => entry.id === guildId);
     if (!guild) {
       res.status(404).json({ error: "Guild not found." });
+      return;
+    }
+    if (!guild.members.some((member) => member.userId === userId)) {
+      res.status(403).json({ error: "Guild membership required." });
       return;
     }
     guild.raid.hp = Math.max(0, guild.raid.hp - damage);
@@ -798,9 +887,9 @@ async function handleSocial(req, res) {
   if (action === "shadow-battle") {
     if (store.profiles[userId]) {
       store.profiles[userId].pvp = {
-        rating: Number(req.body?.pvp?.rating) || store.profiles[userId].pvp?.rating || 1000,
-        wins: Number(req.body?.pvp?.wins) || store.profiles[userId].pvp?.wins || 0,
-        losses: Number(req.body?.pvp?.losses) || store.profiles[userId].pvp?.losses || 0
+        rating: boundedNumber(req.body?.pvp?.rating, store.profiles[userId].pvp?.rating || 1000, 0, 100000),
+        wins: boundedNumber(req.body?.pvp?.wins, store.profiles[userId].pvp?.wins || 0),
+        losses: boundedNumber(req.body?.pvp?.losses, store.profiles[userId].pvp?.losses || 0)
       };
       store.profiles[userId].updatedAt = new Date().toISOString();
     }

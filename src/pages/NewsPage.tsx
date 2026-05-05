@@ -2,23 +2,28 @@ import { useMemo, useState } from "react";
 import { usePageMeta } from "../app/usePageMeta";
 import { NewsCard } from "../components/content/NewsCard";
 import { SectionHeader } from "../components/ui/SectionHeader";
-import { newsCategories, newsRegions, type NewsCategory, type NewsRegion } from "../data/newsHub";
+import { newsCategories, newsRegions, type NewsCategory, type NewsRegionFilter } from "../data/newsHub";
 import { useNewsFeed } from "../hooks/useNewsFeed";
 import { formatNewsMetaDate } from "../lib/newsHub";
 import { useI18n } from "../i18n/I18nProvider";
+import "../styles/news-view-toggle.css";
 
 export function NewsPage() {
   const { t } = useI18n();
   usePageMeta(t("News"), t("Latest updates, patch notes, events, and official announcements."));
   const [activeCategory, setActiveCategory] = useState<NewsCategory>("all");
   const [query, setQuery] = useState("");
-  const [activeRegion, setActiveRegion] = useState<NewsRegion>("gms");
+  const [activeRegion, setActiveRegion] = useState<NewsRegionFilter>("all");
+  // "grouped" = themed lanes; "all" = single flat grid showing every match.
+  // Default to "all" so the page never silently hides items.
+  const [viewMode, setViewMode] = useState<"grouped" | "all">("all");
   const {
     categoryCounts,
     error,
     featuredItem,
     filteredItems,
     gridItems,
+    regionAgnosticItems,
     isLoading,
     isRefreshing,
     isStale,
@@ -28,42 +33,46 @@ export function NewsPage() {
     refresh
   } = useNewsFeed(activeCategory, query, activeRegion);
   const hasSearch = query.trim().length > 0;
-  const showGroupedLanes = activeCategory === "all" && !hasSearch && !isLoading;
+  const showGroupedLanes = viewMode === "grouped" && activeCategory === "all" && !hasSearch && !isLoading;
   const newsLanes = useMemo(() => {
+    // Build each lane from the region-agnostic feed for the KMS Preview lane
+    // (so it stays populated regardless of the selected region tab) and from
+    // the active-region gridItems for the rest.
+    const kmsLaneSource = regionAgnosticItems.filter((item) => item.region === "kms");
     const lanes = [
       {
         description: t("Newest official updates."),
-        items: gridItems.slice(0, 6),
+        items: gridItems,
         key: "latest",
         title: t("Latest News")
       },
       {
         description: t("Version changes and patch details."),
-        items: gridItems.filter((item) => item.category === "patch-notes").slice(0, 6),
+        items: gridItems.filter((item) => item.category === "patch-notes"),
         key: "patch",
         title: t("Patch Notes")
       },
       {
         description: t("Time-limited activities and rewards."),
-        items: gridItems.filter((item) => item.category === "events").slice(0, 6),
+        items: gridItems.filter((item) => item.category === "events"),
         key: "events",
         title: t("Events")
       },
       {
         description: t("Shop updates, sales, and bundles."),
-        items: gridItems.filter((item) => item.category === "cash-shop").slice(0, 6),
+        items: gridItems.filter((item) => item.category === "cash-shop"),
         key: "cash",
         title: t("Cash Shop Updates")
       },
       {
         description: t("KMS previews and future-facing updates."),
-        items: gridItems.filter((item) => item.region === "kms").slice(0, 6),
+        items: kmsLaneSource,
         key: "kms",
         title: t("KMS Preview")
       }
     ];
     return lanes.filter((lane) => lane.items.length > 0);
-  }, [gridItems, t]);
+  }, [gridItems, regionAgnosticItems, t]);
 
   return (
     <>
@@ -150,6 +159,26 @@ export function NewsPage() {
             </label>
           </div>
 
+          <div className="news-view-toggle" role="tablist" aria-label="News view mode">
+            <button
+              aria-pressed={viewMode === "all"}
+              className={`news-view-toggle__button ${viewMode === "all" ? "is-active" : ""}`}
+              onClick={() => setViewMode("all")}
+              type="button"
+            >
+              {t("All updates")} <small>({filteredItems.length})</small>
+            </button>
+            <button
+              aria-pressed={viewMode === "grouped"}
+              className={`news-view-toggle__button ${viewMode === "grouped" ? "is-active" : ""}`}
+              disabled={activeCategory !== "all" || hasSearch}
+              onClick={() => setViewMode("grouped")}
+              type="button"
+            >
+              {t("Grouped lanes")}
+            </button>
+          </div>
+
           {featuredItem ? (
             <div className="news-featured">
               <SectionHeader
@@ -196,7 +225,7 @@ export function NewsPage() {
             </div>
           ) : (
             <div className="news-grid">
-              {gridItems.map((item) => (
+              {(viewMode === "all" ? filteredItems : gridItems).map((item) => (
                 <NewsCard item={item} key={item.id} />
               ))}
             </div>

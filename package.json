@@ -4,8 +4,8 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "predev": "node ./scripts/sync-youtube.mjs && node ./scripts/sync-twitch.mjs && node ./scripts/sync-news.mjs && node ./scripts/sync-monsters.mjs && node ./scripts/sync-items.mjs && node ./scripts/sync-maps.mjs && node ./scripts/sync-pets.mjs && node ./scripts/sync-quests.mjs",
-    "prebuild": "node ./scripts/sync-youtube.mjs && node ./scripts/sync-twitch.mjs && node ./scripts/sync-news.mjs && node ./scripts/sync-monsters.mjs && node ./scripts/sync-items.mjs && node ./scripts/sync-maps.mjs && node ./scripts/sync-pets.mjs && node ./scripts/sync-quests.mjs",
+    "predev": "node ./scripts/sync-if-enabled.mjs",
+    "prebuild": "node ./scripts/sync-if-enabled.mjs",
     "dev": "vite",
     "build": "tsc -b && vite build",
     "test": "vitest run",
@@ -19,7 +19,8 @@
     "sync:items": "node ./scripts/sync-items.mjs",
     "sync:maps": "node ./scripts/sync-maps.mjs",
     "sync:quests": "node ./scripts/sync-quests.mjs",
-    "sync:pets": "node ./scripts/sync-pets.mjs"
+    "sync:pets": "node ./scripts/sync-pets.mjs",
+    "check:public-assets": "node ./scripts/check-public-assets.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",

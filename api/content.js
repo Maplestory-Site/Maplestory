@@ -1,3 +1,5 @@
+import dns from "node:dns/promises";
+import net from "node:net";
 import { fetchGmsArticle } from "../server/news/gmsArticle.mjs";
 import { fetchHtml } from "../server/news/fetchHtml.mjs";
 import { buildKmsPayloadFromHtml, fetchKmsArticle } from "../server/news/kmsArticle.mjs";
@@ -16,6 +18,8 @@ function decodeTranslatePayload(payload) {
 
 const translationMemory = new Map();
 const MAX_TRANSLATE_CONCURRENCY = 8;
+const RAW_HTML_ALLOWLIST = new Set(["www.nexon.com", "maplestory.nexon.net", "orangemushroom.net"]);
+const MAX_RAW_HTML_BYTES = 2 * 1024 * 1024;
 const REQUIRED_LATEST_YOUTUBE_VIDEO = {
   id: "0Xjqa0LXQlg",
   title: "v 268 Maple University 21st Anniversary Update Preview",
@@ -36,6 +40,76 @@ function sendContentError(res, status, error, code = "CONTENT_ERROR", extra = {}
     code,
     ...extra
   });
+}
+
+function isPrivateIpv4(host) {
+  const parts = host.split(".").map((part) => Number(part));
+  if (parts.length !== 4 || parts.some((part) => !Number.isInteger(part) || part < 0 || part > 255)) return false;
+  const [a, b] = parts;
+  return (
+    a === 10 ||
+    a === 127 ||
+    (a === 172 && b >= 16 && b <= 31) ||
+    (a === 192 && b === 168) ||
+    (a === 169 && b === 254) ||
+    a === 0
+  );
+}
+
+function isBlockedIp(address) {
+  const ipType = net.isIP(address);
+  if (ipType === 4) return isPrivateIpv4(address);
+  if (ipType === 6) {
+    const value = address.toLowerCase();
+    return value === "::1" || value.startsWith("fc") || value.startsWith("fd") || value.startsWith("fe80:");
+  }
+  return false;
+}
+
+async function validateRawHtmlUrl(url) {
+  const parsed = new URL(url);
+  if (!["http:", "https:"].includes(parsed.protocol)) {
+    throw new Error("Invalid URL protocol.");
+  }
+  if (!RAW_HTML_ALLOWLIST.has(parsed.hostname)) {
+    throw new Error("Host is not allowlisted.");
+  }
+  const records = await dns.lookup(parsed.hostname, { all: true });
+  if (!records.length || records.some((record) => isBlockedIp(record.address))) {
+    throw new Error("Host resolves to a blocked network.");
+  }
+  return parsed;
+}
+
+async function fetchAllowedHtml(url, redirects = 0) {
+  if (redirects > 3) throw new Error("Too many redirects.");
+  const parsed = await validateRawHtmlUrl(url);
+  const response = await fetch(parsed, {
+    redirect: "manual",
+    headers: {
+      Accept: "text/html,application/xhtml+xml,application/xml;q=0.9",
+      "User-Agent":
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
+    }
+  });
+  if ([301, 302, 303, 307, 308].includes(response.status)) {
+    const location = response.headers.get("location");
+    if (!location) throw new Error("Redirect without location.");
+    return fetchAllowedHtml(new URL(location, parsed).toString(), redirects + 1);
+  }
+  const contentType = response.headers.get("content-type") ?? "";
+  if (!/text\/html|application\/xhtml\+xml|application\/xml|text\/xml/i.test(contentType)) {
+    throw new Error("Unexpected content type.");
+  }
+  const contentLength = Number(response.headers.get("content-length") ?? 0);
+  if (contentLength > MAX_RAW_HTML_BYTES) {
+    throw new Error("HTML response too large.");
+  }
+  const html = await response.text();
+  if (Buffer.byteLength(html, "utf8") > MAX_RAW_HTML_BYTES) {
+    throw new Error("HTML response too large.");
+  }
+  return { response, html };
 }
 
 function getYoutubePublishedTime(video) {
@@ -240,46 +314,34 @@ function buildKmsFallbackPayload(url, html = "") {
 }
 
 async function fetchRawArticle(url, res) {
+  if (process.env.ALLOW_RAW_HTML_FETCH !== "true") {
+    sendContentError(res, 403, "Raw HTML fetching is disabled.", "RAW_HTML_FETCH_DISABLED");
+    return;
+  }
   if (!url || typeof url !== "string") {
     sendContentError(res, 400, "Missing url parameter.", "MISSING_URL");
     return;
   }
 
   try {
-    const parsed = new URL(url);
-    if (!["http:", "https:"].includes(parsed.protocol)) {
-      sendContentError(res, 400, "Invalid URL protocol.", "INVALID_URL_PROTOCOL");
-      return;
-    }
+    await validateRawHtmlUrl(url);
   } catch {
     sendContentError(res, 400, "Invalid URL.", "INVALID_URL");
     return;
   }
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 15000);
-
   try {
-    const response = await fetch(url, {
-      headers: {
-        Accept: "text/html",
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36"
-      },
-      signal: controller.signal
-    });
+    const { response, html } = await fetchAllowedHtml(url);
 
     if (!response.ok) {
       sendContentError(res, response.status, "Failed to fetch article.", "FETCH_HTML_FAILED");
       return;
     }
 
-    const html = await response.text();
     res.status(200).json({ html });
-  } catch {
-    sendContentError(res, 500, "Failed to fetch article.", "FETCH_HTML_FAILED");
-  } finally {
-    clearTimeout(timeout);
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to fetch article.";
+    sendContentError(res, 400, message, "FETCH_HTML_BLOCKED");
   }
 }
 
@@ -545,3 +607,5 @@ export default async function handler(req, res) {
 
   sendContentError(res, 404, "Unknown content resource.", "UNKNOWN_RESOURCE");
 }
+
+export { isBlockedIp, validateRawHtmlUrl };

@@ -87,6 +87,13 @@ function stripNoiseCheerio(root) {
 }
 
 function extractImageFromNode($, node, baseUrl) {
+  const pickFromSrcSet = (value = "") =>
+    value
+      .split(",")
+      .map((part) => part.trim().split(" ")[0])
+      .filter(Boolean)[0] || "";
+
+  const pictureSource = $(node).closest("picture").find("source[srcset], source[data-srcset]").first();
   const srcCandidate =
     $(node).attr("src") ||
     $(node).attr("data-src") ||
@@ -94,20 +101,80 @@ function extractImageFromNode($, node, baseUrl) {
     $(node).attr("data-original") ||
     $(node).attr("data-orig-file") ||
     $(node).attr("data-large-file") ||
-    $(node)
-      .attr("srcset")
-      ?.split(",")
-      .map((part) => part.trim().split(" ")[0])
-      .filter(Boolean)[0] ||
-    $(node)
-      .attr("data-srcset")
-      ?.split(",")
-      .map((part) => part.trim().split(" ")[0])
-      .filter(Boolean)[0] ||
+    pickFromSrcSet($(node).attr("srcset") || "") ||
+    pickFromSrcSet($(node).attr("data-srcset") || "") ||
+    pickFromSrcSet(pictureSource.attr("srcset") || pictureSource.attr("data-srcset") || "") ||
     "";
   const src = resolveUrl(srcCandidate, baseUrl);
   const alt = cleanText($(node).attr("alt") || "");
   return { src, alt };
+}
+
+function extractLinksFromNode($, node, baseUrl) {
+  return $(node)
+    .find("a[href]")
+    .toArray()
+    .map((link) => ({
+      type: "link",
+      href: resolveUrl($(link).attr("href") || "", baseUrl),
+      label: cleanText($(link).text() || $(link).attr("aria-label") || $(link).attr("title") || "")
+    }))
+    .filter((link) => link.href && link.label && link.href !== link.label);
+}
+
+function extractListItems($, node) {
+  return $(node)
+    .children("li")
+    .toArray()
+    .map((li) => {
+      const clone = $(li).clone();
+      clone.children("ul, ol").remove();
+      const text = cleanText(clone.text() || "");
+      const children = $(li)
+        .children("ul, ol")
+        .children("li")
+        .toArray()
+        .map((child) => cleanText($(child).text() || ""))
+        .filter(Boolean);
+      return { text, children };
+    })
+    .filter((item) => item.text || item.children.length);
+}
+
+function extractTable($, node) {
+  const caption = cleanText($(node).find("caption").first().text() || "");
+  const headerCells = $(node)
+    .find("thead tr")
+    .first()
+    .find("th, td")
+    .toArray()
+    .map((cell) => cleanText($(cell).text() || ""))
+    .filter(Boolean);
+
+  const firstRowHeaders = !headerCells.length
+    ? $(node)
+        .find("tr")
+        .first()
+        .find("th")
+        .toArray()
+        .map((cell) => cleanText($(cell).text() || ""))
+        .filter(Boolean)
+    : [];
+  const headers = headerCells.length ? headerCells : firstRowHeaders;
+  const rows = $(node)
+    .find("tr")
+    .toArray()
+    .slice(headers.length && !headerCells.length ? 1 : 0)
+    .map((row) =>
+      $(row)
+        .find("td, th")
+        .toArray()
+        .map((cell) => cleanText($(cell).text() || ""))
+        .filter(Boolean)
+    )
+    .filter((row) => row.length);
+
+  return { headers, rows, caption };
 }
 
 function walkCheerio($, node, tokens, baseUrl, stats) {
@@ -137,14 +204,10 @@ function walkCheerio($, node, tokens, baseUrl, stats) {
     if (img.length) {
       const { src, alt } = extractImageFromNode($, img, baseUrl);
       if (src) {
-        tokens.push({ type: "image", src, alt });
+        const caption = cleanText($(node).find("figcaption").text() || "");
+        tokens.push({ type: "image", src, alt, caption });
         stats.images += 1;
       }
-    }
-    const caption = cleanText($(node).find("figcaption").text() || "");
-    if (caption) {
-      tokens.push({ type: "text", value: caption });
-      stats.paragraphs += 1;
     }
     return;
   }
@@ -164,15 +227,12 @@ function walkCheerio($, node, tokens, baseUrl, stats) {
       tokens.push({ type: "text", value: text });
       stats.paragraphs += 1;
     }
+    extractLinksFromNode($, node, baseUrl).forEach((link) => tokens.push(link));
     return;
   }
 
   if (tag === "ul" || tag === "ol") {
-    const items = $(node)
-      .find("li")
-      .map((_, el) => cleanText($(el).text() || ""))
-      .get()
-      .filter(Boolean);
+    const items = extractListItems($, node);
     if (items.length) {
       tokens.push({ type: "list", items });
       stats.lists += 1;
@@ -181,21 +241,19 @@ function walkCheerio($, node, tokens, baseUrl, stats) {
   }
 
   if (tag === "table") {
-    const rows = $(node)
-      .find("tr")
-      .map((_, row) =>
-        $(row)
-          .find("th, td")
-          .map((__, cell) => cleanText($(cell).text() || ""))
-          .get()
-          .filter(Boolean)
-          .join(" | ")
-      )
-      .get()
-      .filter(Boolean);
+    const { headers, rows, caption } = extractTable($, node);
     if (rows.length) {
-      tokens.push({ type: "list", items: rows });
+      tokens.push({ type: "table", headers, rows, caption });
       stats.lists += 1;
+    }
+    return;
+  }
+
+  if (tag === "a") {
+    const href = resolveUrl($(node).attr("href") || "", baseUrl);
+    const label = cleanText($(node).text() || $(node).attr("aria-label") || $(node).attr("title") || "");
+    if (href && label) {
+      tokens.push({ type: "link", href, label });
     }
     return;
   }
@@ -252,10 +310,14 @@ function buildSections(tokens) {
 
     const item =
       token.type === "image"
-        ? { type: "image", src: token.src, alt: token.alt || "" }
+        ? { type: "image", src: token.src, alt: token.alt || "", caption: token.caption || "" }
         : token.type === "list"
           ? { type: "list", items: token.items || [] }
-          : { type: "text", value: token.value || "" };
+          : token.type === "link"
+            ? { type: "link", href: token.href, label: token.label }
+            : token.type === "table"
+              ? { type: "table", headers: token.headers || [], rows: token.rows || [], caption: token.caption || "" }
+              : { type: "text", value: token.value || "" };
 
     if (current) {
       current.details.push(item);
@@ -307,7 +369,9 @@ function buildSections(tokens) {
     const totalChars = details.reduce((sum, item) => {
       if (!item) return sum;
       if (item.type === "text" || item.type === "subheading") return sum + (item.value || "").length;
-      if (item.type === "list") return sum + (item.items || []).join(" ").length;
+      if (item.type === "list") return sum + (item.items || []).map((entry) => (typeof entry === "string" ? entry : `${entry.text || ""} ${(entry.children || []).join(" ")}`)).join(" ").length;
+      if (item.type === "table") return sum + [...(item.headers || []), ...(item.rows || []).flat()].join(" ").length;
+      if (item.type === "link") return sum + `${item.label || ""} ${item.href || ""}`.length;
       return sum;
     }, 0);
     const chunkSize = totalBlocks > 36 ? 9 : totalBlocks > 28 ? 8 : totalBlocks > 20 ? 7 : 6;
@@ -319,8 +383,12 @@ function buildSections(tokens) {
         item?.type === "text" || item?.type === "subheading"
           ? item.value || ""
           : item?.type === "list"
-            ? (item.items || []).join(" ")
-            : "";
+            ? (item.items || []).map((entry) => (typeof entry === "string" ? entry : `${entry.text || ""} ${(entry.children || []).join(" ")}`)).join(" ")
+            : item?.type === "table"
+              ? [...(item.headers || []), ...(item.rows || []).flat()].join(" ")
+              : item?.type === "link"
+                ? `${item.label || ""} ${item.href || ""}`
+                : "";
 
       if (item?.type === "text" && isHeadingLike(textValue) && bucket.details.length >= 2) {
         const nextTitle = textValue.replace(/:$/, "").trim() || "Details";
@@ -379,7 +447,13 @@ export function detectCategory(section) {
   const textBlob = (section.details || [])
     .map((item) => {
       if (item?.type === "text" || item?.type === "subheading") return item.value;
-      if (item?.type === "list") return item.items?.join(" ") || "";
+      if (item?.type === "list") {
+        return (item.items || [])
+          .map((entry) => (typeof entry === "string" ? entry : `${entry.text || ""} ${(entry.children || []).join(" ")}`))
+          .join(" ");
+      }
+      if (item?.type === "table") return [...(item.headers || []), ...(item.rows || []).flat()].join(" ");
+      if (item?.type === "link") return `${item.label || ""} ${item.href || ""}`;
       return "";
     })
     .join(" ")
@@ -443,7 +517,7 @@ export function parseArticleHtml(html = "", baseUrl = "") {
     }
   }
 
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.DEBUG_NEWS_PARSER === "true") {
     console.log("[KMS Parser] HTML length:", html.length);
     console.log("[KMS Parser] root selector:", rootSelector || "NONE");
   }
@@ -488,7 +562,7 @@ export function parseArticleHtml(html = "", baseUrl = "") {
 
   stripNoiseCheerio(root);
 
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.DEBUG_NEWS_PARSER === "true") {
     console.log("[KMS Parser] root children:", root.contents().length);
   }
 
@@ -498,7 +572,7 @@ export function parseArticleHtml(html = "", baseUrl = "") {
 
   const rootHtml = root.html() || "";
   const fullText = cleanText(root.text() || "");
-  if (process.env.NODE_ENV !== "production") {
+  if (process.env.DEBUG_NEWS_PARSER === "true") {
     console.log("[KMS Parser] root HTML length:", rootHtml.length);
     console.log("[KMS Parser] Tokens extracted:", tokens.length);
     console.log("[KMS Parser] paragraphs:", stats.paragraphs);
@@ -507,7 +581,7 @@ export function parseArticleHtml(html = "", baseUrl = "") {
   }
 
   const likelyPartialExtraction = !tokens.length || (fullText.length < 280 && !stats.images && !stats.lists);
-  if (likelyPartialExtraction) {
+  if (likelyPartialExtraction && process.env.DEBUG_NEWS_PARSER === "true") {
     console.warn("[KMS Parser] ARTICLE EXTRACTION FALLBACK MAY BE PARTIAL");
   }
 
@@ -524,7 +598,14 @@ export function parseArticleHtml(html = "", baseUrl = "") {
       .map((detail) => {
         if (!detail) return null;
         if (typeof detail === "string") return { type: "text", value: detail };
-        if (detail.type === "text" || detail.type === "list" || detail.type === "image" || detail.type === "subheading") {
+        if (
+          detail.type === "text" ||
+          detail.type === "list" ||
+          detail.type === "image" ||
+          detail.type === "subheading" ||
+          detail.type === "link" ||
+          detail.type === "table"
+        ) {
           return detail;
         }
         if ("value" in detail && typeof detail.value === "string") {
@@ -537,7 +618,7 @@ export function parseArticleHtml(html = "", baseUrl = "") {
 
   const totalDetails = sections.reduce((sum, section) => sum + (section.details?.length || 0), 0);
   const hasStructuredDetails = sections.some((section) =>
-    (section.details || []).some((detail) => detail?.type === "image" || detail?.type === "list")
+    (section.details || []).some((detail) => detail?.type === "image" || detail?.type === "list" || detail?.type === "table" || detail?.type === "link")
   );
   if (fullText && !hasStructuredDetails && sections.length <= 1 && totalDetails < 4) {
     sections = [

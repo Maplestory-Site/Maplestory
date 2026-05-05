@@ -5,6 +5,16 @@ import { getActiveRoomId } from "../../components/content/minigames/shared/multi
 import { updateRoom } from "../../components/content/minigames/shared/multiplayerApi";
 import { loginCloudAccount, signupCloudAccount } from "../../components/content/minigames/shared/onlineAccounts";
 
+/**
+ * MockAuthContext — demo / offline auth surface.
+ *
+ * Security note: this context NEVER stores plaintext passwords in
+ * `localStorage`. The cached profile only carries metadata + an opaque
+ * session token (when the cloud signs one). Authentication is delegated to
+ * the cloud handler at /api/auth, which now uses scrypt + HMAC session
+ * tokens — see `server/security/passwords.mjs` and
+ * `server/security/sessionToken.mjs`.
+ */
 type MockUser = {
   id: string;
   username: string;
@@ -17,7 +27,6 @@ type MockUser = {
   coins: number;
   ownedItems: string[];
   highScores: UserProgress["highScores"];
-  password: string;
 };
 
 type LoginPayload = {
@@ -36,10 +45,38 @@ type MockAuthContextValue = {
   logout: () => void;
 };
 
+type StoredSession = {
+  userId: string;
+  token?: string;
+};
+
 const STORAGE_KEY = "snailslayer-accounts";
 const SESSION_KEY = "snailslayer-session";
 
 const MockAuthContext = createContext<MockAuthContextValue | null>(null);
+
+/**
+ * Strip any password-shaped fields from a stored record. Migrates old saves
+ * that may still carry a `password` field from the previous implementation.
+ */
+function sanitizeStoredUser(value: unknown): MockUser | null {
+  if (!value || typeof value !== "object") return null;
+  const record = value as Record<string, unknown>;
+  if (typeof record.id !== "string" || typeof record.username !== "string") return null;
+  return {
+    id: record.id,
+    username: record.username,
+    name: typeof record.name === "string" ? record.name : record.username,
+    email: typeof record.email === "string" ? record.email : "",
+    avatarLabel: typeof record.avatarLabel === "string" ? record.avatarLabel : record.username.slice(0, 1).toUpperCase(),
+    createdAt: typeof record.createdAt === "string" ? record.createdAt : new Date().toISOString(),
+    xp: typeof record.xp === "number" ? record.xp : 0,
+    level: typeof record.level === "number" ? record.level : 1,
+    coins: typeof record.coins === "number" ? record.coins : 0,
+    ownedItems: Array.isArray(record.ownedItems) ? (record.ownedItems as string[]) : [],
+    highScores: (record.highScores as UserProgress["highScores"]) ?? ({} as UserProgress["highScores"])
+  };
+}
 
 function readInitialUser(): MockUser | null {
   if (typeof window === "undefined") return null;
@@ -47,9 +84,12 @@ function readInitialUser(): MockUser | null {
     const session = window.localStorage.getItem(SESSION_KEY);
     const saved = window.localStorage.getItem(STORAGE_KEY);
     if (!saved || !session) return null;
-    const parsed = JSON.parse(saved) as MockUser[];
-    const sessionId = JSON.parse(session) as { userId: string };
-    return parsed.find((entry) => entry.id === sessionId.userId) || null;
+    const parsed = JSON.parse(saved) as unknown[];
+    const sessionId = JSON.parse(session) as StoredSession;
+    const list = (Array.isArray(parsed) ? parsed : [])
+      .map(sanitizeStoredUser)
+      .filter((entry): entry is MockUser => entry !== null);
+    return list.find((entry) => entry.id === sessionId.userId) || null;
   } catch {
     window.localStorage.removeItem(STORAGE_KEY);
     window.localStorage.removeItem(SESSION_KEY);
@@ -69,59 +109,76 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function persistUser(nextUser: MockUser) {
+  function persistUser(nextUser: MockUser, token?: string) {
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    const parsed = stored ? (JSON.parse(stored) as MockUser[]) : [];
-    const next = parsed.filter((entry) => entry.id !== nextUser.id).concat(nextUser);
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    window.localStorage.setItem(SESSION_KEY, JSON.stringify({ userId: nextUser.id }));
+    let parsed: unknown[] = [];
+    try {
+      parsed = stored ? (JSON.parse(stored) as unknown[]) : [];
+    } catch {
+      parsed = [];
+    }
+    const list = (Array.isArray(parsed) ? parsed : [])
+      .map(sanitizeStoredUser)
+      .filter((entry): entry is MockUser => entry !== null && entry.id !== nextUser.id);
+    list.push(nextUser);
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
+    const existing = (() => {
+      try {
+        const raw = window.localStorage.getItem(SESSION_KEY);
+        return raw ? (JSON.parse(raw) as StoredSession) : null;
+      } catch {
+        return null;
+      }
+    })();
+    window.localStorage.setItem(SESSION_KEY, JSON.stringify({ userId: nextUser.id, token: token ?? existing?.token }));
   }
 
   async function login({ email, password }: LoginPayload) {
-    const stored = window.localStorage.getItem(STORAGE_KEY);
+    // The local profile cache no longer stores passwords, so authentication
+    // is always delegated to the cloud handler. If cloud rejects the
+    // credentials we fail closed.
     try {
-      const parsed = stored ? (JSON.parse(stored) as MockUser[]) : [];
-      const match = parsed.find((entry) => entry.email === email.trim().toLowerCase() && entry.password === password);
-      if (!match) {
-        const cloudUser = await loginCloudAccount({ email, password });
-        if (!cloudUser) return false;
-        const progress = extractUserProgress({ xp: 0, level: 1, highScores: {} as UserProgress["highScores"] } as MockUser);
-        const nextUser: MockUser = {
-          id: cloudUser.id,
-          username: cloudUser.username,
-          name: cloudUser.username,
-          email: cloudUser.email,
-          avatarLabel: cloudUser.username.slice(0, 1).toUpperCase(),
-          createdAt: cloudUser.createdAt,
-          xp: progress.xp,
-          level: progress.level,
-          coins: progress.coins,
-          ownedItems: progress.ownedItems ?? [],
-          highScores: progress.highScores,
-          password
-        };
-        setUser(nextUser);
-        setAuthOpen(false);
-        persistUser(nextUser);
-        applyUserProgress(progress);
-        return true;
+      const auth = await loginCloudAccount({ email, password });
+      if (!auth) return false;
+      const cloudUser = auth.user;
+      const stored = window.localStorage.getItem(STORAGE_KEY);
+      let cachedProfile: MockUser | null = null;
+      try {
+        const parsed = stored ? (JSON.parse(stored) as unknown[]) : [];
+        cachedProfile = (Array.isArray(parsed) ? parsed : [])
+          .map(sanitizeStoredUser)
+          .find((entry): entry is MockUser => entry !== null && entry.id === cloudUser.id) ?? null;
+      } catch {
+        cachedProfile = null;
       }
-      const withProgress = {
-        ...match,
-        ...extractUserProgress(match)
+      const progress = cachedProfile
+        ? extractUserProgress(cachedProfile)
+        : extractUserProgress({ xp: 0, level: 1, highScores: {} as UserProgress["highScores"] } as MockUser);
+      const nextUser: MockUser = {
+        id: cloudUser.id,
+        username: cloudUser.username,
+        name: cloudUser.username,
+        email: cloudUser.email,
+        avatarLabel: cloudUser.username.slice(0, 1).toUpperCase(),
+        createdAt: cloudUser.createdAt,
+        xp: progress.xp,
+        level: progress.level,
+        coins: progress.coins,
+        ownedItems: progress.ownedItems ?? [],
+        highScores: progress.highScores
       };
-      setUser(withProgress);
+      setUser(nextUser);
       setAuthOpen(false);
-      persistUser(withProgress);
-      applyUserProgress(extractUserProgress(withProgress));
-      void loadCloudProgress(withProgress.id)
+      persistUser(nextUser, auth.token);
+      applyUserProgress(progress);
+      void loadCloudProgress(nextUser.id)
         .then((payload) => {
           if (payload.progress) {
             applyUserProgress(payload.progress);
           }
         })
         .finally(() => {
-          void flushOutbox(withProgress.id);
+          void flushOutbox(nextUser.id);
         });
       return true;
     } catch {
@@ -132,37 +189,26 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
   async function signup({ username, email, password }: { username: string; email: string; password: string }) {
     const safeName = username.trim() || "Maple Player";
     const safeEmail = email.trim().toLowerCase() || "player@maple.world";
-    const stored = window.localStorage.getItem(STORAGE_KEY);
-    if (stored) {
-      try {
-        const parsed = JSON.parse(stored) as MockUser[];
-        if (parsed.some((entry) => entry.email === safeEmail)) {
-          return false;
-        }
-      } catch {
-        return false;
-      }
-    }
-    const cloudUser = await signupCloudAccount({ username: safeName, email: safeEmail, password });
-    const id = cloudUser?.id ?? `${safeEmail}-${Date.now()}`;
+    const auth = await signupCloudAccount({ username: safeName, email: safeEmail, password });
+    if (!auth) return false;
+    const cloudUser = auth.user;
     const progress = extractUserProgress({ xp: 0, level: 1, highScores: {} as UserProgress["highScores"] } as MockUser);
     const nextUser: MockUser = {
-      id,
+      id: cloudUser.id,
       username: safeName,
       name: safeName,
       email: safeEmail,
       avatarLabel: safeName.slice(0, 1).toUpperCase(),
-      createdAt: cloudUser?.createdAt ?? new Date().toISOString(),
+      createdAt: cloudUser.createdAt ?? new Date().toISOString(),
       xp: progress.xp,
       level: progress.level,
       coins: progress.coins,
       ownedItems: progress.ownedItems ?? [],
-      highScores: progress.highScores,
-      password
+      highScores: progress.highScores
     };
     setUser(nextUser);
     setAuthOpen(false);
-    persistUser(nextUser);
+    persistUser(nextUser, auth.token);
     applyUserProgress(progress);
     void saveCloudProgress(nextUser.id, progress);
     return true;

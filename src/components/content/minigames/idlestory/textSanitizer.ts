@@ -5,7 +5,8 @@ const SMART_QUOTES = /[\u2018\u2019]/g;
 const DOUBLE_QUOTES = /[\u201C\u201D]/g;
 const BULLETS = /[\u2022]/g;
 const ELLIPSIS = /[\u2026]/g;
-const CONTROL_OR_REPLACEMENT = /[\u0000-\u001f\u007f\uFFFD]/g;
+// eslint-disable-next-line no-control-regex -- intentionally strips unsafe control bytes from save/import text.
+const CONTROL_OR_REPLACEMENT = new RegExp("[\\u0000-\\u001f\\u007f\\uFFFD]", "g");
 
 // Common mojibake fragments represented with escaped bytes so source remains UTF-8 clean.
 const MOJIBAKE_SEQUENCE = new RegExp(

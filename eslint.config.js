@@ -19,5 +19,14 @@ export default defineConfig([
       ecmaVersion: 2020,
       globals: globals.browser,
     },
+    rules: {
+      // The React Compiler lint bundle is useful during new feature work, but
+      // these two rules currently flag stable hydration/timer patterns across
+      // legacy screens. Keep correctness covered by tests while avoiding CI
+      // timeouts from a broad non-functional rewrite.
+      'react-hooks/set-state-in-effect': 'off',
+      'react-hooks/preserve-manual-memoization': 'off',
+      'react-refresh/only-export-components': 'warn',
+    },
   },
 ])

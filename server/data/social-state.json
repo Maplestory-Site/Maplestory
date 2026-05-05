@@ -12,7 +12,7 @@
       "goldEarned": 396000,
       "weeklyStage": 36,
       "weeklyBossClears": 10,
-      "updatedAt": "2026-05-01T07:34:52.346Z",
+      "updatedAt": "2026-05-03T17:11:10.453Z",
       "pvp": {
         "rating": 960,
         "wins": 20,
@@ -39,7 +39,7 @@
       "goldEarned": 748000,
       "weeklyStage": 68,
       "weeklyBossClears": 18,
-      "updatedAt": "2026-05-01T07:34:52.346Z",
+      "updatedAt": "2026-05-03T17:11:10.453Z",
       "pvp": {
         "rating": 1013,
         "wins": 37,
@@ -66,7 +66,7 @@
       "goldEarned": 1144000,
       "weeklyStage": 104,
       "weeklyBossClears": 28,
-      "updatedAt": "2026-05-01T07:34:52.346Z",
+      "updatedAt": "2026-05-03T17:11:10.453Z",
       "pvp": {
         "rating": 1073,
         "wins": 57,
@@ -93,7 +93,7 @@
       "goldEarned": 1716000,
       "weeklyStage": 156,
       "weeklyBossClears": 43,
-      "updatedAt": "2026-05-01T07:34:52.346Z",
+      "updatedAt": "2026-05-03T17:11:10.453Z",
       "pvp": {
         "rating": 1160,
         "wins": 86,
@@ -120,7 +120,7 @@
       "goldEarned": 2244000,
       "weeklyStage": 204,
       "weeklyBossClears": 56,
-      "updatedAt": "2026-05-01T07:34:52.346Z",
+      "updatedAt": "2026-05-03T17:11:10.453Z",
       "pvp": {
         "rating": 1240,
         "wins": 113,
@@ -147,7 +147,7 @@
       "goldEarned": 2772000,
       "weeklyStage": 252,
       "weeklyBossClears": 70,
-      "updatedAt": "2026-05-01T07:34:52.346Z",
+      "updatedAt": "2026-05-03T17:11:10.453Z",
       "pvp": {
         "rating": 1320,
         "wins": 140,
@@ -167,25 +167,25 @@
       "username": "Guest Hero",
       "guildId": "snail-legends-1777237703790",
       "guildName": "Snail Legends",
-      "level": 5,
-      "power": 1618,
-      "stage": 54,
-      "bossKills": 32,
-      "goldEarned": 58595.13845248626,
-      "weeklyStage": 224,
-      "weeklyBossClears": 28,
-      "updatedAt": "2026-05-01T07:34:52.346Z",
+      "level": 3,
+      "power": 921,
+      "stage": 10,
+      "bossKills": 20,
+      "goldEarned": 30525.23013050138,
+      "weeklyStage": 163,
+      "weeklyBossClears": 16,
+      "updatedAt": "2026-05-03T17:11:10.453Z",
       "pvp": {
         "rating": 1000,
         "wins": 0,
         "losses": 0
       },
       "shadow": {
-        "dps": 727.4981112362642,
-        "hp": 1386,
-        "defense": 46,
-        "attackSpeed": 1.06,
-        "critChance": 0.095,
+        "dps": 655.3251860034879,
+        "hp": 1042,
+        "defense": 38,
+        "attackSpeed": 1.036,
+        "critChance": 0.089,
         "critDamage": 1.45
       }
     },
@@ -232,8 +232,8 @@
           "userId": "guest-58jvrj04",
           "username": "Guest Hero",
           "role": "leader",
-          "power": 1618,
-          "level": 5,
+          "power": 921,
+          "level": 3,
           "contribution": 0
         }
       ],

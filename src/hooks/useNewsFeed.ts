@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { NewsCategory, NewsFeed, NewsRegion } from "../data/newsHub";
+import type { NewsCategory, NewsFeed, NewsRegionFilter } from "../data/newsHub";
 import { getFallbackNewsFeed, loadKmsNewsFeed, loadNewsFeed } from "../lib/newsFeedClient";
 import { filterNewsItems, getFeaturedNews, getNewsCategoryCounts, normalizeNewsFeed } from "../lib/newsHub";
 
-export function useNewsFeed(activeCategory: NewsCategory, query: string, region: NewsRegion) {
+export function useNewsFeed(activeCategory: NewsCategory, query: string, region: NewsRegionFilter) {
   const [feed, setFeed] = useState<NewsFeed>(() => getFallbackNewsFeed());
   const [requestVersion, setRequestVersion] = useState(0);
   const [status, setStatus] = useState({
@@ -72,7 +72,8 @@ export function useNewsFeed(activeCategory: NewsCategory, query: string, region:
     const controller = new AbortController();
 
     async function loadKmsFeed() {
-      if (region !== "kms") return;
+      // Fetch the dedicated KMS endpoint when the user is on the KMS or "all" region tab.
+      if (region !== "kms" && region !== "all") return;
 
       try {
         const result = await loadKmsNewsFeed({
@@ -113,6 +114,13 @@ export function useNewsFeed(activeCategory: NewsCategory, query: string, region:
     () => filterNewsItems(feed.items, activeCategory, query, region),
     [feed.items, activeCategory, query, region]
   );
+  // Region-agnostic projection used by grouped-view lanes (e.g. KMS Preview)
+  // so they can pull cross-region items even when the user has the GMS or
+  // KMS region selected. Always built from the full feed.
+  const regionAgnosticItems = useMemo(
+    () => filterNewsItems(feed.items, activeCategory, query, "all"),
+    [feed.items, activeCategory, query]
+  );
   const featuredItem = useMemo(() => getFeaturedNews(filteredItems), [filteredItems]);
   const gridItems = useMemo(
     () => filteredItems.filter((item) => item.id !== featuredItem?.id),
@@ -132,6 +140,7 @@ export function useNewsFeed(activeCategory: NewsCategory, query: string, region:
     featuredItem,
     filteredItems,
     gridItems,
+    regionAgnosticItems,
     meta: feed.meta,
     refresh
   };

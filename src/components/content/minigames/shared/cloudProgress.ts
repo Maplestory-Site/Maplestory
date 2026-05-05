@@ -1,4 +1,5 @@
 import type { UserProgress } from "./gameMeta";
+import { authHeaders } from "./onlineAccounts";
 
 const OUTBOX_KEY = "snailslayer-progress-outbox";
 
@@ -30,7 +31,8 @@ function writeOutbox(payload: OutboxPayload | null) {
 
 export async function loadCloudProgress(userId: string) {
   const response = await fetch(`/api/progress?userId=${encodeURIComponent(userId)}`, {
-    method: "GET"
+    method: "GET",
+    headers: authHeaders()
   });
 
   if (!response.ok) {
@@ -49,7 +51,7 @@ export async function saveCloudProgress(userId: string, progress: UserProgress) 
   try {
     const response = await fetch("/api/progress", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify({ userId, progress })
     });
     if (!response.ok) {
@@ -77,7 +79,7 @@ export async function submitLeaderboardScore(payload: { userId: string; username
   try {
     const response = await fetch("/api/leaderboard", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(payload)
     });
     return response.ok;

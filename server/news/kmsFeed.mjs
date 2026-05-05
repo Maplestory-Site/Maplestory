@@ -5,7 +5,7 @@ import { sortNewsItems } from "./normalize.mjs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 
-const MAX_KMS_ITEMS = 36;
+const MAX_KMS_ITEMS = Math.max(1, Number.parseInt(process.env.KMS_FEED_LIMIT || "72", 10) || 72);
 
 async function readJson(file) {
   try {
@@ -33,7 +33,8 @@ function buildMeta({ status, itemCount, updatedAt, lastSuccessfulSync }) {
     lastUpdated: updatedAt,
     lastSuccessfulSync,
     sourceStatus: status,
-    itemCount
+    itemCount,
+    kmsLimit: MAX_KMS_ITEMS
   };
 }
 
