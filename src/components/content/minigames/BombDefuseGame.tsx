@@ -35,6 +35,8 @@ export function BombDefuseGame() {
   const timerRef = useRef<number | null>(null);
   const timeLeftRef = useRef(7);
 
+
+
   function finishRun() {
     setPhase("over");
     updateGameMeta({ gameId: "bomb-defuse", score, outcome: "loss" });
@@ -50,6 +52,11 @@ export function BombDefuseGame() {
       return next;
     });
   }
+
+  const finishRunRef = useRef(finishRun);
+  useEffect(() => {
+    finishRunRef.current = finishRun;
+  });
 
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
@@ -72,7 +79,7 @@ export function BombDefuseGame() {
       timeLeftRef.current = next;
       setTimeLeft(next);
       if (next <= 0.05) {
-        finishRun();
+        finishRunRef.current();
       }
     }, 100);
 

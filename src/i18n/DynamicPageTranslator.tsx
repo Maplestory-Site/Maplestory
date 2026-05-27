@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 import { getDynamicTranslationCache, requestDynamicTranslations } from "./dynamicTranslate";
 import { useI18n } from "./I18nProvider";
 import { TRANSLATIONS } from "./translations";
+import { type LanguageCode } from "./languages";
 
 const TRANSLATABLE_ATTRIBUTES = ["placeholder", "aria-label", "title"] as const;
 const SKIP_SELECTOR =
@@ -10,9 +11,10 @@ const MAX_BATCH_SIZE = 45;
 
 type TextRecord = {
   original: string;
+  translated?: string;
 };
 
-type AttributeRecord = Partial<Record<(typeof TRANSLATABLE_ATTRIBUTES)[number], string>>;
+type AttributeRecord = Partial<Record<(typeof TRANSLATABLE_ATTRIBUTES)[number], { original: string; translated: string }>>;
 
 function hasLetters(value: string) {
   return /\p{L}/u.test(value);
@@ -44,6 +46,33 @@ function chunk<T>(items: T[], size: number) {
   return chunks;
 }
 
+function findOriginalKey(translatedText: string, language: LanguageCode): string | null {
+  if (language === "en" || !translatedText) return null;
+  const normalizedTranslated = normalizeText(translatedText);
+
+  // Search in static translations
+  const staticTable = TRANSLATIONS[language];
+  if (staticTable) {
+    for (const [key, val] of Object.entries(staticTable)) {
+      if (normalizeText(val) === normalizedTranslated) {
+        return key;
+      }
+    }
+  }
+
+  // Search in dynamic cache
+  const dynamicCacheTable = getDynamicTranslationCache()[language];
+  if (dynamicCacheTable) {
+    for (const [key, val] of Object.entries(dynamicCacheTable)) {
+      if (normalizeText(val) === normalizedTranslated) {
+        return key;
+      }
+    }
+  }
+
+  return null;
+}
+
 export function DynamicPageTranslator() {
   const { language } = useI18n();
   const textRecords = useRef(new WeakMap<Text, TextRecord>());
@@ -61,13 +90,17 @@ export function DynamicPageTranslator() {
   useEffect(() => {
     if (typeof window === "undefined" || typeof document === "undefined") return;
 
+    // Reset records when language changes so we re-scan the new DOM elements and state fresh
+    textRecords.current = new WeakMap();
+    attributeRecords.current = new WeakMap();
+
     const restoreEnglish = () => {
       applyingRef.current = true;
       const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
       let node = walker.nextNode() as Text | null;
       while (node) {
         const record = textRecords.current.get(node);
-        if (record && node.nodeValue !== record.original) {
+        if (record && record.original && node.nodeValue !== record.original) {
           node.nodeValue = record.original;
         }
         node = walker.nextNode() as Text | null;
@@ -77,9 +110,9 @@ export function DynamicPageTranslator() {
         const record = attributeRecords.current.get(element);
         if (!record) return;
         TRANSLATABLE_ATTRIBUTES.forEach((attribute) => {
-          const original = record[attribute];
-          if (original) {
-            element.setAttribute(attribute, original);
+          const attrRecord = record[attribute];
+          if (attrRecord && attrRecord.original) {
+            element.setAttribute(attribute, attrRecord.original);
           }
         });
       });
@@ -94,18 +127,25 @@ export function DynamicPageTranslator() {
         return;
       }
 
-      const textTargets: Array<{ node: Text; original: string }> = [];
-      const attributeTargets: Array<{ element: Element; attribute: (typeof TRANSLATABLE_ATTRIBUTES)[number]; original: string }> = [];
-      const texts = new Set<string>();
+      const textTargets: Array<{ node: Text; original: string; translated: string }> = [];
+      const attributeTargets: Array<{ element: Element; attribute: (typeof TRANSLATABLE_ATTRIBUTES)[number]; original: string; translated: string }> = [];
+      const missingTexts = new Set<string>();
 
-      const addText = (value: string) => {
+      const processValue = (value: string) => {
         const normalized = normalizeText(value);
-        if (!isWorthTranslating(normalized)) return "";
-        if (knownTranslatedValues.has(normalized)) return "";
-        texts.add(normalized);
-        return normalized;
+        if (!isWorthTranslating(normalized)) return null;
+        if (knownTranslatedValues.has(normalized)) return null;
+
+        // Check if we already have a translation in static tables or cache
+        const translated = TRANSLATIONS[language]?.[normalized] ?? getDynamicTranslationCache()[language]?.[normalized];
+        if (translated) {
+          return { original: normalized, translated: normalizeText(translated), isCached: true };
+        }
+
+        return { original: normalized, translated: "", isCached: false };
       };
 
+      // Walk text nodes
       const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, {
         acceptNode(node) {
           if (isInsideSkippedElement(node)) return NodeFilter.FILTER_REJECT;
@@ -115,41 +155,102 @@ export function DynamicPageTranslator() {
 
       let node = walker.nextNode() as Text | null;
       while (node) {
-        const current = node.nodeValue ?? "";
-        const stored = textRecords.current.get(node);
-        const original = stored?.original ?? normalizeText(current);
-        if (!stored && original) {
-          textRecords.current.set(node, { original });
-        }
-        const queued = addText(original);
-        if (queued) {
-          textTargets.push({ node, original: queued });
+        const current = normalizeText(node.nodeValue ?? "");
+        if (current) {
+          const stored = textRecords.current.get(node);
+          let original = current;
+
+          if (stored) {
+            if (current === stored.translated || current === stored.original) {
+              original = stored.original;
+            } else {
+              original = current;
+              textRecords.current.set(node, { original });
+            }
+          } else {
+            const reversedKey = findOriginalKey(current, language);
+            if (reversedKey) {
+              original = reversedKey;
+              textRecords.current.set(node, { original, translated: current });
+            } else {
+              textRecords.current.set(node, { original });
+            }
+          }
+
+          const res = processValue(original);
+          if (res) {
+            if (res.isCached) {
+              if (node.nodeValue !== res.translated) {
+                applyingRef.current = true;
+                node.nodeValue = res.translated;
+                applyingRef.current = false;
+              }
+              textRecords.current.set(node, { original: res.original, translated: res.translated });
+            } else {
+              missingTexts.add(res.original);
+              textTargets.push({ node, original: res.original, translated: "" });
+            }
+          }
         }
         node = walker.nextNode() as Text | null;
       }
 
+      // Walk attributes
       document.querySelectorAll<HTMLElement>("*").forEach((element) => {
         if (element.closest(SKIP_SELECTOR)) return;
         const record = attributeRecords.current.get(element) ?? {};
+        let updatedRecord = false;
 
         TRANSLATABLE_ATTRIBUTES.forEach((attribute) => {
-          const current = element.getAttribute(attribute) ?? "";
-          const original = record[attribute] ?? normalizeText(current);
-          if (!record[attribute] && original) {
-            record[attribute] = original;
+          const current = normalizeText(element.getAttribute(attribute) ?? "");
+          if (!current) return;
+
+          let original = current;
+          const attrRecord = record[attribute];
+          
+          if (attrRecord) {
+            if (current === attrRecord.translated || current === attrRecord.original) {
+              original = attrRecord.original;
+            } else {
+              original = current;
+              record[attribute] = { original, translated: "" };
+              updatedRecord = true;
+            }
+          } else {
+            const reversedKey = findOriginalKey(current, language);
+            if (reversedKey) {
+              original = reversedKey;
+              record[attribute] = { original, translated: current };
+              updatedRecord = true;
+            } else {
+              record[attribute] = { original, translated: "" };
+              updatedRecord = true;
+            }
           }
-          const queued = addText(original);
-          if (queued) {
-            attributeTargets.push({ element, attribute, original: queued });
+
+          const res = processValue(original);
+          if (res) {
+            if (res.isCached) {
+              if (element.getAttribute(attribute) !== res.translated) {
+                applyingRef.current = true;
+                element.setAttribute(attribute, res.translated);
+                applyingRef.current = false;
+              }
+              record[attribute] = { original: res.original, translated: res.translated };
+              updatedRecord = true;
+            } else {
+              missingTexts.add(res.original);
+              attributeTargets.push({ element, attribute, original: res.original, translated: "" });
+            }
           }
         });
 
-        if (Object.keys(record).length) {
+        if (updatedRecord) {
           attributeRecords.current.set(element, record);
         }
       });
 
-      const uniqueTexts = Array.from(texts);
+      const uniqueTexts = Array.from(missingTexts);
       if (!uniqueTexts.length) return;
 
       let translations: Record<string, string> = {};
@@ -160,7 +261,7 @@ export function DynamicPageTranslator() {
             ...(await requestDynamicTranslations(batch, language))
           };
         } catch {
-          // Dynamic translation is best-effort; the original text remains visible if it fails.
+          // Dynamic translation is best-effort; original text remains if it fails.
         }
       }
 
@@ -169,14 +270,22 @@ export function DynamicPageTranslator() {
       applyingRef.current = true;
       textTargets.forEach(({ node, original }) => {
         const translated = translations[original];
-        if (translated && node.nodeValue !== translated) {
-          node.nodeValue = translated;
+        if (translated) {
+          const normTranslated = normalizeText(translated);
+          if (node.nodeValue !== normTranslated) {
+            node.nodeValue = normTranslated;
+          }
+          textRecords.current.set(node, { original, translated: normTranslated });
         }
       });
       attributeTargets.forEach(({ element, attribute, original }) => {
         const translated = translations[original];
         if (translated) {
-          element.setAttribute(attribute, translated);
+          const normTranslated = normalizeText(translated);
+          element.setAttribute(attribute, normTranslated);
+          const record = attributeRecords.current.get(element) ?? {};
+          record[attribute] = { original, translated: normTranslated };
+          attributeRecords.current.set(element, record);
         }
       });
       applyingRef.current = false;

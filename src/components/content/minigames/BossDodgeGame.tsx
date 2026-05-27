@@ -59,8 +59,8 @@ export function BossDodgeGame() {
   const animationRef = useRef<number | null>(null);
   const lastFrameRef = useRef<number | null>(null);
   const spawnTimerRef = useRef(0);
-  const debugTickRef = useRef(0);
   const spawnCountRef = useRef(0);
+  const debugTickRef = useRef(0);
   const isTouch = useTouchDevice();
 
   function finishRun(time: number) {
@@ -132,6 +132,16 @@ export function BossDodgeGame() {
       window.setTimeout(() => setMovePulse(false), 120);
     }
   }
+
+  const finishRunRef = useRef(finishRun);
+  const moveLeftRef = useRef(moveLeft);
+  const moveRightRef = useRef(moveRight);
+
+  useEffect(() => {
+    finishRunRef.current = finishRun;
+    moveLeftRef.current = moveLeft;
+    moveRightRef.current = moveRight;
+  });
 
   useEffect(() => {
     laneRef.current = playerLane;
@@ -250,7 +260,7 @@ export function BossDodgeGame() {
 
         if (hit) {
           comboRef.current = 0;
-          window.setTimeout(() => finishRun(nextTime), 0);
+          window.setTimeout(() => finishRunRef.current(nextTime), 0);
         }
 
         const nearMisses = nextAttacks.filter(
@@ -316,11 +326,11 @@ export function BossDodgeGame() {
       }
 
       if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") {
-        moveLeft();
+        moveLeftRef.current();
       }
 
       if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") {
-        moveRight();
+        moveRightRef.current();
       }
     };
 

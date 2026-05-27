@@ -55,6 +55,22 @@ export function TapDodgeGame() {
     playerRef.current = playerX;
   }, [playerX]);
 
+  function startRun() {
+    nextId.current = 1;
+    spawnTimerRef.current = 0;
+    spawnCountRef.current = 0;
+    scoreRef.current = 0;
+    comboRef.current = 0;
+    setObstacles([]);
+    setScore(0);
+    setCombo(0);
+    setPlayerX(0);
+    setPhase("running");
+    playSuccess();
+  }
+
+
+
   function finishRun() {
     if (!runRef.current) return;
     runRef.current = false;
@@ -73,6 +89,30 @@ export function TapDodgeGame() {
       return nextBest;
     });
   }
+
+  function moveLeft() {
+    if (phase !== "running") {
+      startRun();
+    }
+    setPlayerX((current) => Math.max(current - 0.4, -1));
+  }
+
+  function moveRight() {
+    if (phase !== "running") {
+      startRun();
+    }
+    setPlayerX((current) => Math.min(current + 0.4, 1));
+  }
+
+  const finishRunRef = useRef(finishRun);
+  const moveLeftRef = useRef(moveLeft);
+  const moveRightRef = useRef(moveRight);
+
+  useEffect(() => {
+    finishRunRef.current = finishRun;
+    moveLeftRef.current = moveLeft;
+    moveRightRef.current = moveRight;
+  });
 
   useEffect(() => {
     if (phase !== "running") {
@@ -157,7 +197,7 @@ export function TapDodgeGame() {
         });
 
         if (hit) {
-          window.setTimeout(() => finishRun(), 0);
+          window.setTimeout(() => finishRunRef.current(), 0);
           return nextObstacles;
         }
 
@@ -199,42 +239,18 @@ export function TapDodgeGame() {
     };
   }, [phase]);
 
-  function startRun() {
-    nextId.current = 1;
-    spawnTimerRef.current = 0;
-    spawnCountRef.current = 0;
-    scoreRef.current = 0;
-    comboRef.current = 0;
-    setObstacles([]);
-    setScore(0);
-    setCombo(0);
-    setPlayerX(0);
-    setPhase("running");
-    playSuccess();
-  }
 
-  function moveLeft() {
-    if (phase !== "running") {
-      startRun();
-    }
-    setPlayerX((current) => Math.max(current - 0.4, -1));
-  }
 
-  function moveRight() {
-    if (phase !== "running") {
-      startRun();
-    }
-    setPlayerX((current) => Math.min(current + 0.4, 1));
-  }
+
 
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
       if (phase !== "running") return;
       if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") {
-        moveLeft();
+        moveLeftRef.current();
       }
       if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") {
-        moveRight();
+        moveRightRef.current();
       }
     };
     window.addEventListener("keydown", handleKey);

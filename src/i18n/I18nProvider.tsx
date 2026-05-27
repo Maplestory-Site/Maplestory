@@ -137,7 +137,9 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
           }));
         }
       } catch {
-        texts.forEach((text) => queue.add(text));
+        const currentQueue = pendingTranslationsRef.current.get(targetLanguage) ?? new Set<string>();
+        texts.forEach((text) => currentQueue.add(text));
+        pendingTranslationsRef.current.set(targetLanguage, currentQueue);
       }
     },
     []

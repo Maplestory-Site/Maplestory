@@ -49,6 +49,7 @@ import {
 import { createShadowSnapshot } from "../pvpSystem";
 import { ensureMicroMissions } from "../microMissionSystem";
 import { getDungeonDayKey } from "../dungeonSystem";
+import { createSeededRng } from "../seededRng";
 
 // ─── State helpers ────────────────────────────────────────────────────────────
 
@@ -609,8 +610,11 @@ describe("calculateOfflineGains", () => {
     const stateAt20h = freshState({ lastSavedAt: now - TWENTY_HOURS * 1000, mesos: 0 });
     const stateAt8h  = freshState({ lastSavedAt: now - EIGHT_HOURS  * 1000, mesos: 0 });
 
-    const result20h = calculateOfflineGains(stateAt20h, CONTEXT, now);
-    const result8h  = calculateOfflineGains(stateAt8h,  CONTEXT, now);
+    const rng1 = createSeededRng(12345).next;
+    const rng2 = createSeededRng(12345).next;
+
+    const result20h = calculateOfflineGains(stateAt20h, CONTEXT, now, rng1);
+    const result8h  = calculateOfflineGains(stateAt8h,  CONTEXT, now, rng2);
 
     // 20h should produce the same as 8h (capped at 8h)
     expect(result20h.mesos).toBeCloseTo(result8h.mesos, -3); // within ~0.1%

@@ -33,6 +33,8 @@ export function BossClickerGame() {
   const [queuedHits, setQueuedHits] = useState(0);
   const playerHpRef = useRef(BASE_PLAYER_HP);
 
+
+
   function finishRun() {
     setPhase("over");
     updateGameMeta({ gameId: "boss-clicker", score, outcome: "loss" });
@@ -58,6 +60,11 @@ export function BossClickerGame() {
     }
   }
 
+  const applyBossHitRef = useRef(applyBossHit);
+  useEffect(() => {
+    applyBossHitRef.current = applyBossHit;
+  });
+
   useEffect(() => {
     if (phase !== "running") return;
 
@@ -74,20 +81,20 @@ export function BossClickerGame() {
         if (nextPattern === "double") {
           setQueuedHits(2);
         } else {
-          applyBossHit(nextPattern === "slam" ? 2 : 1);
+          applyBossHitRef.current(nextPattern === "slam" ? 2 : 1);
         }
       }, nextPattern === "slam" ? 420 : 300);
     }, baseInterval);
 
     return () => window.clearInterval(timer);
-  }, [phase, round, playerHp]);
+  }, [phase, round]);
 
   useEffect(() => {
     if (phase !== "running") return;
     if (queuedHits <= 0) return;
     const delay = queuedHits === 2 ? 160 : 140;
     const timer = window.setTimeout(() => {
-      applyBossHit(1);
+      applyBossHitRef.current(1);
       setQueuedHits((current) => Math.max(0, current - 1));
     }, delay);
     return () => window.clearTimeout(timer);

@@ -23,8 +23,10 @@ type Props = {
   onBuyTalent: (id: TalentNodeId) => void;
 };
 
+const EMPTY_TALENTS: Record<string, boolean> = {};
+
 function TalentTreePanelInner({ state, onBuyTalent }: Props) {
-  const talentNodes = state.talentNodes ?? {};
+  const talentNodes = state.talentNodes ?? EMPTY_TALENTS;
   const talentPoints = state.talentPoints ?? 0;
   const stats = useMemo(() => getTalentStats(talentNodes), [talentNodes]);
 

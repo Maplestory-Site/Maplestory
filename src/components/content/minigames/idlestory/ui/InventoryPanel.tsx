@@ -198,6 +198,9 @@ function statDisplayValue(key: string, value: number): string {
   return `${Math.round(value * 100)}%`;
 }
 
+const EMPTY_ARRAY: IdleItemInstance[] = [];
+const EMPTY_OBJECT: Record<string, IdleItemInstance | undefined> = {};
+
 function InventoryPanelInner({
   state,
   items,
@@ -214,8 +217,8 @@ function InventoryPanelInner({
   const [selected, setSelected] = useState<IdleItemInstance | null>(null);
   const [filter, setFilter] = useState<InventoryFilter>("all");
   const [sort, setSort] = useState<InventorySort>("newest");
-  const inventory = state.inventory ?? [];
-  const equipment = state.equipment ?? {};
+  const inventory = state.inventory ?? EMPTY_ARRAY;
+  const equipment = state.equipment ?? EMPTY_OBJECT;
   const itemDatabase = items as ItemDatabaseEntry[];
   const fallbackItems = items.slice(0, 10);
   const materials = state.materials ?? { shard: 0, essence: 0, crystal: 0, bossCore: 0 };

@@ -49,6 +49,8 @@ export function AimTrainerGame() {
   const debugTickRef = useRef(0);
   const spawnCountRef = useRef(0);
 
+
+
   function spawnTarget(timestamp: number, lifespan: number): Target {
     const size = 42 - speedTier * 4;
     return {
@@ -87,6 +89,20 @@ export function AimTrainerGame() {
     }
   }
 
+  const scoreRef = useRef(score);
+  const targetRef = useRef(target);
+  const finishRunRef = useRef(finishRun);
+  const registerMissRef = useRef(registerMiss);
+  const spawnTargetRef = useRef(spawnTarget);
+
+  useEffect(() => {
+    scoreRef.current = score;
+    targetRef.current = target;
+    finishRunRef.current = finishRun;
+    registerMissRef.current = registerMiss;
+    spawnTargetRef.current = spawnTarget;
+  });
+
   useEffect(() => {
     if (phase !== "running") {
       runningRef.current = false;
@@ -112,7 +128,7 @@ export function AimTrainerGame() {
       timeLeftRef.current = Math.max(0, timeLeftRef.current - delta);
       setTimeLeft(timeLeftRef.current);
       if (timeLeftRef.current <= 0.01) {
-        finishRun();
+        finishRunRef.current();
       }
 
       setTarget((current) => {
@@ -123,7 +139,7 @@ export function AimTrainerGame() {
         const lifespan = Math.max(0.45, 1.2 - tier * 0.15);
 
         if (current && timestamp - current.spawnedAt >= current.lifespan * 1000) {
-          registerMiss();
+          registerMissRef.current();
           return null;
         }
 
@@ -135,12 +151,12 @@ export function AimTrainerGame() {
             lifespan: Number(lifespan.toFixed(2)),
             tier
           });
-          return spawnTarget(timestamp, lifespan);
+          return spawnTargetRef.current(timestamp, lifespan);
         }
         if (!current && timeLeftRef.current < ROUND_SECONDS - 1.2) {
           spawnCountRef.current += 1;
           gameDebug("aim-trainer:spawn-fallback", { count: spawnCountRef.current });
-          return spawnTarget(timestamp, lifespan);
+          return spawnTargetRef.current(timestamp, lifespan);
         }
 
         if (!current) {
@@ -156,8 +172,8 @@ export function AimTrainerGame() {
         debugTickRef.current = timestamp;
         gameDebug("aim-trainer:tick", {
           timeLeft: Number(timeLeftRef.current.toFixed(2)),
-          hasTarget: Boolean(target),
-          score
+          hasTarget: Boolean(targetRef.current),
+          score: scoreRef.current
         });
       }
 

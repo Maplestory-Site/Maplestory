@@ -138,6 +138,14 @@ export function NeoSnakeGame() {
     });
   }
 
+  const stepRef = useRef(step);
+  const queueDirectionRef = useRef(queueDirection);
+
+  useEffect(() => {
+    stepRef.current = step;
+    queueDirectionRef.current = queueDirection;
+  });
+
   useEffect(() => {
     if (phase !== "running") {
       if (timerRef.current) {
@@ -149,7 +157,7 @@ export function NeoSnakeGame() {
 
     const burstBonus = boostTicks > 0 ? 40 : 0;
     const interval = Math.max(110, 280 - speedTier * 20 - burstBonus);
-    timerRef.current = window.setInterval(() => step(), interval);
+    timerRef.current = window.setInterval(() => stepRef.current(), interval);
 
     return () => {
       if (timerRef.current) {
@@ -157,19 +165,19 @@ export function NeoSnakeGame() {
       }
       timerRef.current = null;
     };
-  }, [phase, speedTier, queuedDirection, food, snake]);
+  }, [phase, speedTier, boostTicks]);
 
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
       if (phase !== "running") return;
-      if (event.key === "ArrowUp" || event.key.toLowerCase() === "w") queueDirection("up");
-      if (event.key === "ArrowDown" || event.key.toLowerCase() === "s") queueDirection("down");
-      if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") queueDirection("left");
-      if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") queueDirection("right");
+      if (event.key === "ArrowUp" || event.key.toLowerCase() === "w") queueDirectionRef.current("up");
+      if (event.key === "ArrowDown" || event.key.toLowerCase() === "s") queueDirectionRef.current("down");
+      if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") queueDirectionRef.current("left");
+      if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") queueDirectionRef.current("right");
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [phase, direction]);
+  }, [phase]);
 
   const speedLabel = useMemo(() => {
     if (speedTier >= 5) return "Hyper";

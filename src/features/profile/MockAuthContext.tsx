@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useMemo, useState, useCallback, type ReactNode } from "react";
 import { applyUserProgress, extractUserProgress, loadGameMeta, type UserProgress } from "../../components/content/minigames/shared/gameMeta";
 import { flushOutbox, loadCloudProgress, saveCloudProgress, submitLeaderboardScore } from "../../components/content/minigames/shared/cloudProgress";
 import { getActiveRoomId } from "../../components/content/minigames/shared/multiplayerSession";
@@ -109,7 +109,7 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  function persistUser(nextUser: MockUser, token?: string) {
+  const persistUser = useCallback((nextUser: MockUser, token?: string) => {
     const stored = window.localStorage.getItem(STORAGE_KEY);
     let parsed: unknown[] = [];
     try {
@@ -131,9 +131,9 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
       }
     })();
     window.localStorage.setItem(SESSION_KEY, JSON.stringify({ userId: nextUser.id, token: token ?? existing?.token }));
-  }
+  }, []);
 
-  async function login({ email, password }: LoginPayload) {
+  const login = useCallback(async ({ email, password }: LoginPayload) => {
     // The local profile cache no longer stores passwords, so authentication
     // is always delegated to the cloud handler. If cloud rejects the
     // credentials we fail closed.
@@ -184,9 +184,9 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     } catch {
       return false;
     }
-  }
+  }, [persistUser]);
 
-  async function signup({ username, email, password }: { username: string; email: string; password: string }) {
+  const signup = useCallback(async ({ username, email, password }: { username: string; email: string; password: string }) => {
     const safeName = username.trim() || "Maple Player";
     const safeEmail = email.trim().toLowerCase() || "player@maple.world";
     const auth = await signupCloudAccount({ username: safeName, email: safeEmail, password });
@@ -212,12 +212,12 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     applyUserProgress(progress);
     void saveCloudProgress(nextUser.id, progress);
     return true;
-  }
+  }, [persistUser]);
 
-  function logout() {
+  const logout = useCallback(() => {
     setUser(null);
     window.localStorage.removeItem(SESSION_KEY);
-  }
+  }, []);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -238,7 +238,7 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     };
     window.addEventListener("mini-games-meta:update", handleUpdate);
     return () => window.removeEventListener("mini-games-meta:update", handleUpdate);
-  }, [user]);
+  }, [user, persistUser]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -257,18 +257,21 @@ export function MockAuthProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("mini-game:result", handleResult);
   }, [user]);
 
+  const openAuth = useCallback(() => setAuthOpen(true), []);
+  const closeAuth = useCallback(() => setAuthOpen(false), []);
+
   const value = useMemo<MockAuthContextValue>(
     () => ({
       user,
       isAuthenticated: Boolean(user),
       authOpen,
-      openAuth: () => setAuthOpen(true),
-      closeAuth: () => setAuthOpen(false),
+      openAuth,
+      closeAuth,
       login,
       signup,
       logout
     }),
-    [authOpen, user]
+    [authOpen, user, openAuth, closeAuth, login, signup, logout]
   );
 
   return <MockAuthContext.Provider value={value}>{children}</MockAuthContext.Provider>;

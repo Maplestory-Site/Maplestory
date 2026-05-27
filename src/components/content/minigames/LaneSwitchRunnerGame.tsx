@@ -53,6 +53,8 @@ export function LaneSwitchRunnerGame() {
   const spawnCountRef = useRef(0);
   const isTouch = useTouchDevice();
 
+
+
   function startRun() {
     nextId.current = 1;
     spawnTimerRef.current = 0;
@@ -112,6 +114,18 @@ export function LaneSwitchRunnerGame() {
     setJumpActive(true);
     playSuccess();
   }
+
+  const finishRunRef = useRef(finishRun);
+  const moveLeftRef = useRef(moveLeft);
+  const moveRightRef = useRef(moveRight);
+  const triggerJumpRef = useRef(triggerJump);
+
+  useEffect(() => {
+    finishRunRef.current = finishRun;
+    moveLeftRef.current = moveLeft;
+    moveRightRef.current = moveRight;
+    triggerJumpRef.current = triggerJump;
+  });
 
   useEffect(() => {
     laneRef.current = lane;
@@ -204,7 +218,7 @@ export function LaneSwitchRunnerGame() {
           return true;
         });
         if (hit) {
-          window.setTimeout(() => finishRun(), 0);
+          window.setTimeout(() => finishRunRef.current(), 0);
         }
 
         next = next.map((obstacle) => {
@@ -249,9 +263,9 @@ export function LaneSwitchRunnerGame() {
   useEffect(() => {
     const handleKey = (event: KeyboardEvent) => {
       if (phase !== "running") return;
-      if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") moveLeft();
-      if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") moveRight();
-      if (event.key === " " || event.key === "ArrowUp" || event.key.toLowerCase() === "w") triggerJump();
+      if (event.key === "ArrowLeft" || event.key.toLowerCase() === "a") moveLeftRef.current();
+      if (event.key === "ArrowRight" || event.key.toLowerCase() === "d") moveRightRef.current();
+      if (event.key === " " || event.key === "ArrowUp" || event.key.toLowerCase() === "w") triggerJumpRef.current();
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);

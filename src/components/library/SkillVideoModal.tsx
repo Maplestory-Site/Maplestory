@@ -49,7 +49,7 @@ export function SkillVideoModal({ skill, className, onClose }: Props) {
 
   const meta = useMemo(
     () => (skill ? getSkillVideoMeta(skill.videoUrl, skill.videoType) : null),
-    [skill?.videoUrl, skill?.videoType]
+    [skill]
   );
 
   if (!skill) return null;

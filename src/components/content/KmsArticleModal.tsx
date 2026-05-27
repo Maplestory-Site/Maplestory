@@ -131,11 +131,13 @@ export function KmsArticleModal({ item, onClose }: KmsArticleModalProps) {
 
   const published = useMemo(() => formatNewsMetaDate(item?.publishedAt ?? ""), [item]);
   const renderData = translatedData ?? data;
+  const isTranslated = Boolean(translatedData && language !== "en");
   const isTranslatingArticle =
     Boolean(data) && language !== "en" && translatedArticle.translating && !translatedArticle.ready;
   const articleText = (value?: string, fallback = "") => value || fallback;
   const dynamicText = (value?: string, fallback = "") => {
     const resolved = articleText(value, fallback);
+    if (isTranslated) return resolved;
     return td(resolved);
   };
   const sectionList = useMemo(() => renderData?.sections ?? [], [renderData]);

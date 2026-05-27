@@ -50,19 +50,10 @@ export function ReactionTestGame() {
 
   useEffect(() => {
     positionRef.current = position;
-  }, [position]);
-
-  useEffect(() => {
     directionRef.current = direction;
-  }, [direction]);
-
-  useEffect(() => {
     zoneRef.current = zoneCenter;
-  }, [zoneCenter]);
-
-  useEffect(() => {
     roundRef.current = round;
-  }, [round]);
+  });
 
   useEffect(() => {
     if (phase !== "running") {
@@ -176,6 +167,16 @@ export function ReactionTestGame() {
     }
   }
 
+  const startRoundRef = useRef(startRound);
+  const resumeRunRef = useRef(resumeRun);
+  const stopRunRef = useRef(stopRun);
+
+  useEffect(() => {
+    startRoundRef.current = startRound;
+    resumeRunRef.current = resumeRun;
+    stopRunRef.current = stopRun;
+  });
+
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.code !== "Space" && event.code !== "Enter") {
@@ -185,21 +186,21 @@ export function ReactionTestGame() {
       event.preventDefault();
 
       if (phase === "running") {
-        stopRun();
+        stopRunRef.current();
         return;
       }
 
       if (phase === "paused") {
-        resumeRun();
+        resumeRunRef.current();
         return;
       }
 
-      startRound();
+      startRoundRef.current();
     };
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [phase, combo, score, perfectHalf, goodHalf]);
+  }, [phase]);
 
   function resetSession() {
     setPhase("ready");
