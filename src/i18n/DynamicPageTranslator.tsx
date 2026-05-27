@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useMemo, useRef } from "react";
 import { getDynamicTranslationCache, requestDynamicTranslations } from "./dynamicTranslate";
 import { useI18n } from "./I18nProvider";
@@ -71,6 +72,85 @@ function findOriginalKey(translatedText: string, language: LanguageCode): string
   }
 
   return null;
+}
+
+function getActiveLanguage(): LanguageCode {
+  if (typeof window === "undefined") return "en";
+  return (window as any).__active_language ?? (window.localStorage.getItem("snailslayer-language") as LanguageCode) ?? "en";
+}
+
+function translateSynchronously(text: string, lang: LanguageCode): string {
+  if (lang === "en" || !text) return text;
+  const normalized = normalizeText(text);
+  if (!isWorthTranslating(normalized)) return text;
+
+  // Search static translations
+  const staticTable = TRANSLATIONS[lang];
+  if (staticTable && staticTable[normalized]) {
+    return staticTable[normalized];
+  }
+
+  // Search dynamic cache
+  const cached = getDynamicTranslationCache()[lang]?.[normalized];
+  if (cached) {
+    return cached;
+  }
+
+  return text;
+}
+
+// Monkey-patch DOM methods to translate React text sets and attribute changes instantly & synchronously
+if (typeof window !== "undefined" && !(window as any).__snailslayer_i18n_patched) {
+  (window as any).__snailslayer_i18n_patched = true;
+
+  const originalDescriptor = Object.getOwnPropertyDescriptor(Node.prototype, "nodeValue");
+  if (originalDescriptor && originalDescriptor.set) {
+    Object.defineProperty(Node.prototype, "nodeValue", {
+      get() {
+        return originalDescriptor.get?.call(this);
+      },
+      set(val) {
+        let targetValue = val;
+        if (this.nodeType === 3 && typeof val === "string") { // TEXT_NODE
+          const lang = getActiveLanguage();
+          if (lang !== "en") {
+            const normalized = normalizeText(val);
+            const translated = translateSynchronously(val, lang);
+            if (translated !== normalized) {
+              targetValue = translated;
+            }
+          }
+        }
+        originalDescriptor.set?.call(this, targetValue);
+      },
+      configurable: true,
+      enumerable: true
+    });
+  }
+
+  const originalCreateTextNode = document.createTextNode;
+  document.createTextNode = function(text) {
+    let targetText = text;
+    if (typeof text === "string") {
+      const lang = getActiveLanguage();
+      if (lang !== "en") {
+        targetText = translateSynchronously(text, lang);
+      }
+    }
+    return originalCreateTextNode.call(this, targetText);
+  };
+
+  const originalSetAttribute = Element.prototype.setAttribute;
+  Element.prototype.setAttribute = function(name, value) {
+    let targetValue = value;
+    if (TRANSLATABLE_ATTRIBUTES.includes(name as any) && typeof value === "string") {
+      const lang = getActiveLanguage();
+      if (lang !== "en") {
+        targetValue = translateSynchronously(value, lang);
+      }
+    }
+    originalSetAttribute.call(this, name, targetValue);
+  };
 }
 
 export function DynamicPageTranslator() {

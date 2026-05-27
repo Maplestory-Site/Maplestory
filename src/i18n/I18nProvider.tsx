@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { LANGUAGES, SUPPORTED_LANGUAGE_CODES, type LanguageCode, type LanguageMeta } from "./languages";
 import {
@@ -73,7 +74,9 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   const [language, setLanguageState] = useState<LanguageCode>(() => {
     if (typeof window === "undefined") return "en";
     const stored = window.localStorage.getItem(STORAGE_KEY);
-    return normalizeLanguage(stored ?? navigator.language);
+    const resolved = normalizeLanguage(stored ?? navigator.language);
+    (window as any).__active_language = resolved;
+    return resolved;
   });
 
   useEffect(() => {
@@ -92,6 +95,7 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem(STORAGE_KEY, language);
+    (window as any).__active_language = language;
   }, [language]);
 
   useEffect(() => {
