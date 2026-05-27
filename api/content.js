@@ -157,11 +157,11 @@ function normalizeTranslateLanguage(language = "en") {
 
 function isLikelyUntranslatedIdentity(source = "", translated = "", language = "en") {
   if (!source || !translated || normalizeTranslateLanguage(language) === "en") return false;
-  const normalize = (value) => String(value).replace(/\s+/g, " ").trim();
+  const normalize = (value) => String(value).replace(/\s+/g, " ").trim().toLowerCase();
   const original = normalize(source);
   const candidate = normalize(translated);
   if (original !== candidate) return false;
-  return original.length > 12 && /\s/.test(original) && /[A-Za-z]{3,}/.test(original);
+  return /[a-z]/i.test(original);
 }
 
 function splitLongTranslateText(text) {
@@ -225,16 +225,13 @@ async function translateSingleText(text, language) {
             textPreview: text.slice(0, 120)
           });
         }
-        return text;
+        return null;
       }
 
       const payload = await response.json();
-      const translatedChunk = decodeTranslatePayload(payload) || chunk;
-      if (process.env.NODE_ENV !== "production" && isLikelyUntranslatedIdentity(chunk, translatedChunk, targetLanguage)) {
-        console.warn("[translate-batch] upstream returned identity translation", {
-          language: targetLanguage,
-          chunkPreview: chunk.slice(0, 120)
-        });
+      const translatedChunk = decodeTranslatePayload(payload);
+      if (!translatedChunk) {
+        return null;
       }
       translatedChunks.push(translatedChunk);
     } catch {
@@ -244,7 +241,7 @@ async function translateSingleText(text, language) {
           textPreview: text.slice(0, 120)
         });
       }
-      return text;
+      return null;
     } finally {
       clearTimeout(timeout);
     }
@@ -252,9 +249,9 @@ async function translateSingleText(text, language) {
 
   const translated = translatedChunks.join(chunks.length > 1 && text.includes("\n\n") ? "\n\n" : " ");
   if (!isLikelyUntranslatedIdentity(text, translated, targetLanguage)) {
-    translationMemory.set(cacheKey, translated || text);
+    translationMemory.set(cacheKey, translated);
   }
-  return translated || text;
+  return translated;
 }
 
 async function translateTexts(texts, language) {
@@ -266,7 +263,10 @@ async function translateTexts(texts, language) {
     while (index < queue.length) {
       const text = queue[index];
       index += 1;
-      translations[text] = await translateSingleText(text, language);
+      const res = await translateSingleText(text, language);
+      if (res !== null && res !== undefined) {
+        translations[text] = res;
+      }
     }
   }
 

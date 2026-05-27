@@ -15,13 +15,10 @@ const structuredTranslationCache = new Map<string, unknown>();
 
 function isLikelyUntranslatedIdentity(source = "", translated = "", language?: LanguageCode) {
   if (!source || !translated || language === "en") return false;
-  const original = normalizeReaderText(source, "paragraph");
-  const candidate = normalizeReaderText(translated, "paragraph");
+  const original = normalizeReaderText(source, "paragraph").toLowerCase();
+  const candidate = normalizeReaderText(translated, "paragraph").toLowerCase();
   if (original !== candidate) return false;
-
-  const hasEnglishWords = /[A-Za-z]{3,}/.test(original);
-  const hasReadablePhrase = /\s/.test(original) && original.length > 12;
-  return hasEnglishWords && hasReadablePhrase;
+  return /[a-z]/i.test(original);
 }
 
 function isUsableTranslation(source = "", translated?: string, language?: LanguageCode) {

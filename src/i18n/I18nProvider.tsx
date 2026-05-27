@@ -51,11 +51,11 @@ function normalizeLanguage(input?: string | null): LanguageCode {
 
 function isLikelyUntranslatedIdentity(source = "", translated = "", language?: LanguageCode) {
   if (!source || !translated || language === "en") return false;
-  const normalize = (value: string) => decodeHtmlEntities(value).replace(/\s+/g, " ").trim();
+  const normalize = (value: string) => decodeHtmlEntities(value).replace(/\s+/g, " ").trim().toLowerCase();
   const original = normalize(source);
   const candidate = normalize(translated);
   if (original !== candidate) return false;
-  return original.length > 12 && /\s/.test(original) && /[A-Za-z]{3,}/.test(original);
+  return /[a-z]/i.test(original);
 }
 
 function isUsableDynamicTranslation(source = "", translated?: string, language?: LanguageCode) {
